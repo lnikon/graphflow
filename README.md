@@ -1,6 +1,10 @@
-## Build Instructions
+## Getting Started
 
+# Requirements
 Make sure that you've installed upcxx and have correctly set $UPCXX_INSTALL environment variable, then:
+For more information see official upcxx wiki and INSTALL.md [upcxx](https://bitbucket.org/berkeleylab/upcxx/wiki/Home).
+# Build
+
 
 ```sh
 mkdir build && cd build
