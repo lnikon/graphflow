@@ -12,4 +12,8 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug -G"Ninja" -DCMAKE_CXX_COMPILER=/usr/bin/g++
 ninja
 ```
 
-After these steps executable pgas-graph-test will be generated, simply execute it. 
+After these steps executable pgas-graph-test will be generated, execute it using upcxx-run wrapper e.g.
+
+```sh
+upcxx-run -n4 ./pgas-graph-test
+```
