@@ -1,10 +1,11 @@
 ## Getting Started
 
 # Requirements
-Make sure that you've installed upcxx and have correctly set $UPCXX_INSTALL environment variable, then:
-For more information see official upcxx wiki and INSTALL.md [upcxx](https://bitbucket.org/berkeleylab/upcxx/wiki/Home).
-# Build
 
+Make sure that you've installed upcxx and have correctly set $UPCXX_INSTALL environment variable.
+For more information see official upcxx wiki and INSTALL.md [upcxx](https://bitbucket.org/berkeleylab/upcxx/wiki/Home).
+
+# Build
 
 ```sh
 mkdir build && cd build
@@ -17,3 +18,4 @@ After these steps executable pgas-graph-test will be generated, execute it using
 ```sh
 upcxx-run -n4 ./pgas-graph-test
 ```
+
