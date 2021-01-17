@@ -9,6 +9,11 @@
 
 namespace PGASGraph {
 
+void logMsg(const std::string &msg) {
+  std::cout << "[" << upcxx::rank_me() << "/" << upcxx::rank_n() << "] " << msg
+            << "\n";
+}
+
 /*!
  * Type for the vertex Id.
  */
@@ -142,6 +147,9 @@ public:
           .wait();
     }
 
+    using rank_state_t = upcxx::dist_object<std::set<Rank>>;
+    rank_state_t rankState{{}};
+
     bool oneVertex = false;
     while (!done) {
       // Only worker nodes should search min weight edge.
@@ -154,11 +162,14 @@ public:
              m_vertexStore.fetch(upcxx::rank_me()).wait()) {
           assert(globalVertex.is_local());
           Vertex *localVertex = globalVertex.local();
+
           // Find edge with min weight that is not in MST.
+          logMsg("Find edge with min weight that is not in MST");
           minWeight = localVertex->neighbours.begin()->second;
           fromId = localVertex->id;
           minId = localVertex->neighbours.begin()->first;
           if (localVertex->neighbours.size() == 1) {
+            logMsg("Found only one vertex");
             found = true;
             oneVertex = true;
           } else {
@@ -175,9 +186,17 @@ public:
           }
         }
 
-        if (found) {
+        if (found && oneVertex) {
+          if (isInMST(addedSet, minId)) {
+            logMsg("done\n");
+            done = true;
+          }
+        }
+
+        if (found && !done) {
           // If you are worker node, then send to the master the minimal edge
           // that you've found.
+          logMsg("Adding vertex into MST");
           upcxx::rpc(
               masterRank,
               [](global_minimums_t &globalMinimums, Rank senderRank, Id fromId,
@@ -197,8 +216,15 @@ public:
       // Wait until all the workers updated vector of minimal edges with
       // partial findings.
       upcxx::barrier();
-	  std::cout << "rank=" << upcxx::rank_me() << "\n";
       if (done && masterRank != upcxx::rank_me()) {
+        upcxx::rpc(
+            upcxx::rank_me(),
+            [](rank_state_t &rankState) {
+              rankState->insert(upcxx::rank_me());
+            },
+            rankState)
+            .wait();
+        std::cout << "rank=" << upcxx::rank_me() << "\n";
         break;
       }
 
@@ -218,9 +244,9 @@ public:
           }
         }
 
-        if (!atLeastOneFound) {
-          break;
-        }
+        // if (!atLeastOneFound) {
+        //   break;
+        // }
 
         // Add minimum edge into the MST
         for (Rank rank = 0; rank < upcxx::rank_n(); ++rank) {
@@ -241,7 +267,36 @@ public:
                                localMinimalEdges[minIdx].first.second),
                 localMinimalEdges[minIdx].second))
             .wait();
+
+        // Check if all workers are done and exit
+        size_t ranksDone{0};
+        for (Rank r = 0; r < upcxx::rank_n(); r++) {
+          if (masterRank == r) {
+            ranksDone += 1;
+            continue;
+          }
+
+          ranksDone += upcxx::rpc(
+                           r,
+                           [](rank_state_t &rankState, Rank r) {
+                             if (rankState->count(r) == 1) {
+                               return 1;
+                             }
+
+                             return 0;
+                           },
+                           rankState, r)
+                           .wait();
+        }
+
+        // std::cout << "ranksDone=" << ranksDone << "\n";
+        if (ranksDone == upcxx::rank_n()) {
+          std::cout << "All ranks are done\n";
+          break;
+        }
       }
+
+      upcxx::barrier();
     }
 
     if (masterRank == upcxx::rank_me()) {
