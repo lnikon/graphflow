@@ -9,9 +9,13 @@
 
 namespace PGASGraph {
 
+#define DEBUG_LOG_MSG
+
 void logMsg(const std::string &msg) {
+#ifdef DEBUG_LOG_MSG
   std::cout << "[" << upcxx::rank_me() << "/" << upcxx::rank_n() << "] " << msg
             << "\n";
+#endif
 }
 
 /*!
@@ -42,6 +46,18 @@ public:
 
     /// User supplied data associated with each edge.
     EdgeData data;
+
+    std::string ToString() {
+      std::string result;
+      result += "{from=";
+      result += std::to_string(from);
+      result += ", to=";
+      result += std::to_string(to);
+      result += ", weight=";
+      result += std::to_string(data);
+      result += "}\n";
+      return result;
+    }
   };
 
   /*! \brief Represents vertex in a graph.
@@ -57,12 +73,20 @@ public:
 
     /// A list of Id's of the neighbours.
     /// Id will be used to fetch actual pointer from the vertex store.
-    std::vector<std::pair<Id, EdgeData>> neighbours;
+    using weight_node_t = std::pair<EdgeData, Id>;
+    std::vector<weight_node_t> neighbours;
 
     Vertex(Id id) : id(id) {}
+
+    std::string ToString() const {
+      std::string result;
+      result += "{id=" + std::to_string(id);
+      result += "}";
+      return result;
+    }
   };
 
-  Graph();
+  Graph(const size_t totalNumberVertices, const size_t verticesPerRank);
 
   /*
    * Internal representations of the graph as a vertex store.
@@ -89,227 +113,181 @@ public:
    */
   bool HasEdge(const Id &a, const Id &b) const;
 
+  void printLocal() {
+    auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
+    std::string msg;
+    for (const auto &[id, vertex] : localVertexStore) {
+      msg += std::to_string(id) + " ";
+    }
+    logMsg(msg);
+  }
+
   bool MST() {
+    upcxx::team &worldTeam = upcxx::world();
+    const Rank leaderGroupId =
+
+        upcxx::rank_me() == 0 ? 0 : upcxx::team::color_none;
+    const Rank workerGroupId =
+        upcxx::rank_me() == 0 ? upcxx::team::color_none : 1;
+    const Rank workerGroupKey = workerGroupId;
+
+    upcxx::team leaderTeam = worldTeam.split(leaderGroupId, 0);
+    upcxx::team workerTeam = worldTeam.split(workerGroupId, workerGroupKey);
+
+    if (0 == upcxx::rank_me()) {
+      std::cout << leaderTeam.rank_n() << "\n";
+    } else {
+      std::cout << workerTeam.rank_n() << "\n";
+    }
+
+    upcxx::barrier();
+
     using added_set_t = upcxx::dist_object<std::unordered_set<Id>>;
-    using mst_edge_t = std::pair<std::pair<Id, Id>, EdgeData>;
-    using mst_edge_collection_t = upcxx::dist_object<std::vector<mst_edge_t>>;
+    using weight_node_t = typename Vertex::weight_node_t;
 
     // Process with rank 0 is the master.
     const Rank masterRank = 0;
 
-    // This set is used to track Id's of those nodes, that are already in the
-    // MST
-    added_set_t addedSet{{}};
-    mst_edge_collection_t mstEdges{{}};
-
-    // This lambda used to add node into MST
-    auto addNodeIntoMST = [this](added_set_t &addedSet, Id id) {
-      upcxx::rpc(
-          getVertexParent(id), [](added_set_t &set, Id id) { set->insert(id); },
-          addedSet, id)
-          .wait();
+    auto addIdIntoMST = [this](added_set_t &addedSet, Id id) {
+      auto fut = upcxx::rpc(
+          getVertexParent(id),
+          [](added_set_t &addedSet, Id id) { addedSet->insert(id); }, addedSet,
+          id);
+      fut.wait();
     };
 
-    // This lambda is used to check if node is present in MST
-    auto isInMST = [this](added_set_t &addedSet, Id id) {
-      bool addedIntoMST = upcxx::rpc(
-                              getVertexParent(id),
-                              [](added_set_t &addedSet, Id id) {
-                                return addedSet->find(id) != addedSet->end();
-                              },
-                              addedSet, id)
-                              .wait();
-      return addedIntoMST;
-    };
-
-    // Should be true, when all nodes in the current vertex store are connected
-    // to MST ???
-    bool done = false;
-    using global_minimums_t =
-        upcxx::dist_object<std::vector<std::pair<std::pair<Id, Id>, EdgeData>>>;
-    struct local_edge {
-      Id from;
-      Id to;
-      EdgeData weight;
-    };
-    using global_edge_collection_t =
-        upcxx::dist_object<std::vector<local_edge>>;
-
-    global_edge_collection_t edgeCollection{{}};
-    global_minimums_t globalMinimums{{}};
-    if (masterRank == upcxx::rank_me()) {
-      upcxx::rpc(
-          masterRank,
-          [](global_minimums_t &globalMinimums) {
-            globalMinimums->resize(upcxx::rank_n());
+    auto isIdInMST = [this](added_set_t &addedSet, Id id) {
+      auto fut = upcxx::rpc(
+          getVertexParent(id),
+          [](added_set_t &addedSet, Id id) {
+            return addedSet->find(id) != addedSet->end();
           },
-          globalMinimums)
+          addedSet, id);
+      bool res = fut.wait();
+      return res;
+    };
+
+    auto addedSetSize = [](added_set_t &addedSet) {
+      return upcxx::rpc(
+                 upcxx::rank_me(),
+                 [](added_set_t &addedSet) { return addedSet->size(); },
+                 addedSet)
           .wait();
+    };
+
+    std::unordered_map<Id, upcxx::global_ptr<Vertex>> localVertexStore =
+        m_vertexStore.fetch(upcxx::rank_me()).wait();
+    if (localVertexStore.empty()) {
+      logMsg("Empty local vertex store.");
+      return true;
     }
 
-    using rank_state_t = upcxx::dist_object<std::set<Rank>>;
-    rank_state_t rankState{{}};
+    using local_edge_t = std::pair<EdgeData, std::pair<Id, Id>>;
+    auto ToString = [](local_edge_t edge) {
+      std::string result;
+      result += "{from=";
+      result += std::to_string(edge.second.first);
+      result += ", to=";
+      result += std::to_string(edge.second.second);
+      result += ", weight=";
+      result += std::to_string(edge.first);
+      result += "}\n";
+      return result;
+    };
 
-    bool oneVertex = false;
-    while (!done) {
-      // Only worker nodes should search min weight edge.
-      bool found = false;
-      EdgeData minWeight{std::numeric_limits<int>::min()};
-      Id minId{};
-      Id fromId{};
-      if (masterRank != upcxx::rank_me()) {
-        for (const auto &[id, globalVertex] :
-             m_vertexStore.fetch(upcxx::rank_me()).wait()) {
-          assert(globalVertex.is_local());
-          Vertex *localVertex = globalVertex.local();
+    // Each worker has its portion.
+    added_set_t addedSet{{}};
+    std::vector<local_edge_t> localMst;
 
-          // Find edge with min weight that is not in MST.
-          logMsg("Find edge with min weight that is not in MST");
-          minWeight = localVertex->neighbours.begin()->second;
-          fromId = localVertex->id;
-          minId = localVertex->neighbours.begin()->first;
-          if (localVertex->neighbours.size() == 1) {
-            logMsg("Found only one vertex");
-            found = true;
-            oneVertex = true;
-          } else {
-            for (const auto &[id, edgeData] : localVertex->neighbours) {
-              if (minWeight > edgeData) {
-                if (!isInMST(addedSet, id)) {
-                  minWeight = edgeData;
-                  fromId = localVertex->id;
-                  minId = id;
-                  found = true;
-                }
-              }
-            }
-          }
+    // Add INITIAL random vertex into MST.
+    bool isEmptyLocalVertexStore{false};
+    {
+      auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
+	  // for (const auto [id, vertex] : localVertexStore)
+	  // {
+	  //     logMsg(vertex.local()->ToString());
+	  // }
+	  
+      if (localVertexStore.empty()) {
+        workerTeam.destroy();
+        return true;
+      }
+
+      const Id initialVertex = localVertexStore.begin()->second.local()->id;
+      addIdIntoMST(addedSet, initialVertex);
+    }
+
+	// leaderTeam.destroy();
+	// workerTeam.destroy();
+	// return true;
+
+    bool done = false;
+    while (!done && !isEmptyLocalVertexStore) {
+      // Min edge in the current cut.
+      local_edge_t minEdge =
+          std::make_pair(std::numeric_limits<int>::max(), std::make_pair(0, 0));
+
+      // Find edge with minimum weight that connects vertex in the current cut
+      // to the MST.
+      for (const auto &[id, globalVertex] :
+           m_vertexStore.fetch(upcxx::rank_me()).wait()) {
+        assert(globalVertex.is_local());
+        Vertex *localVertex = globalVertex.local();
+        // logMsg(localVertex->ToString());
+        if (!isIdInMST(addedSet, localVertex->id)) {
+          continue;
         }
 
-        if (found && oneVertex) {
-          if (isInMST(addedSet, minId)) {
-            logMsg("done\n");
-            done = true;
+        for (const auto &neigh : localVertex->neighbours) {
+          // logMsg("\tneigh=" + std::to_string(neigh.second));
+          if (neigh.first < minEdge.first &&
+              !isIdInMST(addedSet, neigh.second)) {
+            upcxx::barrier();
+            minEdge.first = neigh.first;
+            minEdge.second.first = localVertex->id;
+            minEdge.second.second = neigh.second;
           }
-        }
-
-        if (found && !done) {
-          // If you are worker node, then send to the master the minimal edge
-          // that you've found.
-          logMsg("Adding vertex into MST");
-          upcxx::rpc(
-              masterRank,
-              [](global_minimums_t &globalMinimums, Rank senderRank, Id fromId,
-                 Id id, EdgeData weight) {
-                // std::cout << "senderRank=" << senderRank << "\n";
-                globalMinimums->at(senderRank) =
-                    std::make_pair(std::make_pair(fromId, id), weight);
-              },
-              globalMinimums, upcxx::rank_me(), fromId, minId, minWeight)
-              .wait();
-        } else {
-          // std::cout << "rank=" << upcxx::rank_me() << "\n";
-          done = true;
         }
       }
 
-      // Wait until all the workers updated vector of minimal edges with
-      // partial findings.
       upcxx::barrier();
-      if (done && masterRank != upcxx::rank_me()) {
-        upcxx::rpc(
-            upcxx::rank_me(),
-            [](rank_state_t &rankState) {
-              rankState->insert(upcxx::rank_me());
-            },
-            rankState)
-            .wait();
-        std::cout << "rank=" << upcxx::rank_me() << "\n";
+
+      if (minEdge.first == std::numeric_limits<int>::max()) {
+        if (0 == upcxx::rank_me()) {
+          for (auto edge : localMst) {
+            logMsg(ToString(edge));
+          }
+        }
+
+        done = true;
         break;
       }
 
-      if (masterRank == upcxx::rank_me()) {
-        // If you are master, then collect edges from the workers and
-        // broadcast the edge with the minimal weight.
-        int minIdx = 0;
-        bool atLeastOneFound = false;
-        auto localMinimalEdges = globalMinimums.fetch(masterRank).wait();
-        for (size_t idx = 0; idx < localMinimalEdges.size(); idx++) {
-          // std::cout << "idx=" << localMinimalEdges[idx].second << "\n";
-          // std::cout << "minIdx=" << localMinimalEdges[minIdx].second << "\n";
-          if (localMinimalEdges[idx].second <
-              localMinimalEdges[minIdx].second) {
-            minIdx = idx;
-            atLeastOneFound = true;
-          }
-        }
-
-        // if (!atLeastOneFound) {
-        //   break;
-        // }
-
-        // Add minimum edge into the MST
-        for (Rank rank = 0; rank < upcxx::rank_n(); ++rank) {
-          upcxx::rpc(
-              rank, [](added_set_t &addedSet, Id id) { addedSet->insert(id); },
-              addedSet, localMinimalEdges[minIdx].first.second)
+      local_edge_t globalMinEdge =
+          upcxx::reduce_one(
+              minEdge,
+              [](const local_edge_t &lhs, const local_edge_t &rhs) {
+                return (lhs.first < rhs.first ? lhs : rhs);
+              },
+              0)
               .wait();
-        }
 
-        upcxx::rpc(
-            masterRank,
-            [](mst_edge_collection_t &mstEdgeCollection, mst_edge_t edge) {
-              mstEdgeCollection->push_back(edge);
-            },
-            mstEdges,
-            std::make_pair(
-                std::make_pair(localMinimalEdges[minIdx].first.first,
-                               localMinimalEdges[minIdx].first.second),
-                localMinimalEdges[minIdx].second))
-            .wait();
-
-        // Check if all workers are done and exit
-        size_t ranksDone{0};
-        for (Rank r = 0; r < upcxx::rank_n(); r++) {
-          if (masterRank == r) {
-            ranksDone += 1;
-            continue;
-          }
-
-          ranksDone += upcxx::rpc(
-                           r,
-                           [](rank_state_t &rankState, Rank r) {
-                             if (rankState->count(r) == 1) {
-                               return 1;
-                             }
-
-                             return 0;
-                           },
-                           rankState, r)
-                           .wait();
-        }
-
-        // std::cout << "ranksDone=" << ranksDone << "\n";
-        if (ranksDone == upcxx::rank_n()) {
-          std::cout << "All ranks are done\n";
-          break;
-        }
-      }
-
-      upcxx::barrier();
-    }
-
-    if (masterRank == upcxx::rank_me()) {
-      auto localMstEdges = mstEdges.fetch(masterRank).wait();
-      for (const auto &edge : localMstEdges) {
-        std::cout << "from=" << edge.first.first << ", to=" << edge.first.second
-                  << ", weight=" << edge.second << "\n";
+      if (0 == upcxx::rank_me()) {
+        addIdIntoMST(addedSet, globalMinEdge.second.second);
+        localMst.push_back(globalMinEdge);
       }
     }
+
+    leaderTeam.destroy();
+    workerTeam.destroy();
+
+    return true;
   }
 
 private:
   graph_storage_type m_vertexStore;
+  const size_t m_totalNumberVertices;
+  const size_t m_verticesPerRank;
 
   /*
    * Helper methods
@@ -332,7 +310,10 @@ bool Graph<VertexData, EdgeData>::AddEdge(const Edge &edge) {
 }
 
 template <typename VertexData, typename EdgeData>
-Graph<VertexData, EdgeData>::Graph() : m_vertexStore({}) {}
+Graph<VertexData, EdgeData>::Graph(const size_t totalNumberVertices,
+                                   const size_t verticesPerRank)
+    : m_vertexStore({}), m_totalNumberVertices(totalNumberVertices),
+      m_verticesPerRank(verticesPerRank) {}
 
 template <typename VertexData, typename EdgeData>
 bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
@@ -351,14 +332,17 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
     itFrom = graph->find(edge.from);
     upcxx::global_ptr<Vertex> pGlobalFrom = itFrom->second;
     auto pLocalFrom = pGlobalFrom.local();
-    pLocalFrom->neighbours.push_back({edge.to, edge.data});
+    pLocalFrom->neighbours.push_back({edge.data, edge.to});
+
+	logMsg("from=" + std::to_string(edge.from) + ", to=" + std::to_string(edge.to));
   };
 
   upcxx::future<> aFuture =
       upcxx::rpc(aRank, singleEdgeInsertLambda, m_vertexStore, edge);
 
   upcxx::future<> bFuture =
-      upcxx::rpc(bRank, singleEdgeInsertLambda, m_vertexStore, edge);
+      upcxx::rpc(bRank, singleEdgeInsertLambda, m_vertexStore,
+                 Edge{edge.to, edge.from, edge.data});
 
   aFuture.wait();
   bFuture.wait();
@@ -385,49 +369,48 @@ bool Graph<VertexData, EdgeData>::hasEdgeHelper(const Id &a,
   // Get rank of the parent of a second node
   const Rank &bRank = getVertexParent(b);
 
-  auto singleEdgeInsertLambda = [](graph_storage_type &graph, Id idA, Id idB) {
-    auto itId = graph->find(idA);
-    if (itId == graph->end()) {
-      graph->insert({idA, upcxx::new_<Vertex>(idA)});
+  auto singleEdgeFindLambda = [](graph_storage_type &graph, Id idA, Id idB) {
+    auto itIdA = graph->find(idA);
+    if (itIdA == graph->end()) {
+      return false;
     }
 
-    itId = graph->find(idA);
-    upcxx::global_ptr<Vertex> aPtr = itId->second;
+    upcxx::global_ptr<Vertex> aPtr = itIdA->second;
     auto localAPtr = aPtr.local();
-    auto itB = std::find(localAPtr->neighbours.begin(),
-                         localAPtr->neighbours.end(), idB);
+    auto itB = std::find_if(
+        localAPtr->neighbours.begin(), localAPtr->neighbours.end(),
+        [idB](const auto &weightNode) { return weightNode.second == idB; });
     return itB != localAPtr->neighbours.end();
   };
 
   upcxx::future<bool> aFuture =
-      upcxx::rpc(aRank, singleEdgeInsertLambda, m_vertexStore, a, b);
+      upcxx::rpc(aRank, singleEdgeFindLambda, m_vertexStore, a, b);
 
   return aFuture.wait();
 }
 
 template <typename VertexData, typename EdgeData>
 Rank Graph<VertexData, EdgeData>::getVertexParent(const Id &id) const {
-  const auto size{upcxx::rank_n()};
-  return id % size;
+  return id / m_verticesPerRank;
 }
 
 template <typename VertexData, typename EdgeData>
 upcxx::global_ptr<typename Graph<VertexData, EdgeData>::Vertex>
 Graph<VertexData, EdgeData>::fetchVertexFromStore(const Id &id) const {
   const Rank idParentRank = getVertexParent(id);
-  upcxx::future<upcxx::global_ptr<Vertex>> vertexFuture = upc(
+  upcxx::future<upcxx::global_ptr<Vertex>> vertexFuture = upcxx::rpc(
       idParentRank,
       [](graph_storage_type &graph, Id id) {
         auto idIt = graph->find(id);
         if (idIt == graph->end()) {
-          return nullptr;
+          return upcxx::global_ptr<Vertex>(nullptr);
         }
 
         return idIt->second;
       },
       m_vertexStore, id);
 
-  return vertexFuture.wait().value();
+  return vertexFuture.wait();
 }
 
 }; // namespace PGASGraph
