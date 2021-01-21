@@ -12,8 +12,8 @@ int main() {
   PGASGraph::Graph<std::string, int> g(totalNumberVertices, verticesPerRank);
   g.AddEdge({0, 1, 3});
   g.AddEdge({2, 3, 9});
-  g.AddEdge({1, 2, 5});
   g.AddEdge({3, 0, 12});
+  g.AddEdge({1, 2, 5});
 
   upcxx::barrier();
 

@@ -123,25 +123,6 @@ public:
   }
 
   bool MST() {
-    upcxx::team &worldTeam = upcxx::world();
-    const Rank leaderGroupId =
-
-        upcxx::rank_me() == 0 ? 0 : upcxx::team::color_none;
-    const Rank workerGroupId =
-        upcxx::rank_me() == 0 ? upcxx::team::color_none : 1;
-    const Rank workerGroupKey = workerGroupId;
-
-    upcxx::team leaderTeam = worldTeam.split(leaderGroupId, 0);
-    upcxx::team workerTeam = worldTeam.split(workerGroupId, workerGroupKey);
-
-    if (0 == upcxx::rank_me()) {
-      std::cout << leaderTeam.rank_n() << "\n";
-    } else {
-      std::cout << workerTeam.rank_n() << "\n";
-    }
-
-    upcxx::barrier();
-
     using added_set_t = upcxx::dist_object<std::unordered_set<Id>>;
     using weight_node_t = typename Vertex::weight_node_t;
 
@@ -197,29 +178,47 @@ public:
 
     // Each worker has its portion.
     added_set_t addedSet{{}};
-    std::vector<local_edge_t> localMst;
+
+    using dist_local_edge_vec_t = upcxx::dist_object<std::vector<local_edge_t>>;
+    dist_local_edge_vec_t localMst{{}};
 
     // Add INITIAL random vertex into MST.
     bool isEmptyLocalVertexStore{false};
     {
       auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
-	  // for (const auto [id, vertex] : localVertexStore)
-	  // {
-	  //     logMsg(vertex.local()->ToString());
-	  // }
-	  
-      if (localVertexStore.empty()) {
-        workerTeam.destroy();
+      isEmptyLocalVertexStore = localVertexStore.empty();
+      if (isEmptyLocalVertexStore) {
         return true;
       }
 
       const Id initialVertex = localVertexStore.begin()->second.local()->id;
+
       addIdIntoMST(addedSet, initialVertex);
+      assert(localVertexStore[initialVertex].is_local());
+      Vertex *initialVertexPtr = localVertexStore[initialVertex].local();
+      local_edge_t minEdge =
+          std::make_pair(std::numeric_limits<int>::max(), std::make_pair(0, 0));
+      for (const auto &neigh : initialVertexPtr->neighbours) {
+        if (neigh.first < minEdge.first) {
+          if (true || !isIdInMST(addedSet, neigh.second)) {
+            minEdge.first = neigh.first;
+            minEdge.second.first = initialVertexPtr->id;
+            minEdge.second.second = neigh.second;
+          }
+        }
+      }
+
+      upcxx::rpc(
+          0,
+          [](dist_local_edge_vec_t &localMst, local_edge_t edge) {
+            localMst->push_back(edge);
+          },
+          localMst, minEdge)
+          .wait();
+      // addIdIntoMST(addedSet, minEdge.second.second);
     }
 
-	// leaderTeam.destroy();
-	// workerTeam.destroy();
-	// return true;
+    upcxx::barrier();
 
     bool done = false;
     while (!done && !isEmptyLocalVertexStore) {
@@ -227,25 +226,23 @@ public:
       local_edge_t minEdge =
           std::make_pair(std::numeric_limits<int>::max(), std::make_pair(0, 0));
 
-      // Find edge with minimum weight that connects vertex in the current cut
-      // to the MST.
+      // Find edge with minimum weight that connects vertex in the current
+      // cut to the MST.
       for (const auto &[id, globalVertex] :
            m_vertexStore.fetch(upcxx::rank_me()).wait()) {
+
         assert(globalVertex.is_local());
         Vertex *localVertex = globalVertex.local();
-        // logMsg(localVertex->ToString());
-        if (!isIdInMST(addedSet, localVertex->id)) {
-          continue;
-        }
 
+        const bool isCurrentInMst = isIdInMST(addedSet, localVertex->id);
         for (const auto &neigh : localVertex->neighbours) {
-          // logMsg("\tneigh=" + std::to_string(neigh.second));
-          if (neigh.first < minEdge.first &&
-              !isIdInMST(addedSet, neigh.second)) {
-            upcxx::barrier();
-            minEdge.first = neigh.first;
-            minEdge.second.first = localVertex->id;
-            minEdge.second.second = neigh.second;
+          if (neigh.first < minEdge.first) {
+            if (isCurrentInMst && !isIdInMST(addedSet, neigh.second)) {
+              upcxx::barrier();
+              minEdge.first = neigh.first;
+              minEdge.second.first = localVertex->id;
+              minEdge.second.second = neigh.second;
+            }
           }
         }
       }
@@ -254,9 +251,16 @@ public:
 
       if (minEdge.first == std::numeric_limits<int>::max()) {
         if (0 == upcxx::rank_me()) {
-          for (auto edge : localMst) {
-            logMsg(ToString(edge));
-          }
+          upcxx::rpc(
+              0,
+              [ToString](dist_local_edge_vec_t &localMst) {
+                auto begin = localMst->begin();
+                for (; begin != localMst->end(); ++begin) {
+                  logMsg(ToString(*begin));
+                }
+              },
+              localMst)
+              .wait();
         }
 
         done = true;
@@ -274,12 +278,15 @@ public:
 
       if (0 == upcxx::rank_me()) {
         addIdIntoMST(addedSet, globalMinEdge.second.second);
-        localMst.push_back(globalMinEdge);
+        upcxx::rpc(
+            0,
+            [](dist_local_edge_vec_t &localMst, local_edge_t edge) {
+              localMst->push_back(edge);
+            },
+            localMst, globalMinEdge)
+            .wait();
       }
     }
-
-    leaderTeam.destroy();
-    workerTeam.destroy();
 
     return true;
   }
@@ -334,7 +341,6 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
     auto pLocalFrom = pGlobalFrom.local();
     pLocalFrom->neighbours.push_back({edge.data, edge.to});
 
-	logMsg("from=" + std::to_string(edge.from) + ", to=" + std::to_string(edge.to));
   };
 
   upcxx::future<> aFuture =
