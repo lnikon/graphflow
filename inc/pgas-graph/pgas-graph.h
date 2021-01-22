@@ -228,11 +228,9 @@ public:
           std::make_pair(std::numeric_limits<int>::max(), std::make_pair(0, 0));
       for (const auto &neigh : initialVertexPtr->neighbours) {
         if (neigh.first < minEdge.first) {
-          if (true || !isIdInMST(addedSet, neigh.second)) {
             minEdge.first = neigh.first;
             minEdge.second.first = initialVertexPtr->id;
             minEdge.second.second = neigh.second;
-          }
         }
       }
 
