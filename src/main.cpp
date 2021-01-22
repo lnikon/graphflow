@@ -14,52 +14,52 @@ int main() {
 
   // from 0
   if (0 == upcxx::rank_me()) {
-    g.AddEdge({0, 1, 12});
-    g.AddEdge({0, 2, 11});
-    g.AddEdge({0, 3, 10});
-    g.AddEdge({0, 4, 9});
-    g.AddEdge({0, 5, 8});
-    g.AddEdge({0, 6, 7});
-
-    // from 1
-    g.AddEdge({1, 2, 6});
-    g.AddEdge({1, 6, 5});
-
-    // from 2
-    g.AddEdge({2, 3, 4});
-
-    // from 3
-    g.AddEdge({3, 4, 3});
-
-    // from 4
-    g.AddEdge({4, 5, 2});
-
-    // from 5
-    g.AddEdge({5, 6, 1});
- 
-
-    // g.AddEdge({0, 1, 1});
-    // g.AddEdge({0, 2, 2});
-    // g.AddEdge({0, 3, 3});
-    // g.AddEdge({0, 4, 4});
-    // g.AddEdge({0, 5, 5});
-    // g.AddEdge({0, 6, 6});
+    // g.AddEdge({0, 1, 12});
+    // g.AddEdge({0, 2, 11});
+    // g.AddEdge({0, 3, 10});
+    // g.AddEdge({0, 4, 9});
+    // g.AddEdge({0, 5, 8});
+    // g.AddEdge({0, 6, 7});
 
     // // from 1
-    // g.AddEdge({1, 2, 7});
-    // g.AddEdge({1, 6, 8});
+    // g.AddEdge({1, 2, 6});
+    // g.AddEdge({1, 6, 5});
 
     // // from 2
-    // g.AddEdge({2, 3, 9});
+    // g.AddEdge({2, 3, 4});
 
     // // from 3
-    // g.AddEdge({3, 4, 10});
+    // g.AddEdge({3, 4, 3});
 
     // // from 4
-    // g.AddEdge({4, 5, 11});
+    // g.AddEdge({4, 5, 2});
 
     // // from 5
-    // g.AddEdge({5, 6, 12});
+    // g.AddEdge({5, 6, 1});
+ 
+
+    g.AddEdge({0, 1, 1});
+    g.AddEdge({0, 2, 2});
+    g.AddEdge({0, 3, 3});
+    g.AddEdge({0, 4, 4});
+    g.AddEdge({0, 5, 5});
+    g.AddEdge({0, 6, 6});
+
+    // from 1
+    g.AddEdge({1, 2, 7});
+    g.AddEdge({1, 6, 8});
+
+    // from 2
+    g.AddEdge({2, 3, 9});
+
+    // from 3
+    g.AddEdge({3, 4, 10});
+
+    // from 4
+    g.AddEdge({4, 5, 11});
+
+    // from 5
+    g.AddEdge({5, 6, 12});
   }
 
   // g.AddEdge({0, 1, 3});

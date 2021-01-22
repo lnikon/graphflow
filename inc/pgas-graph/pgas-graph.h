@@ -253,8 +253,7 @@ public:
 
     upcxx::barrier();
 
-    bool done = false;
-    while (/* !done && */ !isMSTFull(localMst) && !isEmptyLocalVertexStore) {
+    while (!isMSTFull(localMst) && !isEmptyLocalVertexStore) {
       // Min edge in the current cut.
       local_edge_t minEdge =
           std::make_pair(std::numeric_limits<int>::max(), std::make_pair(0, 0));
@@ -274,40 +273,16 @@ public:
               minEdge.first = neigh.first;
               minEdge.second.first = localVertex->id;
               minEdge.second.second = neigh.second;
-            } else if (!isCurrentInMst && isIdInMST(addedSet, neigh.second)) {
+            } /* else if (!isCurrentInMst && isIdInMST(addedSet, neigh.second)) {
               minEdge.first = neigh.first;
               minEdge.second.first = neigh.second;
               minEdge.second.second = localVertex->id;
-            }
+            } */
           }
         }
       }
 
-      logMsg(ToString(minEdge));
-
       upcxx::barrier();
-
-      if (minEdge.first == std::numeric_limits<int>::max()) {
-        if (0 == upcxx::rank_me()) {
-          upcxx::rpc(
-              0,
-              [ToString](dist_local_edge_vec_t &localMst) {
-                logMsg("===============");
-                auto begin = localMst->begin();
-                for (; begin != localMst->end(); ++begin) {
-                  logMsg(ToString(*begin));
-                }
-                logMsg("===============");
-              },
-              localMst)
-              .wait();
-        }
-
-        if (0 != upcxx::rank_me()) {
-          logMsg("Done.");
-          // done = true;
-        }
-      }
 
       local_edge_t globalMinEdge =
           upcxx::reduce_one(
@@ -321,7 +296,6 @@ public:
       upcxx::barrier();
 
       if (0 == upcxx::rank_me()) {
-        // logMsg("* " + ToString(globalMinEdge));
         if (globalMinEdge.first != std::numeric_limits<int>::max()) {
           addIdIntoMST(addedSet, globalMinEdge.second.second);
           addEdgeIntoMst(localMst, globalMinEdge);
