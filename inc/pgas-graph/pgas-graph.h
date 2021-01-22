@@ -117,7 +117,13 @@ public:
     auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
     std::string msg;
     for (const auto &[id, vertex] : localVertexStore) {
-      msg += std::to_string(id) + " ";
+      msg += "\n" + std::to_string(id) + ": [";
+      auto neighs = localVertexStore[id].local()->neighbours;
+      for (const auto &neigh : neighs) {
+        msg += " (" + std::to_string(neigh.first) + ", " +
+               std::to_string(neigh.second) + "), ";
+      }
+      msg += "]\n";
     }
     logMsg(msg);
   }
@@ -125,6 +131,10 @@ public:
   bool MST() {
     using added_set_t = upcxx::dist_object<std::unordered_set<Id>>;
     using weight_node_t = typename Vertex::weight_node_t;
+
+    using local_edge_t = std::pair<EdgeData, std::pair<Id, Id>>;
+    using dist_local_edge_vec_t = upcxx::dist_object<std::vector<local_edge_t>>;
+    dist_local_edge_vec_t localMst{{}};
 
     // Process with rank 0 is the master.
     const Rank masterRank = 0;
@@ -149,10 +159,32 @@ public:
     };
 
     auto addedSetSize = [](added_set_t &addedSet) {
+      // TODO: Collect all added set sizes and terminate if equal to vertex
+      // count.
       return upcxx::rpc(
                  upcxx::rank_me(),
                  [](added_set_t &addedSet) { return addedSet->size(); },
                  addedSet)
+          .wait();
+    };
+
+    auto addEdgeIntoMst = [](dist_local_edge_vec_t &mstEdges,
+                             local_edge_t edge) {
+      upcxx::rpc(
+          0,
+          [](dist_local_edge_vec_t &mstEdges, local_edge_t edge) {
+            if (std::find_if(mstEdges->begin(), mstEdges->end(),
+                             [edge](const auto &current) {
+                               return edge.first == current.first &&
+                                      edge.second.first ==
+                                          current.second.first &&
+                                      edge.second.second ==
+                                          current.second.second;
+                             }) == mstEdges->end()) {
+              mstEdges->push_back(edge);
+            }
+          },
+          mstEdges, edge)
           .wait();
     };
 
@@ -163,7 +195,6 @@ public:
       return true;
     }
 
-    using local_edge_t = std::pair<EdgeData, std::pair<Id, Id>>;
     auto ToString = [](local_edge_t edge) {
       std::string result;
       result += "{from=";
@@ -178,9 +209,6 @@ public:
 
     // Each worker has its portion.
     added_set_t addedSet{{}};
-
-    using dist_local_edge_vec_t = upcxx::dist_object<std::vector<local_edge_t>>;
-    dist_local_edge_vec_t localMst{{}};
 
     // Add INITIAL random vertex into MST.
     bool isEmptyLocalVertexStore{false};
@@ -208,20 +236,25 @@ public:
         }
       }
 
-      upcxx::rpc(
-          0,
-          [](dist_local_edge_vec_t &localMst, local_edge_t edge) {
-            localMst->push_back(edge);
-          },
-          localMst, minEdge)
-          .wait();
-      // addIdIntoMST(addedSet, minEdge.second.second);
+      addEdgeIntoMst(localMst, minEdge);
+      logMsg("initialVertex=" + std::to_string(initialVertexPtr->id));
     }
+
+    auto isMSTFull = [this](dist_local_edge_vec_t &localMst) -> bool {
+      return upcxx::rpc(0, [](dist_local_edge_vec_t &localMst,
+                       size_t totalVertexCount) {
+        if (localMst->empty()) {
+          return false;
+        }
+
+        return localMst->size() == totalVertexCount - 2;
+      }, localMst, m_totalNumberVertices).wait();
+    };
 
     upcxx::barrier();
 
     bool done = false;
-    while (!done && !isEmptyLocalVertexStore) {
+    while (/* !done && */ !isMSTFull(localMst) && !isEmptyLocalVertexStore) {
       // Min edge in the current cut.
       local_edge_t minEdge =
           std::make_pair(std::numeric_limits<int>::max(), std::make_pair(0, 0));
@@ -238,14 +271,19 @@ public:
         for (const auto &neigh : localVertex->neighbours) {
           if (neigh.first < minEdge.first) {
             if (isCurrentInMst && !isIdInMST(addedSet, neigh.second)) {
-              upcxx::barrier();
               minEdge.first = neigh.first;
               minEdge.second.first = localVertex->id;
               minEdge.second.second = neigh.second;
+            } else if (!isCurrentInMst && isIdInMST(addedSet, neigh.second)) {
+              minEdge.first = neigh.first;
+              minEdge.second.first = neigh.second;
+              minEdge.second.second = localVertex->id;
             }
           }
         }
       }
+
+      logMsg(ToString(minEdge));
 
       upcxx::barrier();
 
@@ -254,17 +292,21 @@ public:
           upcxx::rpc(
               0,
               [ToString](dist_local_edge_vec_t &localMst) {
+                logMsg("===============");
                 auto begin = localMst->begin();
                 for (; begin != localMst->end(); ++begin) {
                   logMsg(ToString(*begin));
                 }
+                logMsg("===============");
               },
               localMst)
               .wait();
         }
 
-        done = true;
-        break;
+        if (0 != upcxx::rank_me()) {
+          logMsg("Done.");
+          // done = true;
+        }
       }
 
       local_edge_t globalMinEdge =
@@ -276,16 +318,32 @@ public:
               0)
               .wait();
 
+      upcxx::barrier();
+
       if (0 == upcxx::rank_me()) {
-        addIdIntoMST(addedSet, globalMinEdge.second.second);
-        upcxx::rpc(
-            0,
-            [](dist_local_edge_vec_t &localMst, local_edge_t edge) {
-              localMst->push_back(edge);
-            },
-            localMst, globalMinEdge)
-            .wait();
+        // logMsg("* " + ToString(globalMinEdge));
+        if (globalMinEdge.first != std::numeric_limits<int>::max()) {
+          addIdIntoMST(addedSet, globalMinEdge.second.second);
+          addEdgeIntoMst(localMst, globalMinEdge);
+        }
       }
+    }
+
+    upcxx::barrier();
+
+    if (0 == upcxx::rank_me()) {
+      upcxx::rpc(
+          0,
+          [ToString](dist_local_edge_vec_t &localMst) {
+            logMsg("===============");
+            auto begin = localMst->begin();
+            for (; begin != localMst->end(); ++begin) {
+              logMsg(ToString(*begin));
+            }
+            logMsg("===============");
+          },
+          localMst)
+          .wait();
     }
 
     return true;
@@ -340,7 +398,6 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
     upcxx::global_ptr<Vertex> pGlobalFrom = itFrom->second;
     auto pLocalFrom = pGlobalFrom.local();
     pLocalFrom->neighbours.push_back({edge.data, edge.to});
-
   };
 
   upcxx::future<> aFuture =
@@ -418,7 +475,6 @@ Graph<VertexData, EdgeData>::fetchVertexFromStore(const Id &id) const {
 
   return vertexFuture.wait();
 }
-
 }; // namespace PGASGraph
 
 #endif // PGAS_GRAPH_H
