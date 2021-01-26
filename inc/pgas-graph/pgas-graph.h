@@ -29,11 +29,8 @@ using Id = unsigned long long int;
 using Rank = upcxx::intrank_t;
 
 /*! \brief An adjacency list distributed graph.
- *
  * Each vertex has assigned an Id which is unique across all the
- * vertices. That Id is particularly used for graph distribution by modulo rank
- * size e.g. vertex->id % upcxx::rank_n().
- *
+ * vertices. 
  */
 template <typename VertexData, typename EdgeData> class Graph {
 public:
@@ -280,6 +277,7 @@ public:
         }
       }
 
+	  // TODO Can be removed?
       upcxx::barrier();
 
       local_edge_t globalMinEdge =
