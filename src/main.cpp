@@ -1,91 +1,91 @@
+// PGASGraph
 #include <pgas-graph/pgas-graph.h>
 
+// STL
+#include <chrono>
 #include <iostream>
+#include <random>
 
-int main() {
+// Boost
+#include <boost/program_options.hpp>
+
+// Usings
+namespace po = boost::program_options;
+
+po::options_description createProgramOptions() {
+  po::options_description desc("Allowed options");
+  desc.add_options()("help", "produce help message")(
+      "vertex-count", po::value<int>(), "set vertex count");
+  return desc;
+}
+
+int main(int argc, char *argv[]) {
+  // Initialize UPCXX.
   upcxx::init();
 
-  // const size_t totalNumberVertices = 5;
-  const size_t totalNumberVertices = 8;
+  // Parse command line options.
+  auto optionsDesc = createProgramOptions();
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, optionsDesc), vm);
+  if (vm.count("help")) {
+    std::cout << optionsDesc << std::endl;
+    return 1;
+  }
+
+  // Get vertex count.
+  size_t totalNumberVertices = 256;
+  if (vm.count("vertex-count")) {
+    totalNumberVertices = vm["vertex-count"].as<int>();
+  }
+
+  // Distribute vertices over the ranks.
   const size_t verticesPerRank =
       (totalNumberVertices + upcxx::rank_n() - 1) / upcxx::rank_n();
 
-  PGASGraph::Graph<std::string, int> g(totalNumberVertices, verticesPerRank);
+  // Create graph.
+  PGASGraph::Graph<std::string, size_t> g(totalNumberVertices, verticesPerRank);
 
-  // from 0
+  // Generate vertices.
   if (0 == upcxx::rank_me()) {
-    // g.AddEdge({0, 1, 12});
-    // g.AddEdge({0, 2, 11});
-    // g.AddEdge({0, 3, 10});
-    // g.AddEdge({0, 4, 9});
-    // g.AddEdge({0, 5, 8});
-    // g.AddEdge({0, 6, 7});
+    std::random_device rnd;
+    std::mt19937 generator(rnd());
+    std::uniform_real_distribution<double> distribution(0, 1);
 
-    // // from 1
-    // g.AddEdge({1, 2, 6});
-    // g.AddEdge({1, 6, 5});
+    size_t edgeCount{0};
+    auto start = std::chrono::steady_clock::now();
+    for (size_t i{1}; i < totalNumberVertices; ++i) {
+      for (size_t j{1}; j < totalNumberVertices; ++j) {
+        const auto diceRoll = distribution(generator);
+        if (diceRoll >= 0.5) {
+          g.AddEdge({i, j, i * j});
+          edgeCount++;
+        } else {
+          PGASGraph::logMsg("dice roll: " + std::to_string(diceRoll));
+        }
+      }
+    }
 
-    // // from 2
-    // g.AddEdge({2, 3, 4});
+    auto end = std::chrono::steady_clock::now();
+    PGASGraph::logMsg(
+        "Graph generation elapsed time: " +
+        std::to_string(std::chrono::duration<double>(end - start).count()) +
+        "\n");
 
-    // // from 3
-    // g.AddEdge({3, 4, 3});
-
-    // // from 4
-    // g.AddEdge({4, 5, 2});
-
-    // // from 5
-    // g.AddEdge({5, 6, 1});
- 
-
-    g.AddEdge({0, 1, 1});
-    g.AddEdge({0, 2, 2});
-    g.AddEdge({0, 3, 3});
-    g.AddEdge({0, 4, 4});
-    g.AddEdge({0, 5, 5});
-    g.AddEdge({0, 6, 6});
-
-    // from 1
-    g.AddEdge({1, 2, 7});
-    g.AddEdge({1, 6, 8});
-
-    // from 2
-    g.AddEdge({2, 3, 9});
-
-    // from 3
-    g.AddEdge({3, 4, 10});
-
-    // from 4
-    g.AddEdge({4, 5, 11});
-
-    // from 5
-    g.AddEdge({5, 6, 12});
+    PGASGraph::logMsg("Vertex count: " + std::to_string(totalNumberVertices));
+    PGASGraph::logMsg("Vertex count per rank: " +
+                      std::to_string(verticesPerRank));
+    PGASGraph::logMsg("Edge count: " + std::to_string(edgeCount));
   }
 
-  // g.AddEdge({0, 1, 3});
-  // g.AddEdge({2, 3, 9});
-  // g.AddEdge({3, 0, 12});
-  // g.AddEdge({1, 2, 5});
-
-  upcxx::barrier();
-  g.printLocal();
   upcxx::barrier();
 
-  // std::cout << std::boolalpha << "g.HasEdge(1, 2) = " << g.HasEdge(1, 2) <<
-  // '\n'
-  //           << "g.HasEdge(2, 3) = " << g.HasEdge(2, 3) << '\n'
-  //           << "g.HasEdge(3, 4) = " << g.HasEdge(3, 4) << '\n'
-  //           << "g.HasEdge(4, 1) = " << g.HasEdge(4, 1) << '\n'
-  //           << "g.HasEdge(5, 9) = " << g.HasEdge(5, 9) << '\n'
-  //           << "g.HasEdge(4, 7) = " << g.HasEdge(4, 7) << '\n';
-
-  g.printLocal();
-
-  upcxx::barrier();
-  if (0 == upcxx::rank_me()) {
-    std::cout << " ************** \n";
-  }
+  auto start = std::chrono::steady_clock::now();
   g.MST();
+  auto end = std::chrono::steady_clock::now();
+
+  PGASGraph::logMsg(
+      "MST Elapsed time: " +
+      std::to_string(std::chrono::duration<double>(end - start).count()));
 
   upcxx::finalize();
   return 0;

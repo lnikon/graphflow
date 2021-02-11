@@ -11,12 +11,7 @@ namespace PGASGraph {
 
 #define DEBUG_LOG_MSG
 
-void logMsg(const std::string &msg) {
-#ifdef DEBUG_LOG_MSG
-  std::cout << "[" << upcxx::rank_me() << "/" << upcxx::rank_n() << "] " << msg
-            << "\n";
-#endif
-}
+void logMsg(const std::string &msg);
 
 /*!
  * Type for the vertex Id.
@@ -30,7 +25,7 @@ using Rank = upcxx::intrank_t;
 
 /*! \brief An adjacency list distributed graph.
  * Each vertex has assigned an Id which is unique across all the
- * vertices. 
+ * vertices.
  */
 template <typename VertexData, typename EdgeData> class Graph {
 public:
@@ -74,6 +69,7 @@ public:
     std::vector<weight_node_t> neighbours;
 
     Vertex(Id id) : id(id) {}
+    Vertex() {}
 
     std::string ToString() const {
       std::string result;
@@ -225,9 +221,9 @@ public:
           std::make_pair(std::numeric_limits<int>::max(), std::make_pair(0, 0));
       for (const auto &neigh : initialVertexPtr->neighbours) {
         if (neigh.first < minEdge.first) {
-            minEdge.first = neigh.first;
-            minEdge.second.first = initialVertexPtr->id;
-            minEdge.second.second = neigh.second;
+          minEdge.first = neigh.first;
+          minEdge.second.first = initialVertexPtr->id;
+          minEdge.second.second = neigh.second;
         }
       }
 
@@ -236,19 +232,23 @@ public:
     }
 
     auto isMSTFull = [this](dist_local_edge_vec_t &localMst) -> bool {
-      return upcxx::rpc(0, [](dist_local_edge_vec_t &localMst,
-                       size_t totalVertexCount) {
-        if (localMst->empty()) {
-          return false;
-        }
+      return upcxx::rpc(
+                 0,
+                 [](dist_local_edge_vec_t &localMst, size_t totalVertexCount) {
+                   if (localMst->empty()) {
+                     return false;
+                   }
 
-        return localMst->size() == totalVertexCount - 2;
-      }, localMst, m_totalNumberVertices).wait();
+                   return localMst->size() == totalVertexCount - 2;
+                 },
+                 localMst, m_totalNumberVertices)
+          .wait();
     };
 
     upcxx::barrier();
 
-    while (!isMSTFull(localMst) && !isEmptyLocalVertexStore) {
+    while (!isMSTFull(localMst) &&
+           !isEmptyLocalVertexStore /* isMasterDone() */) {
       // Min edge in the current cut.
       local_edge_t minEdge =
           std::make_pair(std::numeric_limits<int>::max(), std::make_pair(0, 0));
@@ -268,17 +268,16 @@ public:
               minEdge.first = neigh.first;
               minEdge.second.first = localVertex->id;
               minEdge.second.second = neigh.second;
-            } /* else if (!isCurrentInMst && isIdInMST(addedSet, neigh.second)) {
-              minEdge.first = neigh.first;
-              minEdge.second.first = neigh.second;
+            } /* else if (!isCurrentInMst && isIdInMST(addedSet, neigh.second))
+            { minEdge.first = neigh.first; minEdge.second.first = neigh.second;
               minEdge.second.second = localVertex->id;
             } */
           }
         }
       }
 
-	  // TODO Can be removed?
-      upcxx::barrier();
+      // TODO Can be removed?
+      // upcxx::barrier();
 
       local_edge_t globalMinEdge =
           upcxx::reduce_one(
@@ -299,17 +298,20 @@ public:
       }
     }
 
-    upcxx::barrier();
+    // upcxx::barrier();
 
     if (0 == upcxx::rank_me()) {
       upcxx::rpc(
           0,
           [ToString](dist_local_edge_vec_t &localMst) {
             logMsg("===============");
+            size_t cost{0};
             auto begin = localMst->begin();
             for (; begin != localMst->end(); ++begin) {
-              logMsg(ToString(*begin));
+              // logMsg(ToString(*begin));
+              cost += begin->first;
             }
+            std::cout << "MST Cost: " << cost << std::endl;
             logMsg("===============");
           },
           localMst)
@@ -362,6 +364,7 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
     auto itFrom = graph->find(edge.from);
     if (itFrom == graph->end()) {
       graph->insert({edge.from, upcxx::new_<Vertex>(edge.from)});
+      // logMsg("Added new vertes" + std::to_string(edge.from));
     }
 
     itFrom = graph->find(edge.from);
@@ -369,6 +372,9 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
     auto pLocalFrom = pGlobalFrom.local();
     pLocalFrom->neighbours.push_back({edge.data, edge.to});
   };
+
+  // logMsg("aRank=" + std::to_string(aRank) + ", " +
+  //        "bRank=" + std::to_string(bRank));
 
   upcxx::future<> aFuture =
       upcxx::rpc(aRank, singleEdgeInsertLambda, m_vertexStore, edge);
@@ -424,7 +430,7 @@ bool Graph<VertexData, EdgeData>::hasEdgeHelper(const Id &a,
 
 template <typename VertexData, typename EdgeData>
 Rank Graph<VertexData, EdgeData>::getVertexParent(const Id &id) const {
-  return id / m_verticesPerRank;
+  return (id / m_verticesPerRank) % upcxx::rank_n();
 }
 
 template <typename VertexData, typename EdgeData>

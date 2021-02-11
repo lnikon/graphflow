@@ -1,0 +1,15 @@
+HashTables
+Collision Resolution Techniques
+OOP Concepts
+Type Deduction
+Move Semantics
+How Shared Pointer Works
+Multithreading/Issues/DeadlockAndLivelock
+Atomics
+Vector<Bool>
+Exception Safety
+Thread Liveness Properties
+False Sharing
+Virtual Pointer and Table Impl
+TCP/IP Basics, HTTP
+Red-Black Trees
