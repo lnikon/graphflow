@@ -121,11 +121,24 @@ public:
     logMsg(msg);
   }
 
-  bool MST() {
+  upcxx::dist_object<std::vector<std::pair<EdgeData, std::pair<Id, Id>>>>
+  MST() {
     using added_set_t = upcxx::dist_object<std::unordered_set<Id>>;
     using weight_node_t = typename Vertex::weight_node_t;
 
     using local_edge_t = std::pair<EdgeData, std::pair<Id, Id>>;
+    auto ToString = [](local_edge_t edge) {
+      std::string result;
+      result += "{from=";
+      result += std::to_string(edge.second.first);
+      result += ", to=";
+      result += std::to_string(edge.second.second);
+      result += ", weight=";
+      result += std::to_string(edge.first);
+      result += "}\n";
+      return result;
+    };
+
     using dist_local_edge_vec_t = upcxx::dist_object<std::vector<local_edge_t>>;
     dist_local_edge_vec_t localMst{{}};
 
@@ -174,6 +187,18 @@ public:
                                       edge.second.second ==
                                           current.second.second;
                              }) == mstEdges->end()) {
+              auto ToString = [](local_edge_t edge) {
+                std::string result;
+                result += "{from=";
+                result += std::to_string(edge.second.first);
+                result += ", to=";
+                result += std::to_string(edge.second.second);
+                result += ", weight=";
+                result += std::to_string(edge.first);
+                result += "}\n";
+                return result;
+              };
+
               mstEdges->push_back(edge);
             }
           },
@@ -185,20 +210,8 @@ public:
         m_vertexStore.fetch(upcxx::rank_me()).wait();
     if (localVertexStore.empty()) {
       logMsg("Empty local vertex store.");
-      return true;
+      return localMst;
     }
-
-    auto ToString = [](local_edge_t edge) {
-      std::string result;
-      result += "{from=";
-      result += std::to_string(edge.second.first);
-      result += ", to=";
-      result += std::to_string(edge.second.second);
-      result += ", weight=";
-      result += std::to_string(edge.first);
-      result += "}\n";
-      return result;
-    };
 
     // Each worker has its portion.
     added_set_t addedSet{{}};
@@ -209,7 +222,7 @@ public:
       auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
       isEmptyLocalVertexStore = localVertexStore.empty();
       if (isEmptyLocalVertexStore) {
-        return true;
+        return localMst;
       }
 
       const Id initialVertex = localVertexStore.begin()->second.local()->id;
@@ -228,7 +241,6 @@ public:
       }
 
       addEdgeIntoMst(localMst, minEdge);
-      logMsg("initialVertex=" + std::to_string(initialVertexPtr->id));
     }
 
     auto isMSTFull = [this](dist_local_edge_vec_t &localMst) -> bool {
@@ -239,16 +251,25 @@ public:
                      return false;
                    }
 
-                   return localMst->size() == totalVertexCount - 2;
+                   return localMst->size() == totalVertexCount - 1;
                  },
                  localMst, m_totalNumberVertices)
           .wait();
     };
 
+    auto getMSTSize = [this](dist_local_edge_vec_t &localMst) -> bool {
+      return upcxx::rpc(
+                 0,
+                 [](dist_local_edge_vec_t &localMst) {
+                   return localMst->size();
+                 },
+                 localMst)
+          .wait();
+    };
+
     upcxx::barrier();
 
-    while (!isMSTFull(localMst) &&
-           !isEmptyLocalVertexStore /* isMasterDone() */) {
+    while (!isMSTFull(localMst) && !isEmptyLocalVertexStore) {
       // Min edge in the current cut.
       local_edge_t minEdge =
           std::make_pair(std::numeric_limits<int>::max(), std::make_pair(0, 0));
@@ -278,6 +299,7 @@ public:
 
       // TODO Can be removed?
       // upcxx::barrier();
+      upcxx::barrier();
 
       local_edge_t globalMinEdge =
           upcxx::reduce_one(
@@ -287,6 +309,10 @@ public:
               },
               0)
               .wait();
+
+      if (globalMinEdge.first == std::numeric_limits<int>::max()) {
+        break;
+      }
 
       upcxx::barrier();
 
@@ -298,27 +324,24 @@ public:
       }
     }
 
-    // upcxx::barrier();
+    // if (0 == upcxx::rank_me()) {
+    //   upcxx::rpc(
+    //       0,
+    //       [ToString](dist_local_edge_vec_t &localMst) {
+    //         size_t cost{0};
+    //         auto begin = localMst->begin();
+    //         for (; begin != localMst->end(); ++begin) {
+    //           cost += begin->first;
+    //         }
 
-    if (0 == upcxx::rank_me()) {
-      upcxx::rpc(
-          0,
-          [ToString](dist_local_edge_vec_t &localMst) {
-            logMsg("===============");
-            size_t cost{0};
-            auto begin = localMst->begin();
-            for (; begin != localMst->end(); ++begin) {
-              // logMsg(ToString(*begin));
-              cost += begin->first;
-            }
-            std::cout << "MST Cost: " << cost << std::endl;
-            logMsg("===============");
-          },
-          localMst)
-          .wait();
-    }
+    //         logMsg("MST Cost: " + std::to_string(cost));
+    //       },
+    //       localMst)
+    //       .wait();
+    // }
 
-    return true;
+    upcxx::barrier();
+    return localMst;
   }
 
 private:
@@ -364,7 +387,6 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
     auto itFrom = graph->find(edge.from);
     if (itFrom == graph->end()) {
       graph->insert({edge.from, upcxx::new_<Vertex>(edge.from)});
-      // logMsg("Added new vertes" + std::to_string(edge.from));
     }
 
     itFrom = graph->find(edge.from);
@@ -372,9 +394,6 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
     auto pLocalFrom = pGlobalFrom.local();
     pLocalFrom->neighbours.push_back({edge.data, edge.to});
   };
-
-  // logMsg("aRank=" + std::to_string(aRank) + ", " +
-  //        "bRank=" + std::to_string(bRank));
 
   upcxx::future<> aFuture =
       upcxx::rpc(aRank, singleEdgeInsertLambda, m_vertexStore, edge);

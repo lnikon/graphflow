@@ -1,6 +1,9 @@
 #ifndef GRAPH_UTILITIES_HPP
 #define GRAPH_UTILITIES_HPP
 
+// PGASGraph
+#include <pgas-graph/pgas-graph.h>
+
 // STL
 #include <chrono>
 #include <iostream>
@@ -16,10 +19,23 @@
 // Usings
 namespace po = boost::program_options;
 
-namespace GraphUtilities
-{
-using GraphType = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS>;
+namespace GraphUtilities {
+
+using MyBundledVertex = PGASGraph::Graph<std::string, size_t>::Vertex;
+
+using MyBundledEdge =
+    PGASGraph::Graph<std::string, size_t>::Vertex::weight_node_t;
+
+using GraphType =
+    boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS>;
+
+using BoostGraph =
+    boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
+                          MyBundledVertex, MyBundledEdge>;
+
 using SWGen = boost::small_world_iterator<boost::minstd_rand, GraphType>;
+
+BoostGraph generateRandomConnectedGraph(const size_t vertexCount, double percentage);
 
 po::options_description createProgramOptions();
 

@@ -77,49 +77,54 @@ void for_each_bundled_vertex(Graph &g, Function f) {
 }
 
 int main(int argc, char *argv[]) {
-  upcxx::init();
-  using GT = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
-                                   MyBundledVertex, MyBundledEdge>;
-  using ERGen = boost::erdos_renyi_iterator<boost::minstd_rand, GT>;
+  size_t totalNumberVertices{200};
+  GraphUtilities::BoostGraph boostGraph{
+      GraphUtilities::generateRandomConnectedGraph(totalNumberVertices, 30.0)};
 
-  // Generate the graph.
-  boost::minstd_rand gen;
-  const size_t vertexCount{1024};
-  GT g(ERGen(gen, vertexCount, 0.05), ERGen(), 100);
+  // upcxx::init();
+  // using GT = boost::adjacency_list<boost::vecS, boost::vecS,
+  // boost::undirectedS,
+  //                                  MyBundledVertex, MyBundledEdge>;
+  // using ERGen = boost::erdos_renyi_iterator<boost::minstd_rand, GT>;
 
-  // Assign ids to the vertices.
-  set_my_bundled_vertexes(g);
+  // // Generate the graph.
+  // boost::minstd_rand gen;
+  // const size_t vertexCount{63};
+  // GT g(ERGen(gen, vertexCount, 0.05), ERGen(), 100);
 
-  // Assign weights to the edges.
-  auto edges = boost::edges(g);
-  int weight{0};
-  for (auto it = edges.first; it != edges.second; ++it) {
-    g[*it].first = weight++;
-  }
+  // // Assign ids to the vertices.
+  // set_my_bundled_vertexes(g);
 
-  // Convert to the PGASGraph.
-  const auto verticesPerRank{(vertexCount + upcxx::rank_n() - 1) /
-                             upcxx::rank_n()};
-  PGASGraph::logMsg("vertexCount=" + std::to_string(vertexCount));
-  PGASGraph::logMsg("verticesPerRank=" + std::to_string(verticesPerRank));
-  PGASGraph::Graph<std::string, int> pgasGraph(vertexCount, verticesPerRank);
-  auto vs = boost::vertices(g);
-  weight = 0;
-  for (auto vit = vs.first; vit != vs.second; ++vit) {
-    auto neighbors = boost::adjacent_vertices(*vit, g);
-    for (auto nit = neighbors.first; nit != neighbors.second; ++nit) {
-      pgasGraph.AddEdge({g[*vit].id, g[*nit].id, weight++});
-    }
-  }
+  // // Assign weights to the edges.
+  // auto edges = boost::edges(g);
+  // int weight{0};
+  // for (auto it = edges.first; it != edges.second; ++it) {
+  //   g[*it].first = weight++;
+  // }
 
-  auto start = std::chrono::steady_clock::now();
-  pgasGraph.MST();
-  auto end = std::chrono::steady_clock::now();
+  // // Convert to the PGASGraph.
+  // const auto verticesPerRank{(vertexCount + upcxx::rank_n() - 1) /
+  //                            upcxx::rank_n()};
+  // PGASGraph::logMsg("vertexCount=" + std::to_string(vertexCount));
+  // PGASGraph::logMsg("verticesPerRank=" + std::to_string(verticesPerRank));
+  // PGASGraph::Graph<std::string, int> pgasGraph(vertexCount, verticesPerRank);
+  // auto vs = boost::vertices(g);
+  // weight = 0;
+  // for (auto vit = vs.first; vit != vs.second; ++vit) {
+  //   auto neighbors = boost::adjacent_vertices(*vit, g);
+  //   for (auto nit = neighbors.first; nit != neighbors.second; ++nit) {
+  //     pgasGraph.AddEdge({g[*vit].id, g[*nit].id, weight++});
+  //   }
+  // }
 
-  PGASGraph::logMsg(
-      "MST Elapsed time: " +
-      std::to_string(std::chrono::duration<double>(end - start).count()));
+  // // auto start = std::chrono::steady_clock::now();
+  // // pgasGraph.MST();
+  // // auto end = std::chrono::steady_clock::now();
 
-  upcxx::finalize();
+  // // PGASGraph::logMsg(
+  // //     "MST Elapsed time: " +
+  // //     std::to_string(std::chrono::duration<double>(end - start).count()));
+
+  // upcxx::finalize();
   return 0;
 };

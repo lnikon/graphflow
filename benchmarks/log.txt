@@ -1,0 +1,84 @@
+[0/1] Graph generation elapsed time: 0.104210
+[0/1] Vertex count: 64
+[0/1] Vertex count per rank: 64
+[0/1] Edge count: 2016
+[0/1] numComponents=1
+[0/1] initialVertex=58
+[0/1] ===============
+MST Cost: 1953
+[0/1] ===============
+[0/1] MST Elapsed time: 1.114404
+[0/2] Graph generation elapsed time: 0.104577
+[0/2] Vertex count: 64
+[0/2] Vertex count per rank: 32
+[0/2] Edge count: 2016
+[0/2] numComponents=1
+[0/2] initialVertex=28
+[0/2] ===============
+MST Cost: 1953
+*** Caught a signal (proc 1): SIGINT(2)
+*** Caught a signal (proc 0): SIGINT(2)
+[0/2] ===============
+[0/2] MST Elapsed time: 0.827610
+[1/2] initialVertex=60
+*** Caught a signal (proc 2): SIGINT(2)
+*** Caught a signal (proc 3): SIGINT(2)
+*** Caught a signal (proc 1): SIGINT(2)
+*** Caught a signal (proc 0): SIGINT(2)
+[2/4] initialVertex=44
+[3/4] initialVertex=60
+[1/4] initialVertex=28
+[0/4] Graph generation elapsed time: 0.138558
+[0/4] Vertex count: 64
+[0/4] Vertex count per rank: 16
+[0/4] Edge count: 2016
+[0/4] numComponents=1
+[0/4] initialVertex=12
+**********
+*** Caught a signal (proc 0): SIGINT(2)
+*** Caught a signal (proc 1): SIGINT(2)
+*** Caught a signal (proc 0): SIGINT(2)
+[1/2] initialVertex=122
+[0/2] Graph generation elapsed time: 0.443249
+[0/2] Vertex count: 128
+[0/2] Vertex count per rank: 64
+[0/2] Edge count: 8128
+[0/2] numComponents=1
+[0/2] initialVertex=58
+[0/1] Graph generation elapsed time: 0.095342
+[0/1] Vertex count: 64
+[0/1] Vertex count per rank: 64
+[0/1] Edge count: 2016
+[0/1] Number of connected components: 1
+[0/1] UPCXX: Number of Ranks: 1
+[0/1] MST Elapsed time: 1.018741
+[0/1] MST Cost: 1953
+[0/2] Graph generation elapsed time: 0.084831
+[0/2] Vertex count: 64
+[0/2] Vertex count per rank: 32
+[0/2] Edge count: 2016
+[0/2] Number of connected components: 1
+[0/2] UPCXX: Number of Ranks: 2
+[0/2] MST Elapsed time: 0.901794
+[0/2] MST Cost: 1953
+[1/2] MST Elapsed time: 0.901800
+[0/4] Graph generation elapsed time: 0.102002
+[0/4] Vertex count: 64
+[0/4] Vertex count per rank: 16
+[0/4] Edge count: 2016
+[0/4] Number of connected components: 1
+[0/4] UPCXX: Number of Ranks: 4
+[0/4] MST Elapsed time: 0.870372
+[0/4] MST Cost: 1953
+[1/4] MST Elapsed time: 0.870380
+[2/4] MST Elapsed time: 0.870381
+[3/4] MST Elapsed time: 0.870380
+**********
+[0/1] Graph generation elapsed time: 0.096169
+[0/1] Vertex count: 64
+[0/1] Vertex count per rank: 64
+[0/1] Edge count: 2016
+[0/1] Number of connected components: 1
+[0/1] UPCXX: Number of Ranks: 1
+[0/1] MST Elapsed time: 1.014889
+[0/1] MST Cost: 1953
