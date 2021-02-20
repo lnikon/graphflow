@@ -2,6 +2,9 @@
 #include <pgas-graph/graph-utilities.hpp>
 #include <pgas-graph/pgas-graph.h>
 
+// CopyPasted
+#include <pgas-graph/cppmemusage.hpp>
+
 // STL
 #include <chrono>
 #include <iostream>
@@ -132,14 +135,9 @@ int main(int argc, char *argv[]) {
     // Generate the graph.
     auto start = std::chrono::steady_clock::now();
     boost::minstd_rand gen;
-    // BoostGraph boostGraph(SWGen(gen, vertexCount, degree, 1), SWGen(), 100);
-    BoostGraph boostGraph{GraphUtilities::generateRandomConnectedGraph(
+
+    BoostGraph boostGraph{GraphUtilities::generateRandomConnectedGraph<BoostGraph>(
         totalNumberVertices, percentage)};
-    // for (int i = 0; i < totalNumberVertices - 1; i++) {
-    //   for (int j = i + 1; j < totalNumberVertices; j++) {
-    //     boost::add_edge(i, j, boostGraph);
-    //   }
-    // }
 
     // Assign ids to the vertices.
     set_my_bundled_vertexes(boostGraph);
@@ -167,6 +165,7 @@ int main(int argc, char *argv[]) {
 
     auto end = std::chrono::steady_clock::now();
 
+    PGASGraph::logMsg("*********");
     PGASGraph::logMsg(
         "Graph generation elapsed time: " +
         std::to_string(std::chrono::duration<double>(end - start).count()));
@@ -215,8 +214,12 @@ int main(int argc, char *argv[]) {
           PGASGraph::logMsg("MST Cost: " + std::to_string(cost));
         },
         mst)
-        .wait();
+	    .wait();
+
+    size_t peakSize = getPeakRSS( );
+    PGASGraph::logMsg("Peak Mem Usage: " + std::to_string(peakSize/1000000) + "MB");
   }
+  PGASGraph::logMsg("*********");
 
   upcxx::barrier();
   return 0;

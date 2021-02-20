@@ -1,0 +1,797 @@
+%CPU %MEM CMD
+ 0.0  0.0 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+ 0.0  0.0 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+ 0.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+ 0.0  0.0 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+ 0.0  0.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+ 0.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+ 0.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+ 0.0  1.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+ 0.0  0.5 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+ 0.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+ 0.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+ 0.0  1.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+ 0.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+32.0  1.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+27.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+21.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+40.0  1.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+34.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+29.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+48.0  1.9 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+42.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+36.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+56.0  1.9 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+43.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+64.0  2.0 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+56.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+71.0  2.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+63.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+57.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+39.5  2.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+35.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+32.5  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+43.5  2.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+39.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+36.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+47.0  2.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+42.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+39.5  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+51.5  2.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+43.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+55.0  2.5 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.5  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+59.0  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+53.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.5  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+63.5  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+57.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+55.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+45.3  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+41.3  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+39.3  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+48.0  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+44.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+42.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+51.0  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.6  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+44.3  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+53.6  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.3  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.3  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+56.3  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+52.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+59.3  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+54.6  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+52.6  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+46.7  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+43.2  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+41.2  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+48.7  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+45.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+43.5  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+51.0  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.2  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+45.5  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+53.2  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.2  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.7  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+55.5  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.2  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.5  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+57.5  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+53.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.5  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+47.6  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+44.2  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+42.8  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+49.4  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+45.8  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+44.6  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+51.2  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.4  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+52.8  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.8  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+54.6  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.6  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.2  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+56.4  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+52.4  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+58.2  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+54.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+52.6  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+50.0  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.3  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+45.3  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+51.3  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.5  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+52.8  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.8  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+54.3  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.3  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.1  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+55.6  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.6  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+57.1  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+53.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+52.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+50.1  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.4  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+45.7  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+51.2  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.8  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+52.4  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+48.7  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.8  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+53.7  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.8  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+54.8  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.1  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+56.1  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+52.1  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.4  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+50.2  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.6  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+51.2  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.6  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+52.3  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+48.7  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.8  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+53.3  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.7  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+54.5  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.7  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+55.5  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.6  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.8  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+50.3  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.8  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.1  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+51.2  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.7  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+52.2  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+48.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.8  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+53.0  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.4  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+48.6  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+53.8  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.2  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.5  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+54.7  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.1  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.4  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+55.6  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+52.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.2  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+50.8  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.5  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+46.9  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+51.6  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+48.3  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+47.6  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+52.4  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.0  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+48.4  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+53.2  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.8  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.2  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+54.0  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.6  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+49.9  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+54.9  2.7 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+51.4  1.6 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+50.7  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=100
+%CPU %MEM CMD
+ 0.0  0.0 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+ 0.0  0.0 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+ 0.0  0.0 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+ 9.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+ 4.0  0.1 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+ 4.0  0.0 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+16.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+14.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+11.0  0.7 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+ 0.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+27.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+23.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+20.0  0.8 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+ 0.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+35.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+31.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+27.0  1.0 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+ 0.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+41.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+39.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+33.0  1.0 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+ 0.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+48.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+39.0  1.1 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+ 0.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+27.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+25.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+23.0  1.1 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+39.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+31.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+29.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+28.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+47.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+35.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+33.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+32.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+56.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+41.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+37.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+36.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+65.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+41.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+40.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+72.0  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+34.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+31.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+30.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+41.5  0.2 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+38.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+34.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+33.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+46.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+40.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+37.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+36.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+40.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+39.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+53.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+35.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+32.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+31.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+39.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+37.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+34.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+33.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+41.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+38.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+36.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+35.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+44.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+41.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+38.7  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+36.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+46.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+42.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+40.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+38.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+48.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+36.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+34.4  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+32.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+38.7  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+37.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+36.4  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+34.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+40.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+37.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+35.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+42.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+39.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+37.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+44.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+40.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+38.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+46.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+42.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+40.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+48.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+41.4  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+37.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+35.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+41.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+38.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+37.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+43.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+39.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+38.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+44.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+41.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+39.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+46.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+42.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+40.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+47.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+41.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.8  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+39.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+38.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+43.8  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+40.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+38.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+45.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+41.1  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+39.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+46.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+42.1  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+40.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+47.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.1  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+41.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+48.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+42.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.8  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+40.1  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+39.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+44.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+41.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+39.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+45.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+41.7  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+40.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+46.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+42.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+41.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+47.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+42.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+41.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+40.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+46.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+42.4  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+41.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+47.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+42.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+48.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+42.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+42.4  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+41.4  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+47.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+42.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+48.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.7  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+42.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.4  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.4  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.8  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+42.7  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+41.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+47.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+42.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+48.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.9  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.4  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.7  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.4  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.8  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.9  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+42.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+48.4  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.7  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.1  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.4  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.7  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+43.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+48.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.1  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.7  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.4  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.8  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+47.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.8  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+47.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+43.9  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.4  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.4  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.4  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.9  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.0  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+47.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.7  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+44.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.7  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.1  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.2  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.5  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.9  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.9  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+47.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+49.8  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.4  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.3  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.7  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+47.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+47.4  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+47.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+52.6  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.2  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+44.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.1  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+45.6  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.5  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.0  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+50.9  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.3  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+45.9  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.4  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.8  0.4 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+46.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+51.8  0.3 ../build/pgas-graph-test --vertex-count=1024 --percentage=10
+%CPU %MEM CMD
+46.6  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+47.0  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+47.3  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+47.7  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+48.1  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+45.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+46.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+46.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+46.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+47.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+47.5  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+47.8  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10
+%CPU %MEM CMD
+48.2  1.2 ../build/pgas-graph-test --vertex-count=2048 --percentage=10

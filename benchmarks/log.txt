@@ -1,84 +1,189 @@
-[0/1] Graph generation elapsed time: 0.104210
+Current log file: v64_n1_p100.topout
+[0/1] *********
+[0/1] Graph generation elapsed time: 0.003875
 [0/1] Vertex count: 64
 [0/1] Vertex count per rank: 64
-[0/1] Edge count: 2016
-[0/1] numComponents=1
-[0/1] initialVertex=58
-[0/1] ===============
-MST Cost: 1953
-[0/1] ===============
-[0/1] MST Elapsed time: 1.114404
-[0/2] Graph generation elapsed time: 0.104577
-[0/2] Vertex count: 64
-[0/2] Vertex count per rank: 32
-[0/2] Edge count: 2016
-[0/2] numComponents=1
-[0/2] initialVertex=28
-[0/2] ===============
-MST Cost: 1953
-*** Caught a signal (proc 1): SIGINT(2)
-*** Caught a signal (proc 0): SIGINT(2)
-[0/2] ===============
-[0/2] MST Elapsed time: 0.827610
-[1/2] initialVertex=60
-*** Caught a signal (proc 2): SIGINT(2)
-*** Caught a signal (proc 3): SIGINT(2)
-*** Caught a signal (proc 1): SIGINT(2)
-*** Caught a signal (proc 0): SIGINT(2)
-[2/4] initialVertex=44
-[3/4] initialVertex=60
-[1/4] initialVertex=28
-[0/4] Graph generation elapsed time: 0.138558
-[0/4] Vertex count: 64
-[0/4] Vertex count per rank: 16
-[0/4] Edge count: 2016
-[0/4] numComponents=1
-[0/4] initialVertex=12
-**********
-*** Caught a signal (proc 0): SIGINT(2)
-*** Caught a signal (proc 1): SIGINT(2)
-*** Caught a signal (proc 0): SIGINT(2)
-[1/2] initialVertex=122
-[0/2] Graph generation elapsed time: 0.443249
-[0/2] Vertex count: 128
-[0/2] Vertex count per rank: 64
-[0/2] Edge count: 8128
-[0/2] numComponents=1
-[0/2] initialVertex=58
-[0/1] Graph generation elapsed time: 0.095342
-[0/1] Vertex count: 64
-[0/1] Vertex count per rank: 64
-[0/1] Edge count: 2016
+[0/1] Edge count: 2111
+[0/1] Connectivity percentage: 100.000000
 [0/1] Number of connected components: 1
 [0/1] UPCXX: Number of Ranks: 1
-[0/1] MST Elapsed time: 1.018741
-[0/1] MST Cost: 1953
-[0/2] Graph generation elapsed time: 0.084831
+[0/1] MST Elapsed time: 0.006965
+[0/1] MST Cost: 3424
+[0/1] *********
+Current log file: v64_n2_p100.topout
+[0/2] *********
+[0/2] Graph generation elapsed time: 0.006239
 [0/2] Vertex count: 64
 [0/2] Vertex count per rank: 32
-[0/2] Edge count: 2016
+[0/2] Edge count: 2111
+[0/2] Connectivity percentage: 100.000000
 [0/2] Number of connected components: 1
 [0/2] UPCXX: Number of Ranks: 2
-[0/2] MST Elapsed time: 0.901794
-[0/2] MST Cost: 1953
-[1/2] MST Elapsed time: 0.901800
-[0/4] Graph generation elapsed time: 0.102002
-[0/4] Vertex count: 64
-[0/4] Vertex count per rank: 16
-[0/4] Edge count: 2016
-[0/4] Number of connected components: 1
-[0/4] UPCXX: Number of Ranks: 4
-[0/4] MST Elapsed time: 0.870372
-[0/4] MST Cost: 1953
-[1/4] MST Elapsed time: 0.870380
-[2/4] MST Elapsed time: 0.870381
-[3/4] MST Elapsed time: 0.870380
-**********
-[0/1] Graph generation elapsed time: 0.096169
-[0/1] Vertex count: 64
-[0/1] Vertex count per rank: 64
-[0/1] Edge count: 2016
+[0/2] MST Elapsed time: 0.009022
+[0/2] MST Cost: 4115
+[0/2] *********
+Current log file: v256_n1_p100.topout
+[0/1] *********
+[0/1] Graph generation elapsed time: 0.060086
+[0/1] Vertex count: 256
+[0/1] Vertex count per rank: 256
+[0/1] Edge count: 33023
+[0/1] Connectivity percentage: 100.000000
 [0/1] Number of connected components: 1
 [0/1] UPCXX: Number of Ranks: 1
-[0/1] MST Elapsed time: 1.014889
-[0/1] MST Cost: 1953
+[0/1] MST Elapsed time: 0.125918
+[0/1] MST Cost: 60033
+[0/1] *********
+Current log file: v256_n2_p100.topout
+[0/2] *********
+[0/2] Graph generation elapsed time: 0.092476
+[0/2] Vertex count: 256
+[0/2] Vertex count per rank: 128
+[0/2] Edge count: 33023
+[0/2] Connectivity percentage: 100.000000
+[0/2] Number of connected components: 1
+[0/2] UPCXX: Number of Ranks: 2
+[0/2] MST Elapsed time: 0.141477
+[0/2] MST Cost: 63112
+[0/2] *********
+Current log file: v1024_n1_p100.topout
+Current log file: v1024_n2_p100.topout
+[0/1] *********
+[0/1] Graph generation elapsed time: 1.064002
+[0/1] Vertex count: 1024
+[0/1] Vertex count per rank: 1024
+[0/1] Edge count: 525311
+[0/1] Connectivity percentage: 100.000000
+[0/1] Number of connected components: 1
+[0/1] UPCXX: Number of Ranks: 1
+[0/1] MST Elapsed time: 10.313639
+[0/1] MST Cost: 1060302
+[0/1] *********
+[0/2] *********
+[0/2] Graph generation elapsed time: 9.940381
+[0/2] Vertex count: 1024
+[0/2] Vertex count per rank: 512
+[0/2] Edge count: 525311
+[0/2] Connectivity percentage: 100.000000
+[0/2] Number of connected components: 1
+[0/2] UPCXX: Number of Ranks: 2
+[0/2] MST Elapsed time: 31.359447
+[0/2] MST Cost: 1007817
+[0/2] *********
+Current log file: v4096_n1_p25.topout
+Current log file: v4096_n2_p25.topout
+[0/1] *********
+[0/1] Graph generation elapsed time: 5.035365
+[0/1] Vertex count: 4096
+[0/1] Vertex count per rank: 4096
+[0/1] Edge count: 2101247
+[0/1] Connectivity percentage: 25.000000
+[0/1] Number of connected components: 1
+[0/1] UPCXX: Number of Ranks: 1
+[0/1] MST Elapsed time: 226.726789
+[0/1] MST Cost: 16733007
+[0/1] *********
+[0/2] *********
+[0/2] Graph generation elapsed time: 62.948482
+[0/2] Vertex count: 4096
+[0/2] Vertex count per rank: 2048
+[0/2] Edge count: 2101247
+[0/2] Connectivity percentage: 25.000000
+[0/2] Number of connected components: 1
+[0/2] UPCXX: Number of Ranks: 2
+[0/2] MST Elapsed time: 442.579848
+[0/2] MST Cost: 16698544
+[0/2] *********
+Current log file: v8192_n1_p10.topout
+Current log file: v8192_n2_p10.topout
+[0/1] *********
+[0/1] Graph generation elapsed time: 12.012451
+[0/1] Vertex count: 8192
+[0/1] Vertex count per rank: 8192
+[0/1] Edge count: 3363634
+[0/1] Connectivity percentage: 10.000000
+[0/1] Number of connected components: 1
+[0/1] UPCXX: Number of Ranks: 1
+[0/1] MST Elapsed time: 745.825801
+[0/1] MST Cost: 66889034
+[0/1] *********
+[0/2] *********
+[0/2] Graph generation elapsed time: 83.815521
+[0/2] Vertex count: 8192
+[0/2] Vertex count per rank: 4096
+[0/2] Edge count: 3363634
+[0/2] Connectivity percentage: 10.000000
+[0/2] Number of connected components: 1
+[0/2] UPCXX: Number of Ranks: 2
+[0/2] MST Elapsed time: 1308.245827
+[0/2] MST Cost: 66770442
+[0/2] *********
+Current log file: v16384_n1_p0.01.topout
+Current log file: v16384_n2_p0.01.topout
+[0/1] *********
+[0/1] Graph generation elapsed time: 0.546978
+[0/1] Vertex count: 16384
+[0/1] Vertex count per rank: 16384
+[0/1] Edge count: 29804
+[0/1] Connectivity percentage: 0.010000
+[0/1] Number of connected components: 1
+[0/1] UPCXX: Number of Ranks: 1
+[0/1] MST Elapsed time: 641.560580
+[0/1] MST Cost: 201734386
+[0/1] *********
+[0/2] *********
+[0/2] Graph generation elapsed time: 1.212394
+[0/2] Vertex count: 16384
+[0/2] Vertex count per rank: 8192
+[0/2] Edge count: 29804
+[0/2] Connectivity percentage: 0.010000
+[0/2] Number of connected components: 1
+[0/2] UPCXX: Number of Ranks: 2
+[0/2] MST Elapsed time: 1776.265850
+[0/2] MST Cost: 200739910
+[0/2] *********
+Current log file: v33668_n1_p0.01.topout
+Current log file: v33668_n2_p0.01.topout
+[0/1] *********
+[0/1] Graph generation elapsed time: 2.296655
+[0/1] Vertex count: 33668
+[0/1] Vertex count per rank: 33668
+[0/1] Edge count: 90343
+[0/1] Connectivity percentage: 0.010000
+[0/1] Number of connected components: 1
+[0/1] UPCXX: Number of Ranks: 1
+[0/1] MST Elapsed time: 3351.353962
+[0/1] MST Cost: 924224856
+[0/1] *********
+[0/2] *********
+[0/2] Graph generation elapsed time: 5.936106
+[0/2] Vertex count: 33668
+[0/2] Vertex count per rank: 16834
+[0/2] Edge count: 90343
+[0/2] Connectivity percentage: 0.010000
+[0/2] Number of connected components: 1
+[0/2] UPCXX: Number of Ranks: 2
+[0/2] MST Elapsed time: 8226.467284
+[0/2] MST Cost: 924731048
+[0/2] *********
+Current log file: v67336_n1_p0.01.topout
+Current log file: v67336_n2_p0.01.topout
+[0/1] *********
+[0/1] Graph generation elapsed time: 15.019799
+[0/1] Vertex count: 67336
+[0/1] Vertex count per rank: 67336
+[0/1] Edge count: 294041
+[0/1] Connectivity percentage: 0.010000
+[0/1] Number of connected components: 1
+[0/1] UPCXX: Number of Ranks: 1
+[0/1] MST Elapsed time: 19022.654522
+[0/1] MST Cost: 3985733695
+[0/1] *********
+[0/2] *********
+[0/2] Graph generation elapsed time: 32.162463
+[0/2] Vertex count: 67336
+[0/2] Vertex count per rank: 33668
+[0/2] Edge count: 294041
+[0/2] Connectivity percentage: 0.010000
+[0/2] Number of connected components: 1
+[0/2] UPCXX: Number of Ranks: 2

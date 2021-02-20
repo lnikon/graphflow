@@ -129,3 +129,27 @@ target_link_libraries(
     pgas-graph
     graph-utilities
 )
+
+# Program to make experimentations with the BGL MST
+# TODO Move into set of unit tests and benchmarks
+set(
+    BGL_MST_EXPERIMENTS_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/boost_main.cpp"
+)
+add_executable(
+    bgl-mst-experiments
+    ${BGL_MST_EXPERIMENTS_SOURCES}
+)
+target_include_directories(
+    bgl-mst-experiments
+    PUBLIC
+    inc
+)
+target_link_libraries(
+    bgl-mst-experiments 
+    PUBLIC 
+    UPCXX::upcxx 
+    Boost::Boost
+    pgas-graph
+    graph-utilities
+)

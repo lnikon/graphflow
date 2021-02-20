@@ -1,11 +1,16 @@
 #ifndef PGAS_GRAPH_H
 #define PGAS_GRAPH_H
 
+// UPCXX
 #include <upcxx/upcxx.hpp>
 
+// STL
 #include <queue>
 #include <type_traits>
 #include <unordered_map>
+
+// Boost
+#include <boost/timer/timer.hpp>
 
 namespace PGASGraph {
 
@@ -123,6 +128,8 @@ public:
 
   upcxx::dist_object<std::vector<std::pair<EdgeData, std::pair<Id, Id>>>>
   MST() {
+    boost::timer::auto_cpu_timer t;
+
     using added_set_t = upcxx::dist_object<std::unordered_set<Id>>;
     using weight_node_t = typename Vertex::weight_node_t;
 

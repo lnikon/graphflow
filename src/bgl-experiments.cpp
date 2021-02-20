@@ -79,7 +79,7 @@ void for_each_bundled_vertex(Graph &g, Function f) {
 int main(int argc, char *argv[]) {
   size_t totalNumberVertices{200};
   GraphUtilities::BoostGraph boostGraph{
-      GraphUtilities::generateRandomConnectedGraph(totalNumberVertices, 30.0)};
+      GraphUtilities::generateRandomConnectedGraph<GraphUtilities::BoostGraph>(totalNumberVertices, 30.0)};
 
   // upcxx::init();
   // using GT = boost::adjacency_list<boost::vecS, boost::vecS,
