@@ -1,5 +1,3 @@
-# Getting Started
-
 ## Description
 
 PGASGraph is a library that provides distributed graph algorithms and data structures. This library uses distributed vertex store as a underlying graph storage.
@@ -62,7 +60,7 @@ As the library uses modern C++ features such as structured bindings or `auto` la
 
 ## Distributed run notes
 
-If you fish to make *distributed run* then make sure that you've compiled UPCXX with UDP or InfiniBand conduits.
+If you wish to make *distributed run* then make sure that you've compiled UPCXX with UDP or InfiniBand conduits.
 Then make sure that you've correctly set the following variables. `$SSH_SERVERS` and `$GASNET_SSH_SERVERS` 
 contain IP's of those nodes which will participate in a distributed computation. 
 `$GASNET_MASTERIP` contains IP of the node which initiates the computation. **It's very important to set this variable.**
