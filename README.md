@@ -61,7 +61,7 @@ Then make sure that you've correctly set the following variables. `$SSH_SERVERS`
 contain IP's of those nodes which will participate in a distributed computation. 
 `$GASNET_MASTERIP` contains IP of the node which initiates the computation. **It's very important to set this variable.**
 
-`$SSH_SERVERS=185.127.66.88,185.127.66.89`
+`$SSH_SERVERS=111.111.11.11,111.111.11.12`
 
 `$GASNET_SSH_SERVERS=${SSH_SERVERS}`
 
