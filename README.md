@@ -28,7 +28,12 @@ For more information see official UPCXX wiki and INSTALL.md [UPCXX](https://bitb
 
 ## Build
 
+### Dependencies
+
+Library depends on Boost for program options parsing and CPU timer. Make sure that you've Boost libraries installed.
+
 ### Cmake/ninja/make
+
 Library can be built using [Cmake](https://cmake.org/). Following commands can be used to build the library using Cmake and [ninja](https://ninja-build.org/).
 Though, the use of ninja is not necessary and it can be safely replaced with usual [make](https://www.gnu.org/software/make/manual/make.html).
 
@@ -56,6 +61,7 @@ Important UPCXX options here are `codemode`, `threadmode` and `network`.
 As the library uses modern C++ features such as structured bindings or `auto` lambdas make sure to compile it with the `-std=c++17` flag.
 
 ## Distributed run notes
+
 If you fish to make *distributed run* then make sure that you've compiled UPCXX with UDP or InfiniBand conduits.
 Then make sure that you've correctly set the following variables. `$SSH_SERVERS` and `$GASNET_SSH_SERVERS` 
 contain IP's of those nodes which will participate in a distributed computation. 
@@ -66,4 +72,3 @@ contain IP's of those nodes which will participate in a distributed computation.
 `$GASNET_SSH_SERVERS=${SSH_SERVERS}`
 
 `$GASNET_MASTERIP=10.0.0.30`
-
