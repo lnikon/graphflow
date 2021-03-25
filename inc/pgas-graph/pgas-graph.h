@@ -5,6 +5,7 @@
 #include <upcxx/upcxx.hpp>
 
 // STL
+#include <fstream>
 #include <queue>
 #include <type_traits>
 #include <unordered_map>
@@ -62,10 +63,10 @@ public:
    * Each vertex has an unique id.
    */
   struct Vertex {
-    /// A unique id.
+    /// A unique local id.
     Id id;
 
-    /// A value stored in that vertex.
+    /// A value stored in the vertex.
     VertexData value;
 
     /// A list of Id's of the neighbours.
@@ -73,8 +74,10 @@ public:
     using weight_node_t = std::pair<EdgeData, Id>;
     std::vector<weight_node_t> neighbours;
 
-    Vertex(Id id) : id(id) {}
-    Vertex() {}
+    Vertex() = default;
+    Vertex(const Id id) : id(id) {}
+
+    Id masterId() const { return upcxx::rank_me(); }
 
     std::string ToString() const {
       std::string result;
@@ -351,6 +354,37 @@ public:
     return localMst;
   }
 
+  void ExportIntoFile(const std::string &fileName) const {
+    if (0 == upcxx::rank_me()) {
+      const auto &rank_n = upcxx::rank_n();
+
+      for (size_t r = 0; r < rank_n; ++r) {
+        upcxx::rpc(
+            r,
+            [](graph_storage_type &graph, std::string fileName) {
+              std::fstream stream(fileName, std::fstream::in |
+                                                std::fstream::out |
+                                                std::fstream::app);
+              if (!stream.is_open()) {
+                logMsg("Unable to open " + fileName + " to write into\n");
+                return;
+              }
+
+              for (const auto &[id, gptr] : *graph) {
+                Vertex *lptr = gptr.local();
+                for (auto &ngh : lptr->neighbours) {
+                  stream << "" << id << " " << ngh.second << "\n";
+                }
+              }
+            },
+            m_vertexStore, fileName)
+            .wait();
+      }
+    }
+  }
+
+  Rank getVertexParent(const Id &a) const;
+
 private:
   graph_storage_type m_vertexStore;
   const size_t m_totalNumberVertices;
@@ -362,7 +396,6 @@ private:
   bool addEdgeHelper(Edge edge);
   bool hasEdgeHelper(const Id &a, const Id &b) const;
 
-  Rank getVertexParent(const Id &a) const;
   upcxx::global_ptr<Vertex> fetchVertexFromStore(const Id &id) const;
 };
 
@@ -456,7 +489,21 @@ bool Graph<VertexData, EdgeData>::hasEdgeHelper(const Id &a,
 
 template <typename VertexData, typename EdgeData>
 Rank Graph<VertexData, EdgeData>::getVertexParent(const Id &id) const {
-  return (id / m_verticesPerRank) % upcxx::rank_n();
+  const auto rank_n = upcxx::rank_n();
+  Id r = 0;
+  for (; r < rank_n; ++r) {
+    if ((id >= r * m_verticesPerRank) &&
+        (id <= (r + 1) * m_verticesPerRank - 1)) {
+      break;
+    }
+  }
+
+  if (r == rank_n) {
+    logMsg("Wrond parent for " + std::to_string(id) + " is " + std::to_string(r));
+    --r;
+  }
+
+  return r;
 }
 
 template <typename VertexData, typename EdgeData>

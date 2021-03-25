@@ -152,143 +152,143 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
 }
 
 int main(int argc, char *argv[]) {
-  using BoostGraph =
-      boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
-                            MyBundledVertex, MyBundledEdge>;
-  using SWGen = boost::small_world_iterator<boost::minstd_rand, BoostGraph>;
-
-  // Initialize UPCXX.
-  upcxx::init();
-
-  // Parse command line options.
-  auto optionsDesc = createProgramOptions();
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, optionsDesc), vm);
-  if (vm.count("help")) {
-    std::cout << optionsDesc << std::endl;
-    return 1;
-  }
-
-  // Get vertex count.
-  size_t totalNumberVertices = 256;
-  if (vm.count("vertex-count")) {
-    totalNumberVertices = vm["vertex-count"].as<int>();
-  }
-
-  // Get vertex count.
-  size_t degree = 10;
-  if (vm.count("degree")) {
-    degree = vm["degree"].as<int>();
-  }
-
-  // Get vertex count.
-  double percentage = 5.0;
-  if (vm.count("percentage")) {
-    percentage = vm["percentage"].as<double>();
-  }
-
-  // Distribute vertices over the ranks.
-  const size_t verticesPerRank =
-      (totalNumberVertices + upcxx::rank_n() - 1) / upcxx::rank_n();
-
-  PGASGraphType pgasGraph(totalNumberVertices, verticesPerRank);
-
-  if (0 == upcxx::rank_me()) {
-    // Generate the graph.
-    auto start = std::chrono::steady_clock::now();
-    auto edgeCount = generateRandomConnectedPGASGraph(totalNumberVertices,
-                                                      percentage, pgasGraph);
-    // boost::minstd_rand gen;
-
-    // BoostGraph boostGraph{
-    //     GraphUtilities::generateRandomConnectedGraph<BoostGraph>(
-    //         totalNumberVertices, percentage)};
-
-    // // Assign ids to the vertices.
-    // set_my_bundled_vertexes(boostGraph);
-
-    // // Assign weights to the edges.
-    // auto edges = boost::edges(boostGraph);
-    // int weight{0};
-    // for (auto it = edges.first; it != edges.second; ++it) {
-    //   boostGraph[*it].first = weight++;
-    // }
-
-    // auto vs = boost::vertices(boostGraph);
-    // weight = 0;
-    // for (auto vit = vs.first; vit != vs.second; ++vit) {
-    //   auto neighbors = boost::adjacent_vertices(*vit, boostGraph);
-    //   for (auto nit = neighbors.first; nit != neighbors.second; ++nit) {
-    //     pgasGraph.AddEdge({boostGraph[*vit].id, boostGraph[*nit].id,
-    //     weight++}); if (boostGraph[*vit].id == boostGraph[*nit].id) {
-    //       PGASGraph::logMsg("equal");
-    //       upcxx::finalize();
-    //       return 0;
-    //     }
-    //   }
-    // }
-
-    auto end = std::chrono::steady_clock::now();
-
-    PGASGraph::logMsg("*********");
-    PGASGraph::logMsg(
-        "Graph generation elapsed time: " +
-        std::to_string(std::chrono::duration<double>(end - start).count()));
-
-    PGASGraph::logMsg("Vertex count: " + std::to_string(totalNumberVertices));
-
-    PGASGraph::logMsg("Vertex count per rank: " +
-                      std::to_string(verticesPerRank));
-
-    PGASGraph::logMsg("Edge count: " + std::to_string(edgeCount));
-
-    PGASGraph::logMsg("Connectivity percentage: " + std::to_string(percentage));
-
-    PGASGraph::logMsg("UPCXX: Number of Ranks: " +
-                      std::to_string(upcxx::rank_n()));
-  }
-
-  // Print hostname to make sure that the run is truly distributed.
-  char hostname[HOST_NAME_MAX];
-  gethostname(hostname, HOST_NAME_MAX);
-  upcxx::rpc(0, [hostname]() {
-    PGASGraph::logMsg(std::string{"Hostname: "} + hostname);
-  }).wait();
-
-  upcxx::barrier();
-
-  auto start = std::chrono::steady_clock::now();
-  auto mst = pgasGraph.MST();
-  auto end = std::chrono::steady_clock::now();
-
-  upcxx::barrier();
-  PGASGraph::logMsg(
-      "MST Elapsed time: " +
-      std::to_string(std::chrono::duration<double>(end - start).count()));
-
-  if (0 == upcxx::rank_me()) {
-    upcxx::rpc(
-        0,
-        [](decltype(mst) &localMst) {
-          size_t cost{0};
-          auto begin = localMst->begin();
-          for (; begin != localMst->end(); ++begin) {
-            cost += begin->first;
-          }
-          PGASGraph::logMsg("MST Cost: " + std::to_string(cost));
-        },
-        mst)
-        .wait();
-
-    size_t peakSize = getPeakRSS();
-    PGASGraph::logMsg("Peak Mem Usage: " + std::to_string(peakSize / 1000000) +
-                      "MB");
-  }
-  PGASGraph::logMsg("*********");
-
-  upcxx::barrier();
-  return 0;
-
-  upcxx::finalize();
+   using BoostGraph =
+       boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
+                             MyBundledVertex, MyBundledEdge>;
+   using SWGen = boost::small_world_iterator<boost::minstd_rand, BoostGraph>;
+ 
+   // Initialize UPCXX.
+   upcxx::init();
+ 
+   // Parse command line options.
+   auto optionsDesc = createProgramOptions();
+   po::variables_map vm;
+   po::store(po::parse_command_line(argc, argv, optionsDesc), vm);
+   if (vm.count("help")) {
+     std::cout << optionsDesc << std::endl;
+     return 1;
+   }
+ 
+   // Get vertex count.
+   size_t totalNumberVertices = 256;
+   if (vm.count("vertex-count")) {
+     totalNumberVertices = vm["vertex-count"].as<int>();
+   }
+ 
+   // Get vertex count.
+   size_t degree = 10;
+   if (vm.count("degree")) {
+     degree = vm["degree"].as<int>();
+   }
+ 
+   // Get vertex count.
+   double percentage = 5.0;
+   if (vm.count("percentage")) {
+     percentage = vm["percentage"].as<double>();
+   }
+ 
+   // Distribute vertices over the ranks.
+   const size_t verticesPerRank =
+       (totalNumberVertices + upcxx::rank_n() - 1) / upcxx::rank_n();
+ 
+   PGASGraphType pgasGraph(totalNumberVertices, verticesPerRank);
+ 
+   if (0 == upcxx::rank_me()) {
+     // Generate the graph.
+     auto start = std::chrono::steady_clock::now();
+     auto edgeCount = generateRandomConnectedPGASGraph(totalNumberVertices,
+                                                       percentage, pgasGraph);
+     // boost::minstd_rand gen;
+ 
+     // BoostGraph boostGraph{
+     //     GraphUtilities::generateRandomConnectedGraph<BoostGraph>(
+     //         totalNumberVertices, percentage)};
+ 
+     // // Assign ids to the vertices.
+     // set_my_bundled_vertexes(boostGraph);
+ 
+     // // Assign weights to the edges.
+     // auto edges = boost::edges(boostGraph);
+     // int weight{0};
+     // for (auto it = edges.first; it != edges.second; ++it) {
+     //   boostGraph[*it].first = weight++;
+     // }
+ 
+     // auto vs = boost::vertices(boostGraph);
+     // weight = 0;
+     // for (auto vit = vs.first; vit != vs.second; ++vit) {
+     //   auto neighbors = boost::adjacent_vertices(*vit, boostGraph);
+     //   for (auto nit = neighbors.first; nit != neighbors.second; ++nit) {
+     //     pgasGraph.AddEdge({boostGraph[*vit].id, boostGraph[*nit].id,
+     //     weight++}); if (boostGraph[*vit].id == boostGraph[*nit].id) {
+     //       PGASGraph::logMsg("equal");
+     //       upcxx::finalize();
+     //       return 0;
+     //     }
+     //   }
+     // }
+ 
+     auto end = std::chrono::steady_clock::now();
+ 
+     PGASGraph::logMsg("*********");
+     PGASGraph::logMsg(
+         "Graph generation elapsed time: " +
+         std::to_string(std::chrono::duration<double>(end - start).count()));
+ 
+     PGASGraph::logMsg("Vertex count: " + std::to_string(totalNumberVertices));
+ 
+     PGASGraph::logMsg("Vertex count per rank: " +
+                       std::to_string(verticesPerRank));
+ 
+     PGASGraph::logMsg("Edge count: " + std::to_string(edgeCount));
+ 
+     PGASGraph::logMsg("Connectivity percentage: " + std::to_string(percentage));
+ 
+     PGASGraph::logMsg("UPCXX: Number of Ranks: " +
+                       std::to_string(upcxx::rank_n()));
+   }
+ 
+   // Print hostname to make sure that the run is truly distributed.
+   char hostname[HOST_NAME_MAX];
+   gethostname(hostname, HOST_NAME_MAX);
+   upcxx::rpc(0, [hostname]() {
+     PGASGraph::logMsg(std::string{"Hostname: "} + hostname);
+   }).wait();
+ 
+   upcxx::barrier();
+ 
+   auto start = std::chrono::steady_clock::now();
+   auto mst = pgasGraph.MST();
+   auto end = std::chrono::steady_clock::now();
+ 
+   upcxx::barrier();
+   PGASGraph::logMsg(
+       "MST Elapsed time: " +
+       std::to_string(std::chrono::duration<double>(end - start).count()));
+ 
+   if (0 == upcxx::rank_me()) {
+     upcxx::rpc(
+         0,
+         [](decltype(mst) &localMst) {
+           size_t cost{0};
+           auto begin = localMst->begin();
+           for (; begin != localMst->end(); ++begin) {
+             cost += begin->first;
+           }
+           PGASGraph::logMsg("MST Cost: " + std::to_string(cost));
+         },
+         mst)
+         .wait();
+ 
+     size_t peakSize = getPeakRSS();
+     PGASGraph::logMsg("Peak Mem Usage: " + std::to_string(peakSize / 1000000) +
+                       "MB");
+   }
+   PGASGraph::logMsg("*********");
+ 
+   upcxx::barrier();
+   return 0;
+ 
+   upcxx::finalize();
   return 0;
 };

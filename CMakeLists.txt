@@ -106,6 +106,29 @@ target_link_libraries(
     graph-utilities
 )
 
+# Program to test new graph storage.
+set(
+	GRAPH_NEW_STORAGE_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/new-storage-graph.cpp"
+)
+add_executable(
+    pgas-graph-new-storage
+    ${GRAPH_NEW_STORAGE_SOURCES}
+)
+target_include_directories(
+    pgas-graph-new-storage
+    PUBLIC
+    inc
+)
+target_link_libraries(
+    pgas-graph-new-storage 
+    PUBLIC 
+    UPCXX::upcxx 
+    Boost::Boost
+    pgas-graph
+    graph-utilities
+)
+
 # Program to make experimentations with the BGL
 # TODO Move into set of unit tests and benchmarks
 set(
