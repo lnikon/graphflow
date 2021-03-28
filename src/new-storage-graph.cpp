@@ -87,7 +87,6 @@ void for_each_bundled_vertex(Graph &g, Function f) {
   const auto vip = boost::vertices(g);
   const auto j = vip.second;
 
-  PGASGraph::Id id{0};
   for (auto i = vip.first; i != j; ++i) {
     f(g[*i]);
   }
@@ -116,11 +115,9 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
   const auto maxId = (rank_me + 1) * vertexCount - 1;
 
   connected.push_back(minId);
-  for (int i = minId + 1; i <= maxId; ++i) {
+  for (auto i = minId + 1; i <= maxId; ++i) {
     unconnected.push_back(i);
   }
-
-  // std::uniform_int_distribution<int> dist(minId, maxId);
 
   PGASGraph::logMsg("min=" + std::to_string(minId) +
                     ", max=" + std::to_string((maxId)));
@@ -139,16 +136,12 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
     std::advance(unconnectedItemIt, temp2);
     assert(unconnectedItemIt != unconnected.end());
     auto unconnectedItem{*unconnectedItemIt};
-    assert(unconnectedItem != -1);
-    if (unconnectedItem < minId || unconnectedItem > maxId) {
+    PId v{unconnectedItem};
+    if (v < minId || v > maxId) {
       continue;
     }
 
-    PId v{unconnectedItem};
-
     if (u != v) {
-      const auto parentu = graph.getVertexParent(u);
-      const auto parentv = graph.getVertexParent(v);
       graph.AddEdge({u, v, weight++});
       edges++;
     }
@@ -160,10 +153,10 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
 
   auto copyExtraEdges {extraEdges};
   while (copyExtraEdges != 0) {
-    PId temp1 = std::uniform_int_distribution<int>(minId, maxId)(gen);
-    PId temp2 = std::uniform_int_distribution<int>(minId, maxId)(gen);
-    if (temp1 != temp2) {
-      graph.AddEdge({temp1, temp2, weight++});
+    PId u = std::uniform_int_distribution<int>(minId, maxId)(gen);
+    PId v = std::uniform_int_distribution<int>(minId, maxId)(gen);
+    if (u != v) {
+      graph.AddEdge({u, v, weight++});
       edges++;
       copyExtraEdges--;
     }
@@ -191,7 +184,6 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
 
   return edges;
 }
-
 int main(int argc, char *argv[]) {
   // Parse command line options.
   auto optionsDesc = createProgramOptions();
@@ -206,12 +198,6 @@ int main(int argc, char *argv[]) {
   size_t totalNumberVertices = 256;
   if (vm.count("vertex-count")) {
     totalNumberVertices = vm["vertex-count"].as<int>();
-  }
-
-  // Get vertex count.
-  size_t degree = 10;
-  if (vm.count("degree")) {
-    degree = vm["degree"].as<int>();
   }
 
   // Get vertex count.
@@ -233,7 +219,7 @@ int main(int argc, char *argv[]) {
 
   PGASGraphType pgasGraph(totalNumberVertices, verticesPerRank);
   const auto rank_n = upcxx::rank_n();
-  for (size_t r = 0; r < rank_n; ++r) {
+  for (auto r = decltype(rank_n){0}; r < rank_n; ++r) {
     if (r == upcxx::rank_me()) {
       auto start = std::chrono::steady_clock::now();
       auto edgeCount = generateRandomConnectedPGASGraph(verticesPerRank,
@@ -242,12 +228,15 @@ int main(int argc, char *argv[]) {
       PGASGraph::logMsg(
           "Graph generation elapsed time: " +
           std::to_string(std::chrono::duration<double>(end - start).count()));
+      size_t peakSize = getPeakRSS();
+      PGASGraph::logMsg("Peak Mem Usage: " + std::to_string(peakSize / 1000000) +
+                        "MB");
     }
   }
 
   upcxx::barrier();
 
-  pgasGraph.ExportIntoFile("serialized.txt");
+//  pgasGraph.ExportIntoFile("serialized.txt");
   if (printLocal) {
     pgasGraph.printLocal();
   }
