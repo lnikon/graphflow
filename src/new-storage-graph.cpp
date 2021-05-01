@@ -135,45 +135,47 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
     connected.push_back(v);
   }
 
-  auto copyExtraEdges{extraEdges};
-  while (copyExtraEdges != 0) {
-    PId u = std::uniform_int_distribution<int>(minId, maxId)(gen);
-    PId v = std::uniform_int_distribution<int>(minId, maxId)(gen);
-    if (u != v) {
-      graph.AddEdge({u, v, genWeight(weight)});
-      // PGASGraph::logMsg("u: " + std::to_string(u) + ", v: " +
-      // std::to_string(v));
-      edges++;
-      copyExtraEdges--;
-    }
-  }
+  // auto copyExtraEdges{extraEdges};
+  // while (copyExtraEdges != 0) {
+  //   PId u = std::uniform_int_distribution<int>(minId, maxId)(gen);
+  //   PId v = std::uniform_int_distribution<int>(minId, maxId)(gen);
+  //   if (u != v) {
+  //     graph.AddEdge({u, v, genWeight(weight)});
+  //     // PGASGraph::logMsg("u: " + std::to_string(u) + ", v: " +
+  //     // std::to_string(v));
+  //     edges++;
+  //     copyExtraEdges--;
+  //   }
+  // }
 
-  auto genIdForPartition = [&gen](const auto rank, const auto vertexCount) {
-    auto minId = rank * vertexCount;
-    auto maxId = (rank + 1) * vertexCount - 1;
-    // PGASGraph::logMsg("genIdForPartition::minId: " + std::to_string(minId));
-    // PGASGraph::logMsg("genIdForPartition::maxId: " + std::to_string(maxId));
-    return std::uniform_int_distribution<PId>(minId, maxId)(gen);
-  };
+  // auto genIdForPartition = [&gen](const auto rank, const auto vertexCount) {
+  //   auto minId = rank * vertexCount;
+  //   auto maxId = (rank + 1) * vertexCount - 1;
+  //   // PGASGraph::logMsg("genIdForPartition::minId: " +
+  //   std::to_string(minId));
+  //   // PGASGraph::logMsg("genIdForPartition::maxId: " +
+  //   std::to_string(maxId)); return std::uniform_int_distribution<PId>(minId,
+  //   maxId)(gen);
+  // };
 
-  for (PGASGraph::Rank r1 = 0; r1 < rank_n - 1; ++r1) {
-    for (PGASGraph::Rank r2 = r1 + 1; r2 < rank_n; ++r2) {
-      copyExtraEdges = rank_n + vertexCount * 5 / 100;
-      // PGASGraph::logMsg("copyExtraEdges + " +
-      // std::to_string(copyExtraEdges));
-      while (copyExtraEdges != 0) {
-        auto idR1{genIdForPartition(r1, vertexCount)};
-        auto idR2{genIdForPartition(r2, vertexCount)};
-        // PGASGraph::logMsg("idR1: " + std::to_string(idR1));
-        // PGASGraph::logMsg("idR2: " + std::to_string(idR2));
-        if (idR1 != idR2) {
-          graph.AddEdge({idR1, idR2, genWeight(weight)});
-          edges++;
-          --copyExtraEdges;
-        }
-      }
-    }
-  }
+  // for (PGASGraph::Rank r1 = 0; r1 < rank_n - 1; ++r1) {
+  //   for (PGASGraph::Rank r2 = r1 + 1; r2 < rank_n; ++r2) {
+  //     copyExtraEdges = rank_n + vertexCount * 5 / 100;
+  //     // PGASGraph::logMsg("copyExtraEdges + " +
+  //     // std::to_string(copyExtraEdges));
+  //     while (copyExtraEdges != 0) {
+  //       auto idR1{genIdForPartition(r1, vertexCount)};
+  //       auto idR2{genIdForPartition(r2, vertexCount)};
+  //       // PGASGraph::logMsg("idR1: " + std::to_string(idR1));
+  //       // PGASGraph::logMsg("idR2: " + std::to_string(idR2));
+  //       if (idR1 != idR2) {
+  //         graph.AddEdge({idR1, idR2, genWeight(weight)});
+  //         edges++;
+  //         --copyExtraEdges;
+  //       }
+  //     }
+  //   }
+  // }
 
   upcxx::barrier();
   return edges;

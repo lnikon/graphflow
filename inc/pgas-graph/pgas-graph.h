@@ -21,6 +21,7 @@ namespace PGASGraph {
  * \param msg message to be printed.
  */
 void logMsg(const std::string &msg);
+void logMsg(const std::string &msg, const size_t rank);
 
 /*!
  * Type for the vertex Id.
@@ -154,7 +155,7 @@ public:
   /*! \brief Calculate minimum spanning tree of the graph using Kruskal
    * algorithm.
    */
-  upcxx::dist_object<std::vector<std::pair<EdgeData, std::pair<Id, Id>>>>
+  upcxx::dist_object<std::vector<typename Graph<VertexData, EdgeData>::Edge>>
   Kruskal();
 
   /*! \brief Export the whole graph into the file.
@@ -231,6 +232,7 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
     }
 
     neighbours.push_back({edge.data, edge.to});
+    return true;
   };
 
   const Rank &fromRank = getVertexParent(
@@ -501,7 +503,7 @@ Graph<VertexData, EdgeData>::MST() {
 }
 
 template <typename VertexData, typename EdgeData>
-upcxx::dist_object<std::vector<std::pair<EdgeData, std::pair<Id, Id>>>>
+upcxx::dist_object<std::vector<typename Graph<VertexData, EdgeData>::Edge>>
 Graph<VertexData, EdgeData>::Kruskal() {
   struct UnionFind {
     explicit UnionFind(const size_t n) {
@@ -572,6 +574,13 @@ Graph<VertexData, EdgeData>::Kruskal() {
         .wait();
   };
 
+  auto getMSTEdgesCount = [](dist_mst_edges_t &mst, Rank rank) {
+    assert(rank >= 0 && rank < upcxx::rank_n());
+    return upcxx::rpc(
+               rank, [](dist_mst_edges_t &mst) { return mst->size(); }, mst)
+        .wait();
+  };
+
   auto clearMSTEdgesAsync = [](dist_mst_edges_t &mst, Rank rank) {
     assert(rank >= 0 && rank < upcxx::rank_n());
     return upcxx::rpc(
@@ -597,8 +606,10 @@ Graph<VertexData, EdgeData>::Kruskal() {
     }
   }
 
+  logMsg("Edges local size: " + std::to_string(edgesLocal.size()));
+
   // Find the local portion of the MST.
-  UnionFind unionFind;
+  UnionFind unionFind(m_verticesPerRank);
   dist_mst_edges_t distMSTEdges{{}};
   for (auto edge : edgesLocal) {
     if (unionFind.findSet(edge.from) != unionFind.findSet(edge.to)) {
@@ -607,47 +618,62 @@ Graph<VertexData, EdgeData>::Kruskal() {
     }
   }
 
+  logMsg("MST edges local size: " +
+         std::to_string(getMSTEdgesCount(distMSTEdges, upcxx::rank_me())));
+
   // TODO Do I need to clear?
   // edgesLocal.clear();
 
   // Wait until each rank finds its portion of the MST.
   upcxx::barrier();
 
+  // logMsg("here");
+
   const size_t superstepCount = std::log2(upcxx::rank_n());
+  // logMsg("superstepCount: " + std::to_string(superstepCount), 0);
+  Rank rankOffset{1};
   for (size_t superstep = 1; superstep <= superstepCount; ++superstep) {
+    // logMsg("superstep" + std::to_string(superstep), 0);
     const size_t divisibleBy = std::pow(2, superstep);
+    // logMsg("divisibleBy: " + std::to_string(divisibleBy), 0);
     const size_t color = upcxx::rank_me() % divisibleBy;
+    // logMsg("color: " + std::to_string(color), 0);
     const bool isMergeable = (color == 0);
     if (isMergeable) {
       // Teams which should wait for the current superstep.
-      upcxx::team mergeableRanks =
-          upcxx::world().split(color, upcxx::rank_me());
+      // logMsg("Yay!");
+      // upcxx::team mergeableRanks =
+      //     upcxx::world().split(color, upcxx::rank_me());
 
       // Merge portions of the global MST found by each rank.
-      for (Rank rankOffset{1}; rankOffset < upcxx::rank_n(); rankOffset *= 2) {
-        // Determine which ranks should wait for the current superstep.
-        upcxx::team mergeIntoTeam = upcxx::world().split();
-
+      {
+        // logMsg("HooRay!");
         // Which ranks edges to fetch.
-        const auto otherRank{upcxx::rank_n() + rankOffset};
-
+        const auto otherRank{upcxx::rank_me() + rankOffset};
+        // logMsg("otherRank: " + std::to_string(otherRank));
         // Fetch the edges.
         auto globalMSTOtherFuture = distMSTEdges.fetch(otherRank);
         auto globalMSTCurrentFuture = distMSTEdges.fetch(upcxx::rank_me());
 
+        // logMsg("Here 1");
+
         // Wait for the edges to be on the current rank.
-        auto localMSTCurrent = globalMSTCurrentFuture.wait();
         auto localMSTOther = globalMSTOtherFuture.wait();
+        auto localMSTCurrent = globalMSTCurrentFuture.wait();
+        // logMsg("Here 2");
 
         // Clear distributed edges while mergines MSTs.
         auto clearMSTEdgesFuture =
             clearMSTEdgesAsync(distMSTEdges, upcxx::rank_me());
+        // logMsg("Here 3");
 
         // Merge MST from different ranks.
-        auto mergedMSTEdges{mergeMSTEdges(localMSTCurrent, localMSTOther)};
+        auto mergedMSTEdges{unionEdges(localMSTCurrent, localMSTOther)};
+        // logMsg("Here 4");
 
         // Wait for the edge clearing to be finished.
         clearMSTEdgesFuture.wait();
+        // logMsg("Here 5");
 
         // Clear the other rank MST edges.
         // TODO clearMSTEdgesFuture = clearMSTEdgesAsync(distMSTEdges,
@@ -655,13 +681,17 @@ Graph<VertexData, EdgeData>::Kruskal() {
 
         // Add merges edges into the MST.
         addEdgesIntoMST(distMSTEdges, upcxx::rank_me(), mergedMSTEdges);
+        // logMsg("Here 6");
         // TODO clearMSTEdgesFuture.wait();
 
-        upcxx::barrier(mergeableRanks);
+        rankOffset *= 2;
+        // upcxx::barrier(mergeableRanks);
       }
     }
+    upcxx::barrier();
   }
 
+  // logMsg("This is the end");
   upcxx::barrier();
   return distMSTEdges;
 }
