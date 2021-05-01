@@ -592,6 +592,24 @@ Graph<VertexData, EdgeData>::Kruskal() {
     clearMSTEdgesAsync(mst, rank).wait();
   };
 
+  auto kruskal = [](dist_mst_edges_t &mst, Rank rank, edges_t edges,
+                    const size_t verticesCount) {
+    upcxx::rpc(
+        rank,
+        [](dist_mst_edges_t &mst, edges_t edges, const size_t verticesCount) {
+          UnionFind unionFind(verticesCount);
+          for (auto edge : edges) {
+            if (unionFind.findSet(edge.from) != unionFind.findSet(edge.to)) {
+              // addEdgeIntoMST(distMSTEdges, upcxx::rank_me(), edge);
+              mst->push_back(edge);
+              unionFind.unionSets(edge.from, edge.to);
+            }
+          }
+        },
+        mst, edges, verticesCount)
+        .wait();
+  };
+
   // Get the edge list and sort it
   auto edgesLocal = std::vector<Edge>{};
   {
@@ -609,14 +627,15 @@ Graph<VertexData, EdgeData>::Kruskal() {
   logMsg("Edges local size: " + std::to_string(edgesLocal.size()));
 
   // Find the local portion of the MST.
-  UnionFind unionFind(m_verticesPerRank);
+  // UnionFind unionFind(m_verticesPerRank);
   dist_mst_edges_t distMSTEdges{{}};
-  for (auto edge : edgesLocal) {
-    if (unionFind.findSet(edge.from) != unionFind.findSet(edge.to)) {
-      addEdgeIntoMST(distMSTEdges, upcxx::rank_me(), edge);
-      unionFind.unionSets(edge.from, edge.to);
-    }
-  }
+  // for (auto edge : edgesLocal) {
+  //   if (unionFind.findSet(edge.from) != unionFind.findSet(edge.to)) {
+  //     addEdgeIntoMST(distMSTEdges, upcxx::rank_me(), edge);
+  //     unionFind.unionSets(edge.from, edge.to);
+  //   }
+  // }
+  kruskal(distMSTEdges, upcxx::rank_me(), edgesLocal, m_verticesPerRank);
 
   logMsg("MST edges local size: " +
          std::to_string(getMSTEdgesCount(distMSTEdges, upcxx::rank_me())));
@@ -680,7 +699,10 @@ Graph<VertexData, EdgeData>::Kruskal() {
         // otherRank);
 
         // Add merges edges into the MST.
-        addEdgesIntoMST(distMSTEdges, upcxx::rank_me(), mergedMSTEdges);
+        // addEdgesIntoMST(distMSTEdges, upcxx::rank_me(), mergedMSTEdges);
+        kruskal(distMSTEdges, upcxx::rank_me(), mergedMSTEdges,
+                m_totalNumberVertices);
+
         // logMsg("Here 6");
         // TODO clearMSTEdgesFuture.wait();
 
