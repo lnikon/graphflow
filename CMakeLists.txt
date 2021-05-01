@@ -86,12 +86,12 @@ find_package(UPCXX 2020.3.2 REQUIRED)
 message("FOUND UPCXX_VERSION=${UPCXX_VERSION}" )
 #### End UPCXX ####
 
-#### Stat Conan ####
+### Stat Conan ####
 if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conaninfo.txt)
     set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
 endif()
-find_package(Boost 1.74 REQUIRED COMPONENTS graph system unit_test_framework)
-#### End Conan ####
+find_package(Boost 1.74 REQUIRED COMPONENTS program_options)
+### End Conan ####
 
 #### Start PGASGraph ####
 # Export PGASGraph as a static library
@@ -112,78 +112,74 @@ target_link_libraries(
     pgas-graph 
     PRIVATE 
     UPCXX::upcxx
-    Boost::Boost
 )
 
 # Export GraphUtilities as a static library
-set(
-    GRAPH_UTILITIES_LIB_SOURCES
-    "${CMAKE_SOURCE_DIR}/src/graph-utilities.cpp"
-)
-add_library(
-    graph-utilities 
-    ${GRAPH_UTILITIES_LIB_SOURCES}
-)
-target_include_directories(
-    graph-utilities
-    PUBLIC
-    inc
-)
-target_link_libraries(
-    graph-utilities 
-    PRIVATE 
-    UPCXX::upcxx
-    Boost::Boost
-)
+# set(
+#     GRAPH_UTILITIES_LIB_SOURCES
+#     "${CMAKE_SOURCE_DIR}/src/graph-utilities.cpp"
+# )
+# add_library(
+#     graph-utilities 
+#     ${GRAPH_UTILITIES_LIB_SOURCES}
+# )
+# target_include_directories(
+#     graph-utilities
+#     PUBLIC
+#     inc
+# )
+# target_link_libraries(
+#     graph-utilities 
+#     PRIVATE 
+#     UPCXX::upcxx
+# )
 
 # Driver program to test PGASGraph
 # TODO Move into set of unit tests and benchmarks
-set(
-    SOURCES
-    "${CMAKE_SOURCE_DIR}/src/main.cpp"
-    "${CMAKE_SOURCE_DIR}/src/graph-utilities.cpp"
-)
-add_executable(
-    pgas-graph-test 
-    ${SOURCES}
-)
-target_include_directories(
-    pgas-graph-test
-    PUBLIC
-    inc
-)
-target_link_libraries(
-    pgas-graph-test 
-    PUBLIC 
-    UPCXX::upcxx 
-    Boost::Boost
-    pgas-graph
-    graph-utilities
-)
+# set(
+#     SOURCES
+#     "${CMAKE_SOURCE_DIR}/src/main.cpp"
+#     "${CMAKE_SOURCE_DIR}/src/graph-utilities.cpp"
+# )
+# add_executable(
+#     pgas-graph-test 
+#     ${SOURCES}
+# )
+# target_include_directories(
+#     pgas-graph-test
+#     PUBLIC
+#     inc
+# )
+# target_link_libraries(
+#     pgas-graph-test 
+#     PUBLIC 
+#     UPCXX::upcxx 
+#     pgas-graph
+#     graph-utilities
+# )
 
 # Program to generate graphs
 # TODO Move into set of unit tests and benchmarks
-set(
-    GRAPH_GENERATOR_SOURCES
-    "${CMAKE_SOURCE_DIR}/src/generate-graph.cpp"
-)
-add_executable(
-    pgas-graph-generate
-    ${GRAPH_GENERATOR_SOURCES}
-)
-target_include_directories(
-    pgas-graph-generate
-    PUBLIC
-    inc
-)
-target_link_libraries(
-    pgas-graph-generate 
-    PUBLIC 
-    UPCXX::upcxx 
-    Boost::Boost
-    pgas-graph
-    graph-utilities
-)
+# set(
+#     GRAPH_GENERATOR_SOURCES
+#     "${CMAKE_SOURCE_DIR}/src/generate-graph.cpp"
+# )
+# add_executable(
+#     pgas-graph-generate
+#     ${GRAPH_GENERATOR_SOURCES}
+# )
+# target_include_directories(
+#     pgas-graph-generate
+#     PUBLIC
+#     inc
+# )
+# target_link_libraries(
+#     pgas-graph-generate 
+#     PUBLIC 
+#     UPCXX::upcxx 
+#     pgas-graph
+#     graph-utilities
+# )
 
 # Program to test new graph storage.
 set(
@@ -202,57 +198,56 @@ target_include_directories(
 target_link_libraries(
     pgas-graph-new-storage 
     PUBLIC 
-    UPCXX::upcxx 
-    Boost::Boost
+    UPCXX::upcxx
     pgas-graph
-    graph-utilities
+    Boost::Boost
+    # graph-utilities
 )
 
 # Program to make experimentations with the BGL
 # TODO Move into set of unit tests and benchmarks
-set(
-    BGL_EXPERIMENTS_SOURCES
-    "${CMAKE_SOURCE_DIR}/src/bgl-experiments.cpp"
-)
-add_executable(
-    bgl-experiments
-    ${BGL_EXPERIMENTS_SOURCES}
-)
-target_include_directories(
-    bgl-experiments
-    PUBLIC
-    inc
-)
-target_link_libraries(
-    bgl-experiments 
-    PUBLIC 
-    UPCXX::upcxx 
-    Boost::Boost
-    pgas-graph
-    graph-utilities
-)
+# set(
+#     BGL_EXPERIMENTS_SOURCES
+#     "${CMAKE_SOURCE_DIR}/src/bgl-experiments.cpp"
+# )
+# add_executable(
+#     bgl-experiments
+#     ${BGL_EXPERIMENTS_SOURCES}
+# )
+# target_include_directories(
+#     bgl-experiments
+#     PUBLIC
+#     inc
+# )
+# target_link_libraries(
+#     bgl-experiments 
+#     PUBLIC 
+#     UPCXX::upcxx 
+#     pgas-graph
+#     graph-utilities
+# )
 
 # Program to make experimentations with the BGL MST
 # TODO Move into set of unit tests and benchmarks
-set(
-    BGL_MST_EXPERIMENTS_SOURCES
-    "${CMAKE_SOURCE_DIR}/src/boost_main.cpp"
-)
-add_executable(
-    bgl-mst-experiments
-    ${BGL_MST_EXPERIMENTS_SOURCES}
-)
-target_include_directories(
-    bgl-mst-experiments
-    PUBLIC
-    inc
-)
-target_link_libraries(
-    bgl-mst-experiments 
-    PUBLIC 
-    UPCXX::upcxx 
-    Boost::Boost
-    pgas-graph
-    graph-utilities
-)
+# set(
+#     BGL_MST_EXPERIMENTS_SOURCES
+#     "${CMAKE_SOURCE_DIR}/src/boost_main.cpp"
+# )
+# add_executable(
+#     bgl-mst-experiments
+#     ${BGL_MST_EXPERIMENTS_SOURCES}
+# )
+# target_include_directories(
+#     bgl-mst-experiments
+#     PUBLIC
+#     inc
+# )
+# target_link_libraries(
+#     bgl-mst-experiments 
+#     PUBLIC 
+#     UPCXX::upcxx 
+#     Boost::Boost
+#     pgas-graph
+#     graph-utilities
+# )
 #### End PGASGraph ####

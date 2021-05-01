@@ -52,6 +52,10 @@ public:
      */
     Edge Invert() const { return Edge{to, from, data}; }
 
+    bool operator<(const Edge &other) { return data < other.data; }
+
+    bool operator>(const Edge &other) { return !(*this < other); }
+
     /*! \brief Serialize the edge into the string.
      */
     std::string ToString() {
@@ -143,9 +147,15 @@ public:
    */
   void printLocal();
 
-  /*! \brief Calculate minimum spanning tree of the graph.
+  /*! \brief Calculate minimum spanning tree of the graph using Prims algorithm.
    */
   upcxx::dist_object<std::vector<std::pair<EdgeData, std::pair<Id, Id>>>> MST();
+
+  /*! \brief Calculate minimum spanning tree of the graph using Kruskal
+   * algorithm.
+   */
+  upcxx::dist_object<std::vector<std::pair<EdgeData, std::pair<Id, Id>>>>
+  Kruskal();
 
   /*! \brief Export the whole graph into the file.
    *
@@ -207,17 +217,26 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
   auto insertSingleEdge = [this](Edge edge) {
     const auto parentRank = getVertexParent(edge.from);
     const size_t idx = edge.from - parentRank * m_vertexStore.size();
-    // logMsg("edge.from: " + std::to_string(edge.from) + ", idx: " + std::to_string(idx));
-    if (!m_vertexStore[idx]) 
-    {
+    // logMsg("edge.from: " + std::to_string(edge.from) + ", idx: " +
+    // std::to_string(idx));
+    if (!m_vertexStore[idx]) {
       m_vertexStore[idx] = new Vertex(edge.from);
     }
 
-    m_vertexStore[idx]->neighbours.push_back({edge.data, edge.to});
+    auto &neighbours = m_vertexStore[idx]->neighbours;
+    for (auto &ngh : neighbours) {
+      if (ngh.first == edge.data) {
+        return true;
+      }
+    }
+
+    neighbours.push_back({edge.data, edge.to});
   };
 
-  const Rank &fromRank = getVertexParent(edge.from); // logMsg("fromRank: " + std::to_string(fromRank));
-  const Rank &toRank = getVertexParent(edge.to); // logMsg("toRank: " + std::to_string(toRank));
+  const Rank &fromRank = getVertexParent(
+      edge.from); // logMsg("fromRank: " + std::to_string(fromRank));
+  const Rank &toRank =
+      getVertexParent(edge.to); // logMsg("toRank: " + std::to_string(toRank));
 
   auto fromFuture = upcxx::rpc(
       fromRank, [this, insertSingleEdge](Edge edge) { insertSingleEdge(edge); },
@@ -341,7 +360,8 @@ Graph<VertexData, EdgeData>::MST() {
               result += "}\n";
               return result;
             };
-            // logMsg("mstSize: " + std::to_string(mstEdges->size()) + ToString(edge));
+            // logMsg("mstSize: " + std::to_string(mstEdges->size()) +
+            // ToString(edge));
             mstEdges->push_back(edge);
           }
         },
@@ -393,9 +413,11 @@ Graph<VertexData, EdgeData>::MST() {
                  if (localMst->empty()) {
                    return false;
                  }
-                //  logMsg(
-                //      "localMst->size(): " + std::to_string(localMst->size()) +
-                //      ", totalVertexCount: " + std::to_string(totalVertexCount));
+                 //  logMsg(
+                 //      "localMst->size(): " + std::to_string(localMst->size())
+                 //      +
+                 //      ", totalVertexCount: " +
+                 //      std::to_string(totalVertexCount));
                  return localMst->size() == totalVertexCount - 1;
                },
                localMst, m_totalNumberVertices)
@@ -479,6 +501,172 @@ Graph<VertexData, EdgeData>::MST() {
 }
 
 template <typename VertexData, typename EdgeData>
+upcxx::dist_object<std::vector<std::pair<EdgeData, std::pair<Id, Id>>>>
+Graph<VertexData, EdgeData>::Kruskal() {
+  struct UnionFind {
+    explicit UnionFind(const size_t n) {
+      for (size_t i = 0; i < n; ++i) {
+        makeSet(i);
+      }
+    }
+    void makeSet(Id v) { m_parent[v] = v; }
+
+    Id findSet(Id v) {
+      if (m_parent.find(v) == m_parent.end()) {
+        m_parent[v] = v;
+        return v;
+      }
+
+      if (m_parent[v] == v) {
+        return v;
+      }
+
+      return findSet(m_parent[v]);
+    }
+
+    void unionSets(Id a, Id b) {
+      a = findSet(a);
+      b = findSet(b);
+      if (a != b) {
+        m_parent[b] = a;
+      }
+    }
+
+  private:
+    std::unordered_map<Id, Id> m_parent;
+    std::unordered_map<Id, size_t> m_rank;
+  };
+
+  using edges_t = std::vector<Edge>;
+  auto unionEdges = [](edges_t &lhs, edges_t &rhs) {
+    edges_t result;
+
+    std::sort(lhs.begin(), lhs.end());
+    std::sort(rhs.begin(), rhs.end());
+
+    std::set_union(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+                   std::back_inserter(result));
+
+    return result;
+  };
+
+  using dist_mst_edges_t = upcxx::dist_object<edges_t>;
+  auto addEdgeIntoMST = [](dist_mst_edges_t &mst, Rank rank, Edge edge) {
+    assert(rank >= 0 && rank < upcxx::rank_n());
+    upcxx::rpc(
+        rank, [](dist_mst_edges_t &mst, Edge edge) { mst->push_back(edge); },
+        mst, edge)
+        .wait();
+  };
+
+  auto addEdgesIntoMST = [](dist_mst_edges_t &mst, Rank rank, edges_t edges) {
+    assert(rank >= 0 && rank < upcxx::rank_n());
+    upcxx::rpc(
+        rank,
+        [](dist_mst_edges_t &mst, edges_t edges) {
+          for (auto &edge : edges) {
+            mst->push_back(edge);
+          }
+        },
+        mst, edges)
+        .wait();
+  };
+
+  auto clearMSTEdgesAsync = [](dist_mst_edges_t &mst, Rank rank) {
+    assert(rank >= 0 && rank < upcxx::rank_n());
+    return upcxx::rpc(
+        rank, [](dist_mst_edges_t &mst) { mst->clear(); }, mst);
+  };
+
+  auto clearMSTEdges = [clearMSTEdgesAsync](dist_mst_edges_t &mst, Rank rank) {
+    assert(rank >= 0 && rank < upcxx::rank_n());
+    clearMSTEdgesAsync(mst, rank).wait();
+  };
+
+  // Get the edge list and sort it
+  auto edgesLocal = std::vector<Edge>{};
+  {
+    std::set<EdgeData> weights;
+    for (auto *vertex : m_vertexStore) {
+      for (auto &ngh : vertex->neighbours) {
+        if (!weights.count(ngh.first)) {
+          weights.insert(ngh.first);
+          edgesLocal.push_back(Edge{vertex->id, ngh.second, ngh.first});
+        }
+      }
+    }
+  }
+
+  // Find the local portion of the MST.
+  UnionFind unionFind;
+  dist_mst_edges_t distMSTEdges{{}};
+  for (auto edge : edgesLocal) {
+    if (unionFind.findSet(edge.from) != unionFind.findSet(edge.to)) {
+      addEdgeIntoMST(distMSTEdges, upcxx::rank_me(), edge);
+      unionFind.unionSets(edge.from, edge.to);
+    }
+  }
+
+  // TODO Do I need to clear?
+  // edgesLocal.clear();
+
+  // Wait until each rank finds its portion of the MST.
+  upcxx::barrier();
+
+  const size_t superstepCount = std::log2(upcxx::rank_n());
+  for (size_t superstep = 1; superstep <= superstepCount; ++superstep) {
+    const size_t divisibleBy = std::pow(2, superstep);
+    const size_t color = upcxx::rank_me() % divisibleBy;
+    const bool isMergeable = (color == 0);
+    if (isMergeable) {
+      // Teams which should wait for the current superstep.
+      upcxx::team mergeableRanks =
+          upcxx::world().split(color, upcxx::rank_me());
+
+      // Merge portions of the global MST found by each rank.
+      for (Rank rankOffset{1}; rankOffset < upcxx::rank_n(); rankOffset *= 2) {
+        // Determine which ranks should wait for the current superstep.
+        upcxx::team mergeIntoTeam = upcxx::world().split();
+
+        // Which ranks edges to fetch.
+        const auto otherRank{upcxx::rank_n() + rankOffset};
+
+        // Fetch the edges.
+        auto globalMSTOtherFuture = distMSTEdges.fetch(otherRank);
+        auto globalMSTCurrentFuture = distMSTEdges.fetch(upcxx::rank_me());
+
+        // Wait for the edges to be on the current rank.
+        auto localMSTCurrent = globalMSTCurrentFuture.wait();
+        auto localMSTOther = globalMSTOtherFuture.wait();
+
+        // Clear distributed edges while mergines MSTs.
+        auto clearMSTEdgesFuture =
+            clearMSTEdgesAsync(distMSTEdges, upcxx::rank_me());
+
+        // Merge MST from different ranks.
+        auto mergedMSTEdges{mergeMSTEdges(localMSTCurrent, localMSTOther)};
+
+        // Wait for the edge clearing to be finished.
+        clearMSTEdgesFuture.wait();
+
+        // Clear the other rank MST edges.
+        // TODO clearMSTEdgesFuture = clearMSTEdgesAsync(distMSTEdges,
+        // otherRank);
+
+        // Add merges edges into the MST.
+        addEdgesIntoMST(distMSTEdges, upcxx::rank_me(), mergedMSTEdges);
+        // TODO clearMSTEdgesFuture.wait();
+
+        upcxx::barrier(mergeableRanks);
+      }
+    }
+  }
+
+  upcxx::barrier();
+  return distMSTEdges;
+}
+
+template <typename VertexData, typename EdgeData>
 void Graph<VertexData, EdgeData>::ExportIntoFile(
     const std::string &fileName) const {
   if (0 == upcxx::rank_me()) {
@@ -493,7 +681,7 @@ void Graph<VertexData, EdgeData>::ExportIntoFile(
               logMsg("Unable to open " + fileName + " to write into\n");
               return;
             }
-  
+
             int i = 0;
             for (Vertex *vertex : m_vertexStore) {
               assert(vertex != nullptr);
