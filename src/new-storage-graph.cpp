@@ -1,4 +1,5 @@
 // PGASGraph
+#include <performance/performance_monitor.hpp>
 #include <pgas-graph/graph-utilities.hpp>
 #include <pgas-graph/pgas-graph.h>
 
@@ -19,6 +20,13 @@
 
 // Usings
 namespace po = boost::program_options;
+
+struct ProgramOptions {
+  size_t totalNumberVertices{256};
+  double percentage{5.0};
+  bool printLocal{false};
+  std::string exportPath{};
+};
 
 po::options_description createProgramOptions() {
   po::options_description desc("Allowed options");
@@ -130,10 +138,7 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
     connected.push_back(v);
   }
 
-  PGASGraph::logMsg("Edges 1: " + std::to_string(edges));
-
   auto copyExtraEdges{extraEdges - edges};
-  std::cout << "extra edges: " << extraEdges << "\n";
   while (copyExtraEdges != 0) {
     PId u = std::uniform_int_distribution<int>(minId, maxId)(gen);
     PId v = std::uniform_int_distribution<int>(minId, maxId)(gen);
@@ -144,7 +149,6 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
       --copyExtraEdges;
     }
   }
-  PGASGraph::logMsg("Edges 2: " + std::to_string(edges));
 
   auto genIdForPartition = [&gen](const auto rank, const auto vertexCount) {
     auto minId = rank * vertexCount;
@@ -167,7 +171,6 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
       }
     }
   }
-  PGASGraph::logMsg("Edges 3: " + std::to_string(edges));
 
   upcxx::barrier();
   return edges;
@@ -232,8 +235,11 @@ int main(int argc, char *argv[]) {
 
   upcxx::barrier();
 
+  Performance::PerformanceMonitor perfMonitor;
   auto start = std::chrono::steady_clock::now();
+  perfMonitor.Start();
   auto mstEdges = pgasGraph.Kruskal();
+  perfMonitor.Finish();
   auto end = std::chrono::steady_clock::now();
 
   upcxx::barrier();
@@ -250,6 +256,8 @@ int main(int argc, char *argv[]) {
         },
         mstEdges)
         .wait();
+    perfMonitor.Read();
+    perfMonitor.Report();
   }
 
   if (!exportPath.empty()) {
