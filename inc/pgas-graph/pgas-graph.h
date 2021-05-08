@@ -218,16 +218,14 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
   auto insertSingleEdge = [this](Edge edge) {
     const auto parentRank = getVertexParent(edge.from);
     const size_t idx = edge.from - parentRank * m_vertexStore.size();
-    // logMsg("edge.from: " + std::to_string(edge.from) + ", idx: " +
-    // std::to_string(idx));
     if (!m_vertexStore[idx]) {
       m_vertexStore[idx] = new Vertex(edge.from);
     }
 
     auto &neighbours = m_vertexStore[idx]->neighbours;
     for (auto &ngh : neighbours) {
-      if (ngh.first == edge.data) {
-        return true;
+      if (ngh.first == edge.data || ngh.second == edge.to) {
+        return false;
       }
     }
 
@@ -235,10 +233,8 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge) {
     return true;
   };
 
-  const Rank &fromRank = getVertexParent(
-      edge.from); // logMsg("fromRank: " + std::to_string(fromRank));
-  const Rank &toRank =
-      getVertexParent(edge.to); // logMsg("toRank: " + std::to_string(toRank));
+  const Rank &fromRank = getVertexParent(edge.from);
+  const Rank &toRank = getVertexParent(edge.to);
 
   auto fromFuture = upcxx::rpc(
       fromRank, [this, insertSingleEdge](Edge edge) { insertSingleEdge(edge); },
@@ -679,6 +675,11 @@ template <typename VertexData, typename EdgeData>
 void Graph<VertexData, EdgeData>::ExportIntoFile(
     const std::string &fileName) const {
   if (0 == upcxx::rank_me()) {
+    {
+      std::fstream stream(fileName, std::fstream::in | std::fstream::out |
+                                        std::fstream::trunc);
+    }
+
     const auto &rank_n = upcxx::rank_n();
     for (size_t r = 0; r < rank_n; ++r) {
       upcxx::rpc(
@@ -704,6 +705,8 @@ void Graph<VertexData, EdgeData>::ExportIntoFile(
           .wait();
     }
   }
+
+  upcxx::barrier();
 }
 
 template <typename VertexData, typename EdgeData>

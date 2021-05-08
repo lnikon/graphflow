@@ -88,12 +88,6 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
 
   using dist_weight_t = upcxx::dist_object<size_t>;
   dist_weight_t weight{1};
-
-  // for (size_t vidx = minId; vidx < maxId; vidx++) {
-  //     graph.AddEdge({vidx, vidx + 1, weight++});
-  //     edges++;
-  // }
-
   auto genWeight = [](dist_weight_t &weight) {
     return upcxx::rpc(
                0,
@@ -127,24 +121,30 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
     }
 
     if (u != v) {
-      graph.AddEdge({u, v, genWeight(weight)});
-      edges++;
+      if (graph.AddEdge({u, v, genWeight(weight)})) {
+        edges++;
+      }
     }
 
     unconnected.erase(unconnectedItemIt);
     connected.push_back(v);
   }
 
-  auto copyExtraEdges{extraEdges};
+  PGASGraph::logMsg("Edges 1: " + std::to_string(edges));
+
+  auto copyExtraEdges{extraEdges - edges};
+  std::cout << "extra edges: " << extraEdges << "\n";
   while (copyExtraEdges != 0) {
     PId u = std::uniform_int_distribution<int>(minId, maxId)(gen);
     PId v = std::uniform_int_distribution<int>(minId, maxId)(gen);
     if (u != v) {
-      graph.AddEdge({u, v, genWeight(weight)});
-      edges++;
-      copyExtraEdges--;
+      if (graph.AddEdge({u, v, genWeight(weight)})) {
+        edges++;
+      }
+      --copyExtraEdges;
     }
   }
+  PGASGraph::logMsg("Edges 2: " + std::to_string(edges));
 
   auto genIdForPartition = [&gen](const auto rank, const auto vertexCount) {
     auto minId = rank * vertexCount;
@@ -159,13 +159,15 @@ size_t generateRandomConnectedPGASGraph(const size_t vertexCount,
         const auto idR1{genIdForPartition(r1, vertexCount)};
         const auto idR2{genIdForPartition(r2, vertexCount)};
         if (idR1 != idR2) {
-          graph.AddEdge({idR1, idR2, genWeight(weight)});
-          edges++;
+          if (graph.AddEdge({idR1, idR2, genWeight(weight)})) {
+            edges++;
+          }
           --copyExtraEdges;
         }
       }
     }
   }
+  PGASGraph::logMsg("Edges 3: " + std::to_string(edges));
 
   upcxx::barrier();
   return edges;
