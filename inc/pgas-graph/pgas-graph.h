@@ -624,96 +624,53 @@ Graph<VertexData, EdgeData>::Kruskal() {
     }
   }
 
-  logMsg("Edges local size: " + std::to_string(edgesLocal.size()));
-
   // Find the local portion of the MST.
-  // UnionFind unionFind(m_verticesPerRank);
   dist_mst_edges_t distMSTEdges{{}};
-  // for (auto edge : edgesLocal) {
-  //   if (unionFind.findSet(edge.from) != unionFind.findSet(edge.to)) {
-  //     addEdgeIntoMST(distMSTEdges, upcxx::rank_me(), edge);
-  //     unionFind.unionSets(edge.from, edge.to);
-  //   }
-  // }
   kruskal(distMSTEdges, upcxx::rank_me(), edgesLocal, m_verticesPerRank);
-
-  logMsg("MST edges local size: " +
-         std::to_string(getMSTEdgesCount(distMSTEdges, upcxx::rank_me())));
-
-  // TODO Do I need to clear?
-  // edgesLocal.clear();
 
   // Wait until each rank finds its portion of the MST.
   upcxx::barrier();
 
-  // logMsg("here");
-
   const size_t superstepCount = std::log2(upcxx::rank_n());
-  // logMsg("superstepCount: " + std::to_string(superstepCount), 0);
   Rank rankOffset{1};
   for (size_t superstep = 1; superstep <= superstepCount; ++superstep) {
-    // logMsg("superstep" + std::to_string(superstep), 0);
     const size_t divisibleBy = std::pow(2, superstep);
-    // logMsg("divisibleBy: " + std::to_string(divisibleBy), 0);
     const size_t color = upcxx::rank_me() % divisibleBy;
-    // logMsg("color: " + std::to_string(color), 0);
     const bool isMergeable = (color == 0);
+    // Merge portions of the global MST found by each rank.
     if (isMergeable) {
-      // Teams which should wait for the current superstep.
-      // logMsg("Yay!");
-      // upcxx::team mergeableRanks =
-      //     upcxx::world().split(color, upcxx::rank_me());
+      // Which ranks edges to fetch.
+      const auto otherRank{upcxx::rank_me() + rankOffset};
 
-      // Merge portions of the global MST found by each rank.
-      {
-        // logMsg("HooRay!");
-        // Which ranks edges to fetch.
-        const auto otherRank{upcxx::rank_me() + rankOffset};
-        // logMsg("otherRank: " + std::to_string(otherRank));
-        // Fetch the edges.
-        auto globalMSTOtherFuture = distMSTEdges.fetch(otherRank);
-        auto globalMSTCurrentFuture = distMSTEdges.fetch(upcxx::rank_me());
+      // Fetch the edges.
+      auto globalMSTOtherFuture = distMSTEdges.fetch(otherRank);
+      auto globalMSTCurrentFuture = distMSTEdges.fetch(upcxx::rank_me());
 
-        // logMsg("Here 1");
+      // Wait for the edges to be on the current rank.
+      auto localMSTOther = globalMSTOtherFuture.wait();
+      auto localMSTCurrent = globalMSTCurrentFuture.wait();
 
-        // Wait for the edges to be on the current rank.
-        auto localMSTOther = globalMSTOtherFuture.wait();
-        auto localMSTCurrent = globalMSTCurrentFuture.wait();
-        // logMsg("Here 2");
+      // Clear distributed edges while mergines MSTs.
+      auto clearMSTEdgesFuture =
+          clearMSTEdgesAsync(distMSTEdges, upcxx::rank_me());
 
-        // Clear distributed edges while mergines MSTs.
-        auto clearMSTEdgesFuture =
-            clearMSTEdgesAsync(distMSTEdges, upcxx::rank_me());
-        // logMsg("Here 3");
+      // Merge MST from different ranks.
+      auto mergedMSTEdges{unionEdges(localMSTCurrent, localMSTOther)};
 
-        // Merge MST from different ranks.
-        auto mergedMSTEdges{unionEdges(localMSTCurrent, localMSTOther)};
-        // logMsg("Here 4");
+      // Wait for the edge clearing to be finished.
+      clearMSTEdgesFuture.wait();
 
-        // Wait for the edge clearing to be finished.
-        clearMSTEdgesFuture.wait();
-        // logMsg("Here 5");
+      // Clear the other rank MST edges.
 
-        // Clear the other rank MST edges.
-        // TODO clearMSTEdgesFuture = clearMSTEdgesAsync(distMSTEdges,
-        // otherRank);
+      // Add merges edges into the MST.
+      kruskal(distMSTEdges, upcxx::rank_me(), mergedMSTEdges,
+              m_totalNumberVertices);
 
-        // Add merges edges into the MST.
-        // addEdgesIntoMST(distMSTEdges, upcxx::rank_me(), mergedMSTEdges);
-        kruskal(distMSTEdges, upcxx::rank_me(), mergedMSTEdges,
-                m_totalNumberVertices);
-
-        // logMsg("Here 6");
-        // TODO clearMSTEdgesFuture.wait();
-
-        rankOffset *= 2;
-        // upcxx::barrier(mergeableRanks);
-      }
+      rankOffset *= 2;
     }
     upcxx::barrier();
   }
 
-  // logMsg("This is the end");
   upcxx::barrier();
   return distMSTEdges;
 }

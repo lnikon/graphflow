@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "HELLOO MOTHERFUCKER"
+echo "This script is intended to be run from CMake!"
 
-# Configure & make & install
+# Configure & make & install.
 cd ./thirdparty/papi/src
 ./configure --prefix=$(pwd)/install
 make -j 8 && make install
