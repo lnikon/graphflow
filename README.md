@@ -10,7 +10,7 @@ PGASGraph is based on a [UPCXX](https://github.com/brycelelbach/upcxx) and uses 
 ## Supported distributed algorithms
 
 + \+ MST: Prim
-- \- MST: Kruskal
+- \+ MST: Kruskal
 - \- MST: GHS
 - \- Shortest paths
 - \- Clustering
