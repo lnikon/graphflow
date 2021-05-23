@@ -8,6 +8,7 @@
 // STL
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <random>
 
 // Boost
@@ -25,6 +26,7 @@ struct ProgramOptions
     double percentage{5.0};
     bool printLocal{false};
     std::string exportPath{};
+    bool usePapi{false};
 };
 
 po::options_description CreateProgramOptions()
@@ -36,6 +38,7 @@ po::options_description CreateProgramOptions()
     desc.add_options()("print-local", po::value<int>(), "print edges on the current node");
     desc.add_options()(
         "export-path", po::value<std::string>(), "export graph as a edgelist into the file");
+    desc.add_options()("use-papi", po::value<bool>(), "use PAPIs performance counters");
 
     return desc;
 }
@@ -75,6 +78,12 @@ ProgramOptions ParseOptions(int argc, char** argv)
     if (vm.count("export-path"))
     {
         result.exportPath = vm["export-path"].as<std::string>();
+    }
+
+    // Run PAPI or not.
+    if (vm.count("use-papi"))
+    {
+        result.usePapi = vm["use-papi"].as<bool>();
     }
 
     return result;
@@ -137,12 +146,10 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
 
     using dist_weight_t = upcxx::dist_object<size_t>;
     dist_weight_t weight{1};
-    auto genWeight = [](dist_weight_t& weight)
-    {
+    auto genWeight = [](dist_weight_t& weight) {
         return upcxx::rpc(
                    0,
-                   [](dist_weight_t& weight)
-                   {
+                   [](dist_weight_t& weight) {
                        auto res = *weight;
                        *weight += 1;
                        return res;
@@ -201,8 +208,7 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         }
     }
 
-    auto genIdForPartition = [&gen](const auto rank, const auto vertexCount)
-    {
+    auto genIdForPartition = [&gen](const auto rank, const auto vertexCount) {
         auto minId = rank * vertexCount;
         auto maxId = (rank + 1) * vertexCount - 1;
         return std::uniform_int_distribution<PId>(minId, maxId)(gen);
@@ -276,11 +282,26 @@ int main(int argc, char* argv[])
 
     upcxx::barrier();
 
-    Performance::PerformanceMonitor perfMonitor;
+    std::unique_ptr<Performance::PerformanceMonitor> perfMonitor{nullptr};
+    if (programOptions.usePapi)
+    {
+        perfMonitor = std::make_unique<Performance::PerformanceMonitor>();
+    }
+
     auto start = std::chrono::steady_clock::now();
-    perfMonitor.Start();
+
+    if (programOptions.usePapi)
+    {
+        perfMonitor->Start();
+    }
+
     auto mstEdges = pgasGraph.Kruskal();
-    perfMonitor.Finish();
+
+    if (programOptions.usePapi)
+    {
+        perfMonitor->Finish();
+    }
+
     auto end = std::chrono::steady_clock::now();
 
     upcxx::barrier();
@@ -292,12 +313,21 @@ int main(int argc, char* argv[])
     {
         upcxx::rpc(
             upcxx::rank_me(),
-            [](decltype(mstEdges)& mstEdges)
-            { PGASGraph::logMsg("MST Edges = " + std::to_string(mstEdges->size())); },
+            [](decltype(mstEdges)& mstEdges) {
+                PGASGraph::logMsg("MST Edges = " + std::to_string(mstEdges->size()));
+            },
             mstEdges)
             .wait();
-        perfMonitor.Read();
-        perfMonitor.Report();
+
+        if (programOptions.usePapi)
+        {
+            perfMonitor->Read();
+        }
+
+        if (programOptions.usePapi)
+        {
+            perfMonitor->Report();
+        }
     }
 
     if (!programOptions.exportPath.empty())

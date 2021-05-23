@@ -70,3 +70,8 @@ contain IP's of those nodes which will participate in a distributed computation.
 `$GASNET_SSH_SERVERS=${SSH_SERVERS}`
 
 `$GASNET_MASTERIP=10.0.0.30`
+
+## Performance Evaluation
+You need to have following packages installed(Ubuntu)
+
+* 
