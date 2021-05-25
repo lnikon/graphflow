@@ -199,7 +199,7 @@ public:
     size_t VertexStoreSize(const Rank r = upcxx::rank_me());
 
 private:
-    graph_storage_type m_vertexStore;
+    graph_storage_type m_vertexStore{{}};
     const size_t m_totalNumberVertices;
     const size_t m_verticesPerRank;
 
@@ -230,14 +230,13 @@ bool Graph<VertexData, EdgeData>::AddEdge(const Edge& edge)
 
 template <typename VertexData, typename EdgeData>
 Graph<VertexData, EdgeData>::Graph(const size_t totalNumberVertices, const size_t verticesPerRank)
-    : m_vertexStore({{}})
-    , m_totalNumberVertices(totalNumberVertices)
+    : m_totalNumberVertices(totalNumberVertices)
     , m_verticesPerRank(verticesPerRank)
 {
     // Allocate space for the current cut.
     upcxx::rpc(
         upcxx::rank_me(),
-        [](graph_storage_type& graph, size_t verticesPerRank) { graph.resize(verticesPerRank); },
+        [](graph_storage_type& graph, size_t verticesPerRank) { graph->resize(verticesPerRank); },
         m_vertexStore,
         m_verticesPerRank)
         .wait();
@@ -256,45 +255,47 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge)
     }
 
     // Lambda to insert single edge into the graph.
-    auto insertSingleEdge = [](graph_storage_type& vertexStore, Edge edge) {
-        const auto parentRank = getVertexParent(edge.from);
-        const auto vertexStoreSize = vertexStore->size();
-        const size_t idx = edge.from - parentRank * vertexStoreSize;
-        assert(idx < vertexStoreSize);
-        if (!vertexStore->operator[](idx))
-        {
-            vertexStore->operator[](idx) = new Vertex(edge.from);
-        }
+    auto insertSingleEdge =
+        [](Rank rank, graph_storage_type& vertexStore, Edge edge, Rank parentRank) {
+            return upcxx::rpc(
+                rank,
+                [](graph_storage_type& vertexStore, Edge edge, Rank parentRank) {
+                    const auto vertexStoreSize = vertexStore->size();
+                    const size_t idx = edge.from - parentRank * vertexStoreSize;
+                    assert(idx < vertexStoreSize);
+                    if (!vertexStore->operator[](idx))
+                    {
+                        vertexStore->operator[](idx) = new Vertex(edge.from);
+                    }
 
-        auto& neighbours = vertexStore->operator[](idx)->neighbours;
-        for (auto& ngh : neighbours)
-        {
-            if (ngh.first == edge.data || ngh.second == edge.to)
-            {
-                return false;
-            }
-        }
+                    auto& neighbours = vertexStore->operator[](idx)->neighbours;
+                    for (auto& ngh : neighbours)
+                    {
+                        if (ngh.first == edge.data || ngh.second == edge.to)
+                        {
+                            return false;
+                        }
+                    }
 
-        neighbours.push_back({edge.data, edge.to});
-        return true;
-    };
+                    neighbours.push_back({edge.data, edge.to});
+                    return true;
+                },
+                vertexStore,
+                edge,
+                parentRank);
+        };
 
     const Rank& fromRank = getVertexParent(edge.from);
     const Rank& toRank = getVertexParent(edge.to);
 
-    auto fromFuture = upcxx::rpc(
-        fromRank,
-        [this, insertSingleEdge](Edge edge) { insertSingleEdge(m_vertexStore, edge); },
-        edge);
-    auto toFuture = upcxx::rpc(
-        toRank,
-        [this, insertSingleEdge](Edge edge) { insertSingleEdge(m_vertexStore, edge); },
-        edge.Invert());
+    auto fromFuture = insertSingleEdge(fromRank, m_vertexStore, edge, getVertexParent(edge.from));
+    auto toFuture = insertSingleEdge(
+        fromRank, m_vertexStore, edge.Invert(), getVertexParent(edge.Invert().from));
 
-    fromFuture.wait();
-    toFuture.wait();
+    bool res = fromFuture.wait();
+    res &= toFuture.wait();
 
-    return true;
+    return res;
 }
 
 template <typename VertexData, typename EdgeData>

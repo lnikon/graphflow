@@ -198,26 +198,25 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
     const size_t extraEdges{static_cast<size_t>(
         static_cast<double>((vertexCount * vertexCount) / 2) * (percentage / 100.0))};
 
-    upcxx::barrier();
-
     start = std::chrono::steady_clock::now();
     auto copyExtraEdges{extraEdges};
-    PGASGraph::logMsg("copyExtraEdges=" + std::to_string(copyExtraEdges));
     size_t edgesInsideCurrentCcomponent{0};
-    // while (copyExtraEdges != 0)
-    // {
-    //     PId u = std::uniform_int_distribution<unsigned long long>(minId, maxId)(gen);
-    //     PId v = std::uniform_int_distribution<unsigned long long>(minId, maxId)(gen);
-    //     if (u != v)
-    //     {
-    //         if (graph.AddEdge({u, v, genWeight(weight)}))
-    //         {
-    //             edgesInsideCurrentCcomponent++;
-    //             edges++;
-    //         }
-    //         --copyExtraEdges;
-    //     }
-    // }
+    while (copyExtraEdges != 0)
+    {
+        PId u = std::uniform_int_distribution<unsigned long long>(minId, maxId)(gen);
+        PId v = std::uniform_int_distribution<unsigned long long>(minId, maxId)(gen);
+        if (u != v)
+        {
+            if (graph.AddEdge({u, v, genWeight(weight)}))
+            {
+                edgesInsideCurrentCcomponent++;
+                edges++;
+                // PGASGraph::logMsg("Here 1: from " + std::to_string(u) + "to " +
+                // std::to_string(v));
+            }
+            --copyExtraEdges;
+        }
+    }
     end = std::chrono::steady_clock::now();
     PGASGraph::logMsg("Connected component interior generation time: " +
                       std::to_string(std::chrono::duration<double>(end - start).count()));
@@ -229,8 +228,6 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         auto maxId = (rank + 1) * vertexCount - 1;
         return std::uniform_int_distribution<PId>(minId, maxId)(gen);
     };
-
-    upcxx::barrier();
 
     start = std::chrono::steady_clock::now();
     size_t edgesWithOtherComponents{0};
@@ -245,8 +242,7 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
                 const auto idR2{genIdForPartition(r2, vertexCount)};
                 if (idR1 != idR2)
                 {
-                    // if (graph.AddEdge({idR1, idR2, genWeight(weight)}))
-                    if (graph.AddEdge({idR1, idR2, 1}))
+                    if (graph.AddEdge({idR1, idR2, genWeight(weight)}))
                     {
                         edgesWithOtherComponents++;
                         edges++;
@@ -260,7 +256,6 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
     PGASGraph::logMsg("Connected component exterior generation time: " +
                       std::to_string(std::chrono::duration<double>(end - start).count()));
     PGASGraph::logMsg("Edges with other components: " + std::to_string(edgesWithOtherComponents));
-
     upcxx::barrier();
     return edges;
 }
@@ -318,7 +313,6 @@ int main(int argc, char* argv[])
     }
 
     upcxx::barrier();
-    return 0;
 
     std::unique_ptr<Performance::PerformanceMonitor> perfMonitor{nullptr};
     if (programOptions.usePapi)
