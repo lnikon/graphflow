@@ -7,6 +7,7 @@
 
 // STL
 #include <chrono>
+#include <ctime>
 #include <iostream>
 #include <memory>
 #include <random>
@@ -125,9 +126,6 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
     std::vector<PId> connected;
     connected.reserve(vertexCount);
 
-    size_t extraEdges{static_cast<size_t>(static_cast<double>(vertexCount * vertexCount / 2) *
-                                          (percentage / 100.0))};
-
     size_t edges{0};
 
     std::random_device rnd;
@@ -193,7 +191,14 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         connected.push_back(v);
     }
 
-    auto copyExtraEdges{extraEdges - edges};
+    // auto copyExtraEdges{extraEdges - edges};
+    
+    const size_t extraEdges{static_cast<size_t>(static_cast<double>((vertexCount * vertexCount) / 2) *
+                                                                    (percentage / 100.0))};
+
+    auto copyExtraEdges{extraEdges};
+    PGASGraph::logMsg("copyExtraEdges=" + std::to_string(copyExtraEdges));
+    size_t edgesInsideCurrentCcomponent {0};
     while (copyExtraEdges != 0)
     {
         PId u = std::uniform_int_distribution<unsigned long long>(minId, maxId)(gen);
@@ -202,11 +207,13 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         {
             if (graph.AddEdge({u, v, genWeight(weight)}))
             {
+                edgesInsideCurrentCcomponent++;
                 edges++;
             }
             --copyExtraEdges;
         }
     }
+    PGASGraph::logMsg("Edges inside current component: " + std::to_string(edgesInsideCurrentCcomponent));
 
     auto genIdForPartition = [&gen](const auto rank, const auto vertexCount) {
         auto minId = rank * vertexCount;
@@ -214,11 +221,12 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         return std::uniform_int_distribution<PId>(minId, maxId)(gen);
     };
 
+    size_t edgesWithOtherComponents {0};
     for (PGASGraph::Rank r1 = 0; r1 < rank_n - 1; ++r1)
     {
         for (PGASGraph::Rank r2 = r1 + 1; r2 < rank_n; ++r2)
         {
-            copyExtraEdges = rank_n + vertexCount * 5 / 100;
+            copyExtraEdges = rank_n + extraEdges;
             while (copyExtraEdges != 0)
             {
                 const auto idR1{genIdForPartition(r1, vertexCount)};
@@ -227,6 +235,7 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
                 {
                     if (graph.AddEdge({idR1, idR2, genWeight(weight)}))
                     {
+                        edgesWithOtherComponents++;
                         edges++;
                     }
                     --copyExtraEdges;
@@ -234,6 +243,7 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
             }
         }
     }
+    PGASGraph::logMsg("Edges with other components: " + std::to_string(edgesWithOtherComponents));
 
     upcxx::barrier();
     return edges;
@@ -262,6 +272,9 @@ int main(int argc, char* argv[])
     const size_t verticesPerRank =
         (programOptions.totalNumberVertices + upcxx::rank_n() - 1) / upcxx::rank_n();
 
+    std::time_t timeNow = std::time(nullptr);
+    char* dt = std::ctime(&timeNow);
+    PGASGraph::logMsg("Start time: " + std::string(dt));
     PGASGraphType pgasGraph(programOptions.totalNumberVertices, verticesPerRank);
     const auto rank_n = upcxx::rank_n();
     for (auto r = decltype(rank_n){0}; r < rank_n; ++r)
@@ -329,6 +342,10 @@ int main(int argc, char* argv[])
             perfMonitor->Report();
         }
     }
+
+    timeNow = std::time(nullptr);
+    dt = std::ctime(&timeNow);
+    PGASGraph::logMsg("Finish time: " + std::string(dt));
 
     if (!programOptions.exportPath.empty())
     {
