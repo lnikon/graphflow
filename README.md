@@ -71,6 +71,8 @@ contain IP's of those nodes which will participate in a distributed computation.
 
 `$GASNET_MASTERIP=10.0.0.30`
 
+`$UPCXX_NETWORK=udp`
+
 ## Performance Evaluation
 You need to have following packages installed(Ubuntu)
 
