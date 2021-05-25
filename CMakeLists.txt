@@ -37,30 +37,30 @@ message("** PAPI download dir is: ${PAPI_DOWNLOAD_DIR}")
 message("** PAPI source dir is: ${PAPI_SOURCE_DIR}")
 message("** PAPI lib dir is: ${PAPI_LIB_DIR}")
 
-include(FetchContent)
-FetchContent_Declare(
-        PAPI
-        GIT_REPOSITORY https://bitbucket.org/icl/papi.git
-        SOURCE_DIR ${PAPI_DOWNLOAD_DIR}
-)
+# include(FetchContent)
+# FetchContent_Declare(
+#         PAPI
+#         GIT_REPOSITORY https://bitbucket.org/icl/papi.git
+#         SOURCE_DIR ${PAPI_DOWNLOAD_DIR}
+# )
 
-# Download the PAPI.
-FetchContent_GetProperties(PAPI)
-if (NOT PAPI_POPULATED)
-    FetchContent_MakeAvailable(PAPI)
-endif ()
+# # Download the PAPI.
+# FetchContent_GetProperties(PAPI)
+# if (NOT PAPI_POPULATED)
+#     FetchContent_MakeAvailable(PAPI)
+# endif ()
 
 # Build the papi using a external script.
 set(
         PAPI_BUILD_SCRIPT_PATH
         "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BuildPAPI.sh"
 )
-execute_process(
-        COMMAND
-        ${PAPI_BUILD_SCRIPT_PATH}
-        WORKING_DIRECTORY
-        ${CMAKE_CURRENT_SOURCE_DIR}
-)
+# execute_process(
+#         COMMAND
+#         ${PAPI_BUILD_SCRIPT_PATH}
+#         WORKING_DIRECTORY
+#         ${CMAKE_CURRENT_SOURCE_DIR}
+# )
 
 # Add PAPI libs to the linker search paths.
 link_directories(

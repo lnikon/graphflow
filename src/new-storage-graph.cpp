@@ -156,6 +156,7 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
             .wait();
     };
 
+    auto start = std::chrono::steady_clock::now();
     while (!unconnected.empty())
     {
         const auto temp1 =
@@ -190,12 +191,15 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         unconnected.erase(unconnectedItemIt);
         connected.push_back(v);
     }
-
+    auto end = std::chrono::steady_clock::now();
+    PGASGraph::logMsg("Connected component core generation time: " +
+                        std::to_string(std::chrono::duration<double>(end - start).count()));
     // auto copyExtraEdges{extraEdges - edges};
     
     const size_t extraEdges{static_cast<size_t>(static_cast<double>((vertexCount * vertexCount) / 2) *
                                                                     (percentage / 100.0))};
 
+    start = std::chrono::steady_clock::now();
     auto copyExtraEdges{extraEdges};
     PGASGraph::logMsg("copyExtraEdges=" + std::to_string(copyExtraEdges));
     size_t edgesInsideCurrentCcomponent {0};
@@ -213,6 +217,9 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
             --copyExtraEdges;
         }
     }
+    end = std::chrono::steady_clock::now();
+    PGASGraph::logMsg("Connected component interior generation time: " +
+                    std::to_string(std::chrono::duration<double>(end - start).count()));
     PGASGraph::logMsg("Edges inside current component: " + std::to_string(edgesInsideCurrentCcomponent));
 
     auto genIdForPartition = [&gen](const auto rank, const auto vertexCount) {
@@ -221,6 +228,7 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         return std::uniform_int_distribution<PId>(minId, maxId)(gen);
     };
 
+    start = std::chrono::steady_clock::now();
     size_t edgesWithOtherComponents {0};
     for (PGASGraph::Rank r1 = 0; r1 < rank_n - 1; ++r1)
     {
@@ -243,6 +251,9 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
             }
         }
     }
+    end = std::chrono::steady_clock::now();
+    PGASGraph::logMsg("Connected component exterior generation time: " +
+                    std::to_string(std::chrono::duration<double>(end - start).count()));
     PGASGraph::logMsg("Edges with other components: " + std::to_string(edgesWithOtherComponents));
 
     upcxx::barrier();
@@ -265,6 +276,16 @@ struct UPCXXInitializer
 int main(int argc, char* argv[])
 {
     UPCXXInitializer upcxxInitializer{};
+    std::time_t timeNow = std::time(nullptr);
+    char* dt = nullptr;
+    if (0 == upcxx::rank_me())
+    {
+        PGASGraph::logMsg("******************************************");
+        dt = std::ctime(&timeNow);
+        PGASGraph::logMsg("Start time: " + std::string(dt));
+    }
+
+    upcxx::barrier();
 
     const auto programOptions{ParseOptions(argc, argv)};
 
@@ -272,9 +293,7 @@ int main(int argc, char* argv[])
     const size_t verticesPerRank =
         (programOptions.totalNumberVertices + upcxx::rank_n() - 1) / upcxx::rank_n();
 
-    std::time_t timeNow = std::time(nullptr);
-    char* dt = std::ctime(&timeNow);
-    PGASGraph::logMsg("Start time: " + std::string(dt));
+
     PGASGraphType pgasGraph(programOptions.totalNumberVertices, verticesPerRank);
     const auto rank_n = upcxx::rank_n();
     for (auto r = decltype(rank_n){0}; r < rank_n; ++r)
@@ -343,9 +362,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    timeNow = std::time(nullptr);
-    dt = std::ctime(&timeNow);
-    PGASGraph::logMsg("Finish time: " + std::string(dt));
+
 
     if (!programOptions.exportPath.empty())
     {
@@ -357,5 +374,13 @@ int main(int argc, char* argv[])
         pgasGraph.printLocal();
     }
 
+    upcxx::barrier();
+    if (0 == upcxx::rank_me())
+    {
+        timeNow = std::time(nullptr);
+        dt = std::ctime(&timeNow);
+        PGASGraph::logMsg("Finish time: " + std::string(dt));
+        PGASGraph::logMsg("******************************************");
+    }
     return 0;
 }

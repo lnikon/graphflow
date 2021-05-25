@@ -5,7 +5,7 @@ namespace PGASGraph {
 void logMsg(const std::string &msg) {
 #ifdef DEBUG_LOG_MSG
   std::cout << "[" << upcxx::rank_me() << "/" << upcxx::rank_n() << "] " << msg
-            << "\n";
+            << std::endl;
 #endif
 }
 
@@ -13,7 +13,7 @@ void logMsg(const std::string &msg, const size_t rank) {
 #ifdef DEBUG_LOG_MSG
   if (upcxx::rank_me() == rank) {
     std::cout << "[" << upcxx::rank_me() << "/" << upcxx::rank_n() << "] "
-              << msg << "\n";
+              << msg << std::endl;
   }
 #endif
 }
