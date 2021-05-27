@@ -68,23 +68,23 @@ link_directories(
 )
 
 # Try to compile and link a sample PAPI program.
-set(
-        PAPI_TEST_SRC
-        "${CMAKE_SOURCE_DIR}/tests/PAPITest.cpp"
-)
-add_executable(
-        PAPITest
-        ${PAPI_TEST_SRC}
-)
-target_include_directories(
-        PAPITest
-        PUBLIC
-        ${PAPI_SOURCE_DIR}
-)
-target_link_libraries(
-        PAPITest
-        libpapi
-)
+# set(
+#         PAPI_TEST_SRC
+#         "${CMAKE_SOURCE_DIR}/tests/PAPITest.cpp"
+# )
+# add_executable(
+#         PAPITest
+#         ${PAPI_TEST_SRC}
+# )
+# target_include_directories(
+#         PAPITest
+#         PUBLIC
+#         ${PAPI_SOURCE_DIR}
+# )
+# target_link_libraries(
+#         PAPITest
+#         libpapi
+# )
 #### End PAPI ####
 
 #### Start UPCXX ####
@@ -101,7 +101,7 @@ set(
 )
 find_package(
         UPCXX
-        2020.3.2
+        2021.3.0
         REQUIRED
 )
 message("FOUND UPCXX_VERSION=${UPCXX_VERSION}")
@@ -124,25 +124,25 @@ find_package(
 ### End Conan ####
 
 #### Start PGASGraph ####
-# Export PerformanceMonitor as a static library
-set(
-        PERFORMANCE_MONITOR_LIB_SOURCES
-        "${CMAKE_SOURCE_DIR}/src/performance_monitor.cpp"
-)
-add_library(
-        performance-monitor
-        ${PERFORMANCE_MONITOR_LIB_SOURCES}
-)
-target_include_directories(
-        performance-monitor
-        PUBLIC
-        inc
-        ${PAPI_SOURCE_DIR}
-)
-target_link_libraries(
-        performance-monitor
-        libpapi
-)
+# # Export PerformanceMonitor as a static library
+# set(
+#         PERFORMANCE_MONITOR_LIB_SOURCES
+#         "${CMAKE_SOURCE_DIR}/src/performance_monitor.cpp"
+# )
+# add_library(
+#         performance-monitor
+#         ${PERFORMANCE_MONITOR_LIB_SOURCES}
+# )
+# target_include_directories(
+#         performance-monitor
+#         PUBLIC
+#         inc
+#         ${PAPI_SOURCE_DIR}
+# )
+# target_link_libraries(
+#         performance-monitor
+#         libpapi
+# )
 
 # Export PGASGraph as a static library
 set(
@@ -163,8 +163,9 @@ target_link_libraries(
         pgas-graph
         PRIVATE
         UPCXX::upcxx
-        performance-monitor
-        libpapi
+        Boost::Boost
+        # performance-monitor
+        # libpapi
 )
 
 # Program to test new graph storage.

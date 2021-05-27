@@ -1,5 +1,5 @@
 // PGASGraph
-#include <performance/performance_monitor.hpp>
+// #include <performance/performance_monitor.hpp>
 #include <pgas-graph/pgas-graph.h>
 
 // CopyPasted
@@ -289,6 +289,11 @@ int main(int argc, char* argv[])
     upcxx::barrier();
 
     const auto programOptions{ParseOptions(argc, argv)};
+    if (upcxx::rank_me() == 0)
+    {
+        PGASGraph::logMsg("Total number of vertices: " + std::to_string(programOptions.totalNumberVertices));
+        PGASGraph::logMsg("Percentage: " + std::to_string(programOptions.percentage));
+    }
 
     // Distribute vertices over the ranks.
     const size_t verticesPerRank =
@@ -314,25 +319,25 @@ int main(int argc, char* argv[])
 
     upcxx::barrier();
 
-    std::unique_ptr<Performance::PerformanceMonitor> perfMonitor{nullptr};
-    if (programOptions.usePapi)
-    {
-        perfMonitor = std::make_unique<Performance::PerformanceMonitor>();
-    }
+    // std::unique_ptr<Performance::PerformanceMonitor> perfMonitor{nullptr};
+    // if (programOptions.usePapi)
+    // {
+    //     perfMonitor = std::make_unique<Performance::PerformanceMonitor>();
+    // }
 
     auto start = std::chrono::steady_clock::now();
 
-    if (programOptions.usePapi)
-    {
-        perfMonitor->Start();
-    }
+    // if (programOptions.usePapi)
+    // {
+    //     perfMonitor->Start();
+    // }
 
     auto mstEdges = pgasGraph.Kruskal();
 
-    if (programOptions.usePapi)
-    {
-        perfMonitor->Finish();
-    }
+    // if (programOptions.usePapi)
+    // {
+    //     perfMonitor->Finish();
+    // }
 
     auto end = std::chrono::steady_clock::now();
 
@@ -351,15 +356,15 @@ int main(int argc, char* argv[])
             mstEdges)
             .wait();
 
-        if (programOptions.usePapi)
-        {
-            perfMonitor->Read();
-        }
+        // if (programOptions.usePapi)
+        // {
+        //     perfMonitor->Read();
+        // }
 
-        if (programOptions.usePapi)
-        {
-            perfMonitor->Report();
-        }
+        // if (programOptions.usePapi)
+        // {
+        //     perfMonitor->Report();
+        // }
     }
 
     if (!programOptions.exportPath.empty())
