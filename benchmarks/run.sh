@@ -4,41 +4,137 @@
 # percentages=[100, 100, 100,  50,   15,   5,    3,     1,     0.5,   0.2,     0.08,     0.03,   0.009]
 # rankCount=(1 2)
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=64 --percentage=100 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=64 --percentage=100 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=64      --percentage=100 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=64      --percentage=100 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=256     --percentage=100 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=256     --percentage=100 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=1024    --percentage=100 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=1024    --percentage=100 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=2048    --percentage=50 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=2048    --percentage=50 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=4096    --percentage=50 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=4096    --percentage=50 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=8192    --percentage=50 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=8192    --percentage=50 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=16384   --percentage=10 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=16384   --percentage=10 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=33668   --percentage=1 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=33668   --percentage=1 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=67336   --percentage=0.5 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=67336   --percentage=0.5 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=134672  --percentage=0.05 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=134672  --percentage=0.05 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=269344  --percentage=0.03 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=269344  --percentage=0.03 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=538688  --percentage=0.02 &&
+# $UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=538688  --percentage=0.02
+#$UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=1077376 --percentage=0.125 &&
+#$UPCXX_INSTALL/bin/upcxx-run -n 2 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=1077376 --percentage=0.125
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=256 --percentage=100 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=256 --percentage=100 &&
+#!/bin/bash
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=1024 --percentage=100 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=1024 --percentage=100 &&
+# vertexCount=[64,  256, 1024, 2048, 4096, 8192, 10000, 33668, 67336, 134672,  269344,   538688, 1077376]
+# percentages=[100, 100, 100,  50,   15,   5,    3,     1,     0.5,   0.2,     0.08,     0.03,   0.009]
+# rankCount=(1 2)
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=2048 --percentage=50 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=2048 --percentage=50 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=1 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=1 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=1 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=1 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=1 &&
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=4096 --percentage=15 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=4096 --percentage=15 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=5 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=5 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=5 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=5 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=5 &&
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=8192 --percentage=5 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=8192 --percentage=5 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=10 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=10 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=10 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=10 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=10 &&
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=16384 --percentage=3 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=16384 --percentage=3 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=15 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=15 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=15 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=15 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=15 &&
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=33668 --percentage=1 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=33668 --percentage=1 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=20 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=20 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=20 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=20 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=20 &&
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=67336 --percentage=0.5 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=67336 --percentage=0.5 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=25 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=25 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=25 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=25 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=25 &&
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=134672 --percentage=0.02 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=134672 --percentage=0.02 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=30 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=30 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=30 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=30 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=30 &&
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=269344 --percentage=0.08 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=269344 --percentage=0.08 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=35 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=35 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=35 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=35 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=35 &&
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=538688 --percentage=0.03 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=538688 --percentage=0.03 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=40 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=40 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=40 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=40 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=40 &&
 
-$UPCXX_INSTALL/bin/upcxx-run -n 1 ../manual_build/graph-pgas-test --vertex-count=1077376 --percentage=0.009 &&
-$UPCXX_INSTALL/bin/upcxx-run -n 2 ../manual_build/graph-pgas-test --vertex-count=1077376 --percentage=0.009
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=45 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=45 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=45 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=45 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=45 &&
+
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=50 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=50 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=50 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=50 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=50 &&
+
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=55 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=55 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=55 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=55 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=55 &&
+
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=60 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=60 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=60 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=60 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=60 &&
+
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=65 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=65 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=65 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=65 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=65 &&
+
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=70 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=70 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=70 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=70 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=70 &&
+
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=75 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=75 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=75 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=75 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=75 &&
+
+$UPCXX_INSTALL/bin/upcxx-run -n 1  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=80 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 2  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=80 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 4  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=80 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 8  -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=80 &&
+$UPCXX_INSTALL/bin/upcxx-run -n 16 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=10000 --percentage=80

@@ -1,0 +1,34 @@
+[0/1] Start time: Mon May 24 07:42:48 2021
+
+[0/1] min=0, max=67335
+[0/1] Graph generation elapsed time: 358.945720
+[0/1] Edge count: 11335342
+[0/1] Peak Mem Usage: 624MB
+[0/1] MST Elapsed Time: 851.307037
+[0/1] MST Edges = 67335
+[0/1] Finish time: Mon May 24 08:02:58 2021
+
+//////////////////////////////////////////////////
+upcxx::init():
+> WARNING: Requested UPC++ shared heap size (1 GB) is larger than the GASNet segment size (978 MB). Adjusted shared heap size to 978 MB.
+//////////////////////////////////////////////////
+[0/2] Start time: Mon May 24 08:02:59 2021
+
+[0/2] min=0, max=33667
+[0/2] Graph generation elapsed time: 112.159555
+[0/2] Edge count: 2835520
+[0/2] Peak Mem Usage: 171MB
+[0/2] MST Elapsed Time: 227.200519
+[0/2] MST Edges = 67335
+[0/2] Finish time: Mon May 24 08:08:38 2021
+
+[1/2] Start time: Mon May 24 08:02:59 2021
+
+[1/2] min=33668, max=67335
+[1/2] Graph generation elapsed time: 112.159588
+[1/2] Edge count: 2835520
+[1/2] Peak Mem Usage: 170MB
+[1/2] MST Elapsed Time: 227.200851
+[1/2] Finish time: Mon May 24 08:08:38 2021
+
+./run.sh: line 30: 2494044 Killed                  $UPCXX_INSTALL/bin/upcxx-run -n 1 -shared-heap 1G ./../build/pgas-graph-new-storage --vertex-count=134672 --percentage=0.5
