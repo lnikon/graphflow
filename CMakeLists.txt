@@ -2,22 +2,22 @@ cmake_minimum_required(VERSION 3.8)
 project(pgasgraph)
 
 # Execute Conan.
-set(
-        CONAN_SCRIPT_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/scripts/ExecuteConan.sh"
-)
-execute_process(
-        COMMAND
-        ${CONAN_SCRIPT_PATH}
-        WORKING_DIRECTORY
-        ${CMAKE_CURRENT_SOURCE_DIR})
+#set(
+#        CONAN_SCRIPT_PATH
+#        "${CMAKE_CURRENT_SOURCE_DIR}/scripts/ExecuteConan.sh"
+#)
+#execute_process(
+#        COMMAND
+#        ${CONAN_SCRIPT_PATH}
+#        WORKING_DIRECTORY
+#        ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Support for custom CMake modules.
-list(
-        APPEND
-        CMAKE_PREFIX_PATH
-        "${CMAKE_SOURCE_DIR}/lib/cmake"
-)
+#list(
+#        APPEND
+#        CMAKE_PREFIX_PATH
+#        "${CMAKE_SOURCE_DIR}/lib/cmake"
+#)
 
 #### Start PAPI ####
 # Declare PAPI Content.
@@ -51,10 +51,10 @@ message("** PAPI lib dir is: ${PAPI_LIB_DIR}")
 # endif ()
 
 # Build the papi using a external script.
-set(
-        PAPI_BUILD_SCRIPT_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BuildPAPI.sh"
-)
+#set(
+#        PAPI_BUILD_SCRIPT_PATH
+#        "${CMAKE_CURRENT_SOURCE_DIR}/scripts/BuildPAPI.sh"
+#)
 # execute_process(
 #         COMMAND
 #         ${PAPI_BUILD_SCRIPT_PATH}
@@ -63,9 +63,9 @@ set(
 # )
 
 # Add PAPI libs to the linker search paths.
-link_directories(
-        ${PAPI_LIB_DIR}
-)
+#link_directories(
+#        ${PAPI_LIB_DIR}
+#)
 
 # Try to compile and link a sample PAPI program.
 # set(
@@ -88,20 +88,25 @@ link_directories(
 #### End PAPI ####
 
 #### Start UPCXX ####
-if (DEFINED ENV{UPCXX_INSTALL})
+if (DEFINED $ENV{UPCXX_INSTALL})
     list(APPEND CMAKE_PREFIX_PATH $ENV{UPCXX_INSTALL})
 endif ()
 
-set(
-        CMAKE_CXX_COMPILER "/usr/bin/g++"
-)
-set(
-        CMAKE_EXPORT_COMPILE_COMMANDS
-        "/usr/bin/g++"
-)
+#set(
+#        CMAKE_CXX_COMPILER "/usr/bin/g++"
+#)
+#set(
+#        CMAKE_EXPORT_COMPILE_COMMANDS
+#        "/usr/bin/g++"
+#)
+
+if (NOT DEFINED $ENV{UPCXX_VERSION})
+	set(UPCXX_VERSION 2021.3.0)
+endif()
+
 find_package(
         UPCXX
-        2021.3.0
+				# $ENV{UPCXX_VERSION}
         REQUIRED
 )
 message("FOUND UPCXX_VERSION=${UPCXX_VERSION}")
@@ -114,13 +119,8 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conaninfo.txt)
             ${CMAKE_CURRENT_BINARY_DIR}
     )
 endif ()
-find_package(
-        Boost
-        1.74
-        REQUIRED
-        COMPONENTS
-        program_options
-)
+
+find_package(Boost COMPONENTS program_options REQUIRED)
 ### End Conan ####
 
 #### Start PGASGraph ####
@@ -149,16 +149,19 @@ set(
         LIB_SOURCES
         "${CMAKE_SOURCE_DIR}/src/pgas-graph.cpp"
 )
+
 add_library(
         pgas-graph
         ${LIB_SOURCES}
 )
+
 target_include_directories(
         pgas-graph
         PUBLIC
         inc
         ${PAPI_SOURCE_DIR}
 )
+
 target_link_libraries(
         pgas-graph
         PRIVATE
@@ -173,15 +176,18 @@ set(
         GRAPH_NEW_STORAGE_SOURCES
         "${CMAKE_SOURCE_DIR}/src/new-storage-graph.cpp"
 )
+
 add_executable(
         pgas-graph-new-storage
         ${GRAPH_NEW_STORAGE_SOURCES}
 )
+
 target_include_directories(
         pgas-graph-new-storage
         PUBLIC
         inc
 )
+
 target_link_libraries(
         pgas-graph-new-storage
         PUBLIC
