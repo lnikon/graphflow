@@ -89,8 +89,8 @@ message("** PAPI lib dir is: ${PAPI_LIB_DIR}")
 
 
 #### Start UPCXX ####
-set(CMAKE_CXX_COMPILER "/usr/bin/g++")
-set(CMAKE_EXPORT_COMPILE_COMMANDS "/usr/bin/g++")
+# set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+# set(CMAKE_EXPORT_COMPILE_COMMANDS "/usr/bin/g++")
 
 message("*** Using UPCXX_INSTALL=$ENV{UPCXX_INSTALL}")
 if(DEFINED ENV{UPCXX_INSTALL})
@@ -129,18 +129,4 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 #         libpapi
 # )
 
-# Export PGASGraph as a static library
-set(LIB_SOURCES "${CMAKE_SOURCE_DIR}/src/pgas-graph.cpp")
-
-add_library(pgas-graph ${LIB_SOURCES})
-
-target_include_directories(pgas-graph PUBLIC inc ${PAPI_SOURCE_DIR})
-
-target_link_libraries(pgas-graph PRIVATE UPCXX::upcxx Boost::Boost) # performance-monitor libpapi)
-
-# Program to test new graph storage.
-set(GRAPH_NEW_STORAGE_SOURCES "${CMAKE_SOURCE_DIR}/src/new-storage-graph.cpp")
-add_executable(pgas-graph-new-storage ${GRAPH_NEW_STORAGE_SOURCES})
-target_include_directories(pgas-graph-new-storage PUBLIC inc)
-target_link_libraries(pgas-graph-new-storage PUBLIC UPCXX::upcxx pgas-graph Boost::Boost)
-#### End PGASGraph ####
+add_subdirectory("src")
