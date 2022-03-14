@@ -8,7 +8,10 @@ class ConanPackage(ConanFile):
 
     requires = [
         ('boost/1.74.0'),
-        ('nlohmann_json/3.9.1')
+        ('nlohmann_json/3.9.1'),
+        ('spdlog/1.9.2'),
+        ('fmt/8.1.1'),
+        ('poco/1.11.1')
     ]
 
     # default_options = (
