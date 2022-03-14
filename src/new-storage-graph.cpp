@@ -143,10 +143,12 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
     PGASGraph::logMsg("min=" + std::to_string(minId) + ", max=" + std::to_string((maxId)));
     using dist_weight_t = upcxx::dist_object<size_t>;
     dist_weight_t weight{1};
-    auto genWeight = [](dist_weight_t& weight) {
+    auto genWeight = [](dist_weight_t& weight)
+    {
         return upcxx::rpc(
                    0,
-                   [](dist_weight_t& weight) {
+                   [](dist_weight_t& weight)
+                   {
                        auto res = *weight;
                        *weight += 1;
                        return res;
@@ -155,7 +157,6 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
             .wait();
     };
 
-    // return 0;
     auto start = std::chrono::steady_clock::now();
     while (!unconnected.empty())
     {
@@ -191,6 +192,7 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         unconnected.erase(unconnectedItemIt);
         connected.push_back(v);
     }
+
     auto end = std::chrono::steady_clock::now();
     PGASGraph::logMsg("Connected component core generation time: " +
                       std::to_string(std::chrono::duration<double>(end - start).count()));
@@ -200,7 +202,7 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
 
     start = std::chrono::steady_clock::now();
     auto copyExtraEdges{extraEdges};
-    size_t edgesInsideCurrentCcomponent{0};
+    size_t edgesInsideCurrentComponent{0};
     while (copyExtraEdges != 0)
     {
         PId u = std::uniform_int_distribution<unsigned long long>(minId, maxId)(gen);
@@ -209,10 +211,8 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         {
             if (graph.AddEdge({u, v, genWeight(weight)}))
             {
-                edgesInsideCurrentCcomponent++;
+                edgesInsideCurrentComponent++;
                 edges++;
-                // PGASGraph::logMsg("Here 1: from " + std::to_string(u) + "to " +
-                // std::to_string(v));
             }
             --copyExtraEdges;
         }
@@ -221,9 +221,10 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
     PGASGraph::logMsg("Connected component interior generation time: " +
                       std::to_string(std::chrono::duration<double>(end - start).count()));
     PGASGraph::logMsg("Edges inside current component: " +
-                      std::to_string(edgesInsideCurrentCcomponent));
+                      std::to_string(edgesInsideCurrentComponent));
 
-    auto genIdForPartition = [&gen](const auto rank, const auto vertexCount) {
+    auto genIdForPartition = [&gen](const auto rank, const auto vertexCount)
+    {
         auto minId = rank * vertexCount;
         auto maxId = (rank + 1) * vertexCount - 1;
         return std::uniform_int_distribution<PId>(minId, maxId)(gen);
@@ -286,12 +287,18 @@ int main(int argc, char* argv[])
         PGASGraph::logMsg("Start time: " + std::string(dt));
     }
 
+    // Print hostname to make sure that the run is truly distributed.
+    char hostname[HOST_NAME_MAX];
+    gethostname(hostname, HOST_NAME_MAX);
+    upcxx::rpc(0, [hostname]() { PGASGraph::logMsg(std::string{"Hostname: "} + hostname); }).wait();
+
     upcxx::barrier();
 
     const auto programOptions{ParseOptions(argc, argv)};
     if (upcxx::rank_me() == 0)
     {
-        PGASGraph::logMsg("Total number of vertices: " + std::to_string(programOptions.totalNumberVertices));
+        PGASGraph::logMsg("Total number of vertices: " +
+                          std::to_string(programOptions.totalNumberVertices));
         PGASGraph::logMsg("Percentage: " + std::to_string(programOptions.percentage));
     }
 
@@ -350,9 +357,8 @@ int main(int argc, char* argv[])
     {
         upcxx::rpc(
             upcxx::rank_me(),
-            [](decltype(mstEdges)& mstEdges) {
-                PGASGraph::logMsg("MST Edges = " + std::to_string(mstEdges->size()));
-            },
+            [](decltype(mstEdges)& mstEdges)
+            { PGASGraph::logMsg("MST Edges = " + std::to_string(mstEdges->size())); },
             mstEdges)
             .wait();
 

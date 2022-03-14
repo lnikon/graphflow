@@ -11,6 +11,6 @@ class ConanPackage(ConanFile):
         ('nlohmann_json/3.9.1')
     ]
 
-    default_options = (
-        'boost:shared=False',
-    )
+    # default_options = (
+    #     'boost:shared=False',
+    # )

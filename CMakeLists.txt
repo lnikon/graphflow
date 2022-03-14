@@ -87,37 +87,22 @@ message("** PAPI lib dir is: ${PAPI_LIB_DIR}")
 # )
 #### End PAPI ####
 
+
 #### Start UPCXX ####
-if (DEFINED $ENV{UPCXX_INSTALL})
-    list(APPEND CMAKE_PREFIX_PATH $ENV{UPCXX_INSTALL})
-endif ()
+set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+set(CMAKE_EXPORT_COMPILE_COMMANDS "/usr/bin/g++")
 
-#set(
-#        CMAKE_CXX_COMPILER "/usr/bin/g++"
-#)
-#set(
-#        CMAKE_EXPORT_COMPILE_COMMANDS
-#        "/usr/bin/g++"
-#)
-
-if (NOT DEFINED $ENV{UPCXX_VERSION})
-	set(UPCXX_VERSION 2021.3.0)
+message("*** Using UPCXX_INSTALL=$ENV{UPCXX_INSTALL}")
+if(DEFINED ENV{UPCXX_INSTALL})
+  list(APPEND CMAKE_PREFIX_PATH $ENV{UPCXX_INSTALL}/share/cmake/UPCXX)
 endif()
 
-find_package(
-        UPCXX
-				# $ENV{UPCXX_VERSION}
-        REQUIRED
-)
-message("FOUND UPCXX_VERSION=${UPCXX_VERSION}")
+find_package(UPCXX REQUIRED )
 #### End UPCXX ####
 
 ### Stat Conan ####
 if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conaninfo.txt)
-    set(
-            CMAKE_MODULE_PATH
-            ${CMAKE_CURRENT_BINARY_DIR}
-    )
+    set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
 endif ()
 
 find_package(Boost COMPONENTS program_options REQUIRED)
@@ -145,54 +130,17 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 # )
 
 # Export PGASGraph as a static library
-set(
-        LIB_SOURCES
-        "${CMAKE_SOURCE_DIR}/src/pgas-graph.cpp"
-)
+set(LIB_SOURCES "${CMAKE_SOURCE_DIR}/src/pgas-graph.cpp")
 
-add_library(
-        pgas-graph
-        ${LIB_SOURCES}
-)
+add_library(pgas-graph ${LIB_SOURCES})
 
-target_include_directories(
-        pgas-graph
-        PUBLIC
-        inc
-        ${PAPI_SOURCE_DIR}
-)
+target_include_directories(pgas-graph PUBLIC inc ${PAPI_SOURCE_DIR})
 
-target_link_libraries(
-        pgas-graph
-        PRIVATE
-        UPCXX::upcxx
-        Boost::Boost
-        # performance-monitor
-        # libpapi
-)
+target_link_libraries(pgas-graph PRIVATE UPCXX::upcxx Boost::Boost) # performance-monitor libpapi)
 
 # Program to test new graph storage.
-set(
-        GRAPH_NEW_STORAGE_SOURCES
-        "${CMAKE_SOURCE_DIR}/src/new-storage-graph.cpp"
-)
-
-add_executable(
-        pgas-graph-new-storage
-        ${GRAPH_NEW_STORAGE_SOURCES}
-)
-
-target_include_directories(
-        pgas-graph-new-storage
-        PUBLIC
-        inc
-)
-
-target_link_libraries(
-        pgas-graph-new-storage
-        PUBLIC
-        UPCXX::upcxx
-        pgas-graph
-        Boost::Boost
-)
+set(GRAPH_NEW_STORAGE_SOURCES "${CMAKE_SOURCE_DIR}/src/new-storage-graph.cpp")
+add_executable(pgas-graph-new-storage ${GRAPH_NEW_STORAGE_SOURCES})
+target_include_directories(pgas-graph-new-storage PUBLIC inc)
+target_link_libraries(pgas-graph-new-storage PUBLIC UPCXX::upcxx pgas-graph Boost::Boost)
 #### End PGASGraph ####
