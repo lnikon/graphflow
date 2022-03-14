@@ -46,9 +46,6 @@ ENV UPCXX_RELEASE_URL $UPCXX_RELEASE_URL
 ARG UPCXX_INSTALL="/workspace/libs/upcxx"
 ENV UPCXX_INSTALL $UPCXX_INSTALL
 
-ARG PATH="$UPCXX_INSTALL/bin:$PATH"
-ENV PATH $PATH
-
 WORKDIR /workspace/libs
 RUN wget -c $UPCXX_RELEASE_URL
 RUN tar zxvf $UPCXX_RELEASE.tar.gz
@@ -59,20 +56,17 @@ RUN make -j $THREAD_COUNT all
 RUN make install
 RUN rm -f $UPCXX_RELEASE.tar.gz
 
-# # Download, build and install pgasgraph
-# FROM UPCXX_BUILD_INSTALL as PGASGRAPH_BUILD_INSTALL
-# WORKDIR /workspace/pgasgraph
-# RUN git clone https://github.com/lnikon/pgas-graph.git .
-# RUN mkdir build
-# RUN conan install --build conancenter -if ./build .
-# RUN cmake -S. -B./build
-# RUN cmake --build ./build -j$THREAD_COUNT
-
+# Should be called with mount .:/workspace/pgasgraph
 FROM UPCXX_BUILD_INSTALL AS PGASGRAPH_DEVELOPMENT
 WORKDIR /workspace/pgasgraph
-ADD . .
-RUN rm -rf build && mkdir build
-RUN conan install --build conancenter -if ./build .
+ENTRYPOINT ["/bin/bash"]
+
+# Download, build and install pgasgraph
+FROM UPCXX_BUILD_INSTALL as PGASGRAPH_BUILD_INSTALL
+WORKDIR /workspace/pgasgraph
+RUN git clone https://github.com/lnikon/pgas-graph.git .
+RUN mkdir build
+RUN conan install -r conancenter --profile conanprofile.toml -if ./build .
 RUN cmake -S. -B./build
 RUN cmake --build ./build -j$THREAD_COUNT
 

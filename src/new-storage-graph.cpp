@@ -373,6 +373,8 @@ int main(int argc, char* argv[])
         // }
     }
 
+    // Testing things
+
     if (!programOptions.exportPath.empty())
     {
         pgasGraph.ExportIntoFile(programOptions.exportPath);

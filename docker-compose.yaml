@@ -8,11 +8,11 @@ services:
     stdin_open: true
     cap_add:
       - SYS_PTRACE
-    environment:
-      - UPCXX_VERSION=2021.9.0
-      - UPCXX_INSTALL=/workspace/libs/upcxx
-      - CONAN_V2_MODE=1
     volumes:
       - .:/workspace/pgasgraph
-    ports:
-      - "127.0.0.1:2222:22"
+  deploy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: PGASGRAPH_BUILD_INSTALL
+ 

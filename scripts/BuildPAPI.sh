@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eu -o pipefail
+
 echo "This script is intended to be run from CMake!"
 
 # Configure & make & install.

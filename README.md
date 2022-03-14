@@ -16,22 +16,18 @@ PGASGraph is based on a [UPCXX](https://github.com/brycelelbach/upcxx) and uses 
 - \- Clustering
 - \- Centrality
 - \- Link analysis
-- \- ... more to come :)
-
 
 ## Requirements
-
 Make sure that you've installed UPCXX and have correctly set `$UPCXX_INSTALL` environment variable.
 For more information see official UPCXX wiki and INSTALL.md [UPCXX](https://bitbucket.org/berkeleylab/upcxx/wiki/Home).
 
 ## Build
+Launch `./scripts/ExecuteConan.sh/ and `./scripts/Build.sh`.
 
 ### Dependencies
-
 Library depends on Boost for program options parsing and CPU timer. Make sure that you've Boost libraries installed.
 
 ### Cmake/ninja/make
-
 Library can be built using [Cmake](https://cmake.org/). Following commands can be used to build the library using Cmake and [ninja](https://ninja-build.org/).
 Though, the use of ninja is not necessary and it can be safely replaced with usual [make](https://www.gnu.org/software/make/manual/make.html).
 
@@ -59,7 +55,6 @@ Important UPCXX options here are `codemode`, `threadmode` and `network`.
 As the library uses modern C++ features such as structured bindings or `auto` lambdas make sure to compile it with the `-std=c++17` flag.
 
 ## Distributed run notes
-
 If you wish to make *distributed run* then make sure that you've compiled UPCXX with UDP or InfiniBand conduits.
 Then make sure that you've correctly set the following variables. `$SSH_SERVERS` and `$GASNET_SSH_SERVERS` 
 contain IP's of those nodes which will participate in a distributed computation. 
@@ -74,6 +69,6 @@ contain IP's of those nodes which will participate in a distributed computation.
 `$UPCXX_NETWORK=udp`
 
 ## Performance Evaluation
-You need to have following packages installed(Ubuntu)
 
-* 
+## ToDo
+* REST Server to serve UPCXX computation requests.
