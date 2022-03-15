@@ -10,5 +10,7 @@ fi
 
 export THREAD_COUNT=16
 
-cmake -DCMAKE_CXX_COMPILER=/usr/bin/g++ -S. -B./build
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DCMAKE_CXX_COMPILER=/usr/bin/g++ -S. -B./build
 cmake --build ./build -j$THREAD_COUNT
+
+cp -f ./build/compile_commands.json .
