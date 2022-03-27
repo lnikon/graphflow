@@ -65,7 +65,5 @@ ENTRYPOINT ["/bin/bash"]
 FROM UPCXX_BUILD_INSTALL as PGASGRAPH_BUILD_INSTALL
 WORKDIR /workspace/pgasgraph
 RUN git clone https://github.com/lnikon/pgas-graph.git .
-RUN mkdir build
-RUN conan install -r conancenter --profile conanprofile.toml -if ./build .
-RUN cmake -S. -B./build
-RUN cmake --build ./build -j$THREAD_COUNT
+RUN ./scripts/ExecuteConan.sh ./build
+RUN ./scripts/Build.sh ./build
