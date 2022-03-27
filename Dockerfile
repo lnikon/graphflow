@@ -67,3 +67,6 @@ WORKDIR /workspace/pgasgraph
 RUN git clone https://github.com/lnikon/pgas-graph.git .
 RUN ./scripts/ExecuteConan.sh ./build
 RUN ./scripts/Build.sh ./build
+
+CMD ["cp", "-rf", "/workspace/*", "/shared-workspace"]
+CMD ["sleep", "infinity"]
