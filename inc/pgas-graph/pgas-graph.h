@@ -7,6 +7,7 @@
 // STL
 #include <fstream>
 #include <queue>
+#include <sstream>
 #include <type_traits>
 #include <unordered_map>
 
@@ -210,7 +211,7 @@ private:
     bool hasEdgeHelper(const Id& a, const Id& b) const;
     upcxx::global_ptr<Vertex> fetchVertexFromStore(const Id& id) const;
 
-    size_t normilizeId(const Id id) const
+    size_t normilizeId(const Id id)
     {
         return id - getVertexParent(id) * VertexStoreSize();
     }
@@ -256,34 +257,36 @@ bool Graph<VertexData, EdgeData>::addEdgeHelper(Edge edge)
 
     // Lambda to insert single edge into the graph.
     auto insertSingleEdge =
-        [](Rank rank, graph_storage_type& vertexStore, Edge edge, Rank parentRank) {
-            return upcxx::rpc(
-                rank,
-                [](graph_storage_type& vertexStore, Edge edge, Rank parentRank) {
-                    const auto vertexStoreSize = vertexStore->size();
-                    const size_t idx = edge.from - parentRank * vertexStoreSize;
-                    assert(idx < vertexStoreSize);
-                    if (!vertexStore->operator[](idx))
-                    {
-                        vertexStore->operator[](idx) = new Vertex(edge.from);
-                    }
+        [](Rank rank, graph_storage_type& vertexStore, Edge edge, Rank parentRank)
+    {
+        return upcxx::rpc(
+            rank,
+            [](graph_storage_type& vertexStore, Edge edge, Rank parentRank)
+            {
+                const auto vertexStoreSize = vertexStore->size();
+                const size_t idx = edge.from - parentRank * vertexStoreSize;
+                assert(idx < vertexStoreSize);
+                if (!vertexStore->operator[](idx))
+                {
+                    vertexStore->operator[](idx) = new Vertex(edge.from);
+                }
 
-                    auto& neighbours = vertexStore->operator[](idx)->neighbours;
-                    for (auto& ngh : neighbours)
+                auto& neighbours = vertexStore->operator[](idx)->neighbours;
+                for (auto& ngh : neighbours)
+                {
+                    if (ngh.first == edge.data || ngh.second == edge.to)
                     {
-                        if (ngh.first == edge.data || ngh.second == edge.to)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
+                }
 
-                    neighbours.push_back({edge.data, edge.to});
-                    return true;
-                },
-                vertexStore,
-                edge,
-                parentRank);
-        };
+                neighbours.push_back({edge.data, edge.to});
+                return true;
+            },
+            vertexStore,
+            edge,
+            parentRank);
+    };
 
     const Rank& fromRank = getVertexParent(edge.from);
     const Rank& toRank = getVertexParent(edge.to);
@@ -340,7 +343,8 @@ Graph<VertexData, EdgeData>::MST()
     // Process with rank 0 is the master.
     const Rank masterRank = 0;
 
-    auto ToString = [](local_edge_t edge) {
+    auto ToString = [](local_edge_t edge)
+    {
         std::string result;
         result += "{from=";
         result += std::to_string(edge.second.first);
@@ -352,7 +356,8 @@ Graph<VertexData, EdgeData>::MST()
         return result;
     };
 
-    auto addIdIntoMST = [this](added_set_t& addedSet, Id id) {
+    auto addIdIntoMST = [this](added_set_t& addedSet, Id id)
+    {
         upcxx::rpc(
             getVertexParent(id),
             [](added_set_t& addedSet, Id id) { addedSet->insert(id); },
@@ -361,28 +366,29 @@ Graph<VertexData, EdgeData>::MST()
             .wait();
     };
 
-    auto isIdInMST = [this](added_set_t& addedSet, Id id) {
+    auto isIdInMST = [this](added_set_t& addedSet, Id id)
+    {
         return upcxx::rpc(
                    getVertexParent(id),
-                   [](added_set_t& addedSet, Id id) {
-                       return addedSet->find(id) != addedSet->end();
-                   },
+                   [](added_set_t& addedSet, Id id)
+                   { return addedSet->find(id) != addedSet->end(); },
                    addedSet,
                    id)
             .wait();
     };
 
-    auto addedSetSizeOnRank = [](added_set_t& addedSet, int rank) {
+    auto addedSetSizeOnRank = [](added_set_t& addedSet, int rank)
+    {
         return upcxx::rpc(
                    rank, [](added_set_t& addedSet) { return addedSet->size(); }, addedSet)
             .wait();
     };
 
-    auto addedSetSize = [addedSetSizeOnRank](added_set_t& addedSet) {
-        return addedSetSizeOnRank(addedSet, upcxx::rank_me());
-    };
+    auto addedSetSize = [addedSetSizeOnRank](added_set_t& addedSet)
+    { return addedSetSizeOnRank(addedSet, upcxx::rank_me()); };
 
-    auto globalAddedSetSize = [addedSetSizeOnRank](added_set_t& addedSet) {
+    auto globalAddedSetSize = [addedSetSizeOnRank](added_set_t& addedSet)
+    {
         size_t count = 0;
         for (auto r = 0; r < upcxx::rank_n(); ++r)
         {
@@ -390,17 +396,23 @@ Graph<VertexData, EdgeData>::MST()
         }
     };
 
-    auto addEdgeIntoMst = [](dist_local_edge_vec_t& mstEdges, local_edge_t edge) {
+    auto addEdgeIntoMst = [](dist_local_edge_vec_t& mstEdges, local_edge_t edge)
+    {
         upcxx::rpc(
             0,
-            [](dist_local_edge_vec_t& mstEdges, local_edge_t edge) {
-                if (std::find_if(mstEdges->begin(), mstEdges->end(), [edge](const auto& current) {
-                        return edge.first == current.first &&               // weight
-                               edge.second.first == current.second.first && // from
-                               edge.second.second == current.second.second; // to
-                    }) == mstEdges->end())
+            [](dist_local_edge_vec_t& mstEdges, local_edge_t edge)
+            {
+                if (std::find_if(mstEdges->begin(),
+                                 mstEdges->end(),
+                                 [edge](const auto& current)
+                                 {
+                                     return edge.first == current.first &&               // weight
+                                            edge.second.first == current.second.first && // from
+                                            edge.second.second == current.second.second; // to
+                                 }) == mstEdges->end())
                 {
-                    auto ToString = [](local_edge_t edge) {
+                    auto ToString = [](local_edge_t edge)
+                    {
                         std::string result;
                         result += "{from=";
                         result += std::to_string(edge.second.first);
@@ -462,10 +474,12 @@ Graph<VertexData, EdgeData>::MST()
         addEdgeIntoMst(localMst, minEdge);
     }
 
-    auto isMSTFull = [this](dist_local_edge_vec_t& localMst) -> bool {
+    auto isMSTFull = [this](dist_local_edge_vec_t& localMst) -> bool
+    {
         return upcxx::rpc(
                    0,
-                   [](dist_local_edge_vec_t& localMst, size_t totalVertexCount) {
+                   [](dist_local_edge_vec_t& localMst, size_t totalVertexCount)
+                   {
                        if (localMst->empty())
                        {
                            return false;
@@ -482,7 +496,8 @@ Graph<VertexData, EdgeData>::MST()
             .wait();
     };
 
-    auto getMSTSize = [this](dist_local_edge_vec_t& localMst) -> bool {
+    auto getMSTSize = [this](dist_local_edge_vec_t& localMst) -> bool
+    {
         return upcxx::rpc(
                    0, [](dist_local_edge_vec_t& localMst) { return localMst->size(); }, localMst)
             .wait();
@@ -520,9 +535,8 @@ Graph<VertexData, EdgeData>::MST()
 
         local_edge_t globalMinEdge = upcxx::reduce_one(
                                          minEdge,
-                                         [](const local_edge_t& lhs, const local_edge_t& rhs) {
-                                             return (lhs.first < rhs.first ? lhs : rhs);
-                                         },
+                                         [](const local_edge_t& lhs, const local_edge_t& rhs)
+                                         { return (lhs.first < rhs.first ? lhs : rhs); },
                                          0)
                                          .wait();
 
@@ -547,7 +561,8 @@ Graph<VertexData, EdgeData>::MST()
     {
         upcxx::rpc(
             0,
-            [ToString](dist_local_edge_vec_t& localMst) {
+            [ToString](dist_local_edge_vec_t& localMst)
+            {
                 size_t cost{0};
                 auto begin = localMst->begin();
                 for (; begin != localMst->end(); ++begin)
@@ -615,7 +630,8 @@ Graph<VertexData, EdgeData>::Kruskal()
     };
 
     using edges_t = std::vector<Edge>;
-    auto unionEdges = [](edges_t& lhs, edges_t& rhs) {
+    auto unionEdges = [](edges_t& lhs, edges_t& rhs)
+    {
         edges_t result;
 
         std::sort(lhs.begin(), lhs.end());
@@ -627,18 +643,21 @@ Graph<VertexData, EdgeData>::Kruskal()
     };
 
     using dist_mst_edges_t = upcxx::dist_object<edges_t>;
-    auto addEdgeIntoMST = [](dist_mst_edges_t& mst, Rank rank, Edge edge) {
+    auto addEdgeIntoMST = [](dist_mst_edges_t& mst, Rank rank, Edge edge)
+    {
         assert(rank >= 0 && rank < upcxx::rank_n());
         upcxx::rpc(
             rank, [](dist_mst_edges_t& mst, Edge edge) { mst->push_back(edge); }, mst, edge)
             .wait();
     };
 
-    auto addEdgesIntoMST = [](dist_mst_edges_t& mst, Rank rank, edges_t edges) {
+    auto addEdgesIntoMST = [](dist_mst_edges_t& mst, Rank rank, edges_t edges)
+    {
         assert(rank >= 0 && rank < upcxx::rank_n());
         upcxx::rpc(
             rank,
-            [](dist_mst_edges_t& mst, edges_t edges) {
+            [](dist_mst_edges_t& mst, edges_t edges)
+            {
                 for (auto& edge : edges)
                 {
                     mst->push_back(edge);
@@ -649,28 +668,33 @@ Graph<VertexData, EdgeData>::Kruskal()
             .wait();
     };
 
-    auto getMSTEdgesCount = [](dist_mst_edges_t& mst, Rank rank) {
+    auto getMSTEdgesCount = [](dist_mst_edges_t& mst, Rank rank)
+    {
         assert(rank >= 0 && rank < upcxx::rank_n());
         return upcxx::rpc(
                    rank, [](dist_mst_edges_t& mst) { return mst->size(); }, mst)
             .wait();
     };
 
-    auto clearMSTEdgesAsync = [](dist_mst_edges_t& mst, Rank rank) {
+    auto clearMSTEdgesAsync = [](dist_mst_edges_t& mst, Rank rank)
+    {
         assert(rank >= 0 && rank < upcxx::rank_n());
         return upcxx::rpc(
             rank, [](dist_mst_edges_t& mst) { mst->clear(); }, mst);
     };
 
-    auto clearMSTEdges = [clearMSTEdgesAsync](dist_mst_edges_t& mst, Rank rank) {
+    auto clearMSTEdges = [clearMSTEdgesAsync](dist_mst_edges_t& mst, Rank rank)
+    {
         assert(rank >= 0 && rank < upcxx::rank_n());
         clearMSTEdgesAsync(mst, rank).wait();
     };
 
-    auto kruskal = [](dist_mst_edges_t& mst, Rank rank, edges_t edges, const size_t verticesCount) {
+    auto kruskal = [](dist_mst_edges_t& mst, Rank rank, edges_t edges, const size_t verticesCount)
+    {
         upcxx::rpc(
             rank,
-            [](dist_mst_edges_t& mst, edges_t edges, const size_t verticesCount) {
+            [](dist_mst_edges_t& mst, edges_t edges, const size_t verticesCount)
+            {
                 UnionFind unionFind(verticesCount);
                 for (auto edge : edges)
                 {
@@ -760,45 +784,31 @@ Graph<VertexData, EdgeData>::Kruskal()
 template <typename VertexData, typename EdgeData>
 void Graph<VertexData, EdgeData>::ExportIntoFile(const std::string& fileName) const
 {
+    std::stringstream graphStream;
     if (0 == upcxx::rank_me())
     {
-        {
-            std::fstream stream(fileName,
-                                std::fstream::in | std::fstream::out | std::fstream::trunc);
-        }
-
         const auto& rank_n = upcxx::rank_n();
         for (size_t r = 0; r < rank_n; ++r)
         {
-            upcxx::rpc(
-                r,
-                [this](std::string fileName) {
-                    std::fstream stream(fileName,
-                                        std::fstream::in | std::fstream::out | std::fstream::app);
-                    if (!stream.is_open())
-                    {
-                        logMsg("Unable to open " + fileName + " to write into\n");
-                        return;
-                    }
-
-                    int i = 0;
-                    auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
-                    for (Vertex* vertex : localVertexStore)
-                    {
-                        assert(vertex != nullptr);
-                        for (auto& ngh : vertex->neighbours)
-                        {
-                            stream << vertex->id << " " << ngh.second << "\n";
-                        }
-                        ++i;
-                    }
-                },
-                fileName)
-                .wait();
+            auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
+            for (Vertex* vertex : localVertexStore)
+            {
+                assert(vertex != nullptr);
+                for (auto& ngh : vertex->neighbours)
+                {
+                    graphStream << vertex->id << " " << ngh.second << "\n";
+                }
+            }
         }
     }
 
-    upcxx::barrier();
+    std::fstream graphFile(fileName, std::ios::trunc | std::ios::in | std::ios::out);
+    if (!graphFile.is_open())
+    {
+        logMsg("Unable to open \"" + fileName + "\" to write computation results");
+    }
+
+    graphFile << graphStream.str();
 }
 
 template <typename VertexData, typename EdgeData>

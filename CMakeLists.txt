@@ -106,6 +106,8 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conaninfo.txt)
 endif ()
 
 find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(fmt REQUIRED)
 ### End Conan ####
 
 #### Start PGASGraph ####

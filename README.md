@@ -72,3 +72,7 @@ contain IP's of those nodes which will participate in a distributed computation.
 
 ## ToDo
 * REST Server to serve UPCXX computation requests.
+* Add command line option to choose computation algorithm.
+* Add command line option to choose graph generation algorithm.
+* Add input graph parsing.
+* Export graph in JSON format.

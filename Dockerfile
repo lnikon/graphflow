@@ -69,4 +69,3 @@ RUN mkdir build
 RUN conan install -r conancenter --profile conanprofile.toml -if ./build .
 RUN cmake -S. -B./build
 RUN cmake --build ./build -j$THREAD_COUNT
-

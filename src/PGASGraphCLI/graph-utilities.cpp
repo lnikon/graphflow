@@ -7,7 +7,7 @@
 
 namespace GraphUtilities {
 
-int listAt(const std::list<int> &l, size_t idx) {
+int listAt(const std::list<int> &l, std::size_t idx) {
   if (idx < 0 || idx >= l.size()) {
     return -1;
   }

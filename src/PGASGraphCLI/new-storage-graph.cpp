@@ -14,12 +14,21 @@
 
 // Boost
 #include <boost/program_options.hpp>
+#include <fmt/core.h>
+#include <nlohmann/json.hpp>
 
 // System
 #include <unistd.h>
 
 // Usings
 namespace po = boost::program_options;
+
+// TODO: Move into separate module
+auto currentTime()
+{
+    auto time = std::time(nullptr);
+    return std::asctime(std::localtime(&time));
+}
 
 struct ProgramOptions
 {
@@ -140,7 +149,7 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         unconnected.push_back(i);
     }
 
-    PGASGraph::logMsg("min=" + std::to_string(minId) + ", max=" + std::to_string((maxId)));
+    // PGASGraph::logMsg("min=" + std::to_string(minId) + ", max=" + std::to_string((maxId)));
     using dist_weight_t = upcxx::dist_object<size_t>;
     dist_weight_t weight{1};
     auto genWeight = [](dist_weight_t& weight)
@@ -194,8 +203,8 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
     }
 
     auto end = std::chrono::steady_clock::now();
-    PGASGraph::logMsg("Connected component core generation time: " +
-                      std::to_string(std::chrono::duration<double>(end - start).count()));
+    // PGASGraph::logMsg("Connected component core generation time: " +
+    //                   std::to_string(std::chrono::duration<double>(end - start).count()));
 
     const size_t extraEdges{static_cast<size_t>(
         static_cast<double>((vertexCount * vertexCount) / 2) * (percentage / 100.0))};
@@ -218,10 +227,10 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         }
     }
     end = std::chrono::steady_clock::now();
-    PGASGraph::logMsg("Connected component interior generation time: " +
-                      std::to_string(std::chrono::duration<double>(end - start).count()));
-    PGASGraph::logMsg("Edges inside current component: " +
-                      std::to_string(edgesInsideCurrentComponent));
+    // PGASGraph::logMsg("Connected component interior generation time: " +
+    //                   std::to_string(std::chrono::duration<double>(end - start).count()));
+    // PGASGraph::logMsg("Edges inside current component: " +
+    //                   std::to_string(edgesInsideCurrentComponent));
 
     auto genIdForPartition = [&gen](const auto rank, const auto vertexCount)
     {
@@ -254,9 +263,10 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         }
     }
     end = std::chrono::steady_clock::now();
-    PGASGraph::logMsg("Connected component exterior generation time: " +
-                      std::to_string(std::chrono::duration<double>(end - start).count()));
-    PGASGraph::logMsg("Edges with other components: " + std::to_string(edgesWithOtherComponents));
+    // PGASGraph::logMsg("Connected component exterior generation time: " +
+    //                   std::to_string(std::chrono::duration<double>(end - start).count()));
+    // PGASGraph::logMsg("Edges with other components: " +
+    // std::to_string(edgesWithOtherComponents));
     upcxx::barrier();
     return edges;
 }
@@ -278,28 +288,33 @@ int main(int argc, char* argv[])
 {
     UPCXXInitializer upcxxInitializer{};
 
+    nlohmann::json resultJson;
+
     std::time_t timeNow = std::time(nullptr);
     char* dt = nullptr;
     if (0 == upcxx::rank_me())
     {
-        PGASGraph::logMsg("******************************************");
-        dt = std::ctime(&timeNow);
-        PGASGraph::logMsg("Start time: " + std::string(dt));
+        // PGASGraph::logMsg("******************************************");
+        // PGASGraph::logMsg("Start time: " + std::string(dt));
+        resultJson["start-time"] = currentTime();
     }
 
     // Print hostname to make sure that the run is truly distributed.
     char hostname[HOST_NAME_MAX];
     gethostname(hostname, HOST_NAME_MAX);
-    upcxx::rpc(0, [hostname]() { PGASGraph::logMsg(std::string{"Hostname: "} + hostname); }).wait();
+    // upcxx::rpc(0, [hostname]() { PGASGraph::logMsg(std::string{"Hostname: "} + hostname);
+    // }).wait();
 
     upcxx::barrier();
 
     const auto programOptions{ParseOptions(argc, argv)};
     if (upcxx::rank_me() == 0)
     {
-        PGASGraph::logMsg("Total number of vertices: " +
-                          std::to_string(programOptions.totalNumberVertices));
-        PGASGraph::logMsg("Percentage: " + std::to_string(programOptions.percentage));
+        // PGASGraph::logMsg("Total number of vertices: " +
+        //                   std::to_string(programOptions.totalNumberVertices));
+        // PGASGraph::logMsg("Percentage: " + std::to_string(programOptions.percentage));
+        resultJson["total-vertex-count"] = std::to_string(programOptions.totalNumberVertices);
+        resultJson["percentage"] = std::to_string(programOptions.percentage);
     }
 
     // Distribute vertices over the ranks.
@@ -316,11 +331,17 @@ int main(int argc, char* argv[])
             auto edgeCount = generateRandomConnectedPGASGraph(
                 verticesPerRank, programOptions.percentage, pgasGraph);
             auto end = std::chrono::steady_clock::now();
-            PGASGraph::logMsg("Graph generation elapsed time: " +
-                              std::to_string(std::chrono::duration<double>(end - start).count()));
-            PGASGraph::logMsg("Edge count: " + std::to_string(edgeCount));
-            size_t peakSize = getPeakRSS();
-            PGASGraph::logMsg("Peak Mem Usage: " + std::to_string(peakSize / 1000000) + "MB");
+            auto took = std::chrono::duration<double>(end - start).count();
+
+            // PGASGraph::logMsg("Graph generation elapsed time: " +
+            //                   std::to_string(took));
+            //  PGASGraph::logMsg("Edge count: " + std::to_string(edgeCount));
+            //  PGASGraph::logMsg("Peak Mem Usage: " + std::to_string(peakSize / 1000000) + "MB");
+
+            const size_t peakSize = getPeakRSS();
+            resultJson["counters"]["generation-time"][fmt::format("rank_{}", r)] = took;
+            resultJson["counters"]["edge-count"][fmt::format("rank_{}", r)] = edgeCount;
+            resultJson["counters"]["peak-rss"][fmt::format("rank_{}", r)] = peakSize;
         }
     }
 
@@ -350,17 +371,26 @@ int main(int argc, char* argv[])
 
     upcxx::barrier();
 
-    PGASGraph::logMsg("MST Elapsed Time: " +
-                      std::to_string(std::chrono::duration<double>(end - start).count()));
+    const auto mstElapsedTime = std::chrono::duration<double>(end - start).count();
+    // PGASGraph::logMsg("MST Elapsed Time: " +
+    //                   std::to_string(mstElapsedTime));
+    resultJson["computation"]["elapsed-time"][fmt::format("rank_{}", upcxx::rank_me())] =
+        mstElapsedTime;
 
     if (upcxx::rank_me() == 0)
     {
-        upcxx::rpc(
-            upcxx::rank_me(),
-            [](decltype(mstEdges)& mstEdges)
-            { PGASGraph::logMsg("MST Edges = " + std::to_string(mstEdges->size())); },
-            mstEdges)
-            .wait();
+        const auto mstEdgeCount = upcxx::rpc(
+                                      upcxx::rank_me(),
+                                      [](decltype(mstEdges)& mstEdges)
+                                      {
+                                          // PGASGraph::logMsg("MST Edges = " +
+                                          // std::to_string(mstEdges->size()));
+                                          return mstEdges->size();
+                                      },
+                                      mstEdges)
+                                      .wait();
+
+        resultJson["computation"]["edge-count"] = mstEdgeCount;
 
         // if (programOptions.usePapi)
         // {
@@ -371,13 +401,14 @@ int main(int argc, char* argv[])
         // {
         //     perfMonitor->Report();
         // }
-    }
 
-    // Testing things
+        // Testing things
 
-    if (!programOptions.exportPath.empty())
-    {
-        pgasGraph.ExportIntoFile(programOptions.exportPath);
+        if (!programOptions.exportPath.empty())
+        {
+            // PGASGraph::logMsg("Exporting into \"" + programOptions.exportPath + "\"");
+            pgasGraph.ExportIntoFile(programOptions.exportPath);
+        }
     }
 
     if (programOptions.printLocal)
@@ -390,9 +421,20 @@ int main(int argc, char* argv[])
     {
         timeNow = std::time(nullptr);
         dt = std::ctime(&timeNow);
-        PGASGraph::logMsg("Finish time: " + std::string(dt));
-        PGASGraph::logMsg("******************************************");
+        resultJson["finish-time"] = currentTime();
+        // PGASGraph::logMsg("Finish time: " + std::string(dt));
+        // PGASGraph::logMsg("******************************************");
+
+        for (upcxx::intrank_t r = 1; r < upcxx::rank_n(); r++)
+        {
+            auto rResult = upcxx::rpc(r, [&resultJson]() { return resultJson.dump(); }).wait();
+            auto rResultJson = nlohmann::json::parse(rResult);
+            resultJson.merge_patch(rResultJson);
+        }
+
+        std::cout << resultJson << std::endl;
     }
+    upcxx::barrier();
 
     return 0;
 }
