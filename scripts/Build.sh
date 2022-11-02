@@ -34,6 +34,5 @@ function build_pgasgrah() {
 }
 
 build_pgasgrah $1 "smp"
-# build_pgasgrah $1 "udp"
 
 cp -f "$1"/compile_commands.json .

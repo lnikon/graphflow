@@ -8,7 +8,7 @@ project(pgasgraph)
 # target_include_directories(pgas-graph PUBLIC "${CMAKE_SOURCE_DIR}/inc" "${PAPI_SOURCE_DIR}")
 # target_link_libraries(pgas-graph PRIVATE UPCXX::upcxx Boost::Boost) # performance-monitor libpapi)
 
-set(PGASGRAPH_CLI_SRC "new-storage-graph.cpp" "pgas-graph.cpp")
+set(PGASGRAPH_CLI_SRC "main.cpp")
 set(PGASGRAPH_CLI "pgas-graph-cli-${UPCXX_NETWORK}")
 
 add_executable(${PGASGRAPH_CLI} ${PGASGRAPH_CLI_SRC})

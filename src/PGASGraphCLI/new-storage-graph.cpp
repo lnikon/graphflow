@@ -10,7 +10,10 @@
 #include <ctime>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <random>
+#include <cmath>
+#include <limits>
 
 // Boost
 #include <boost/program_options.hpp>
@@ -149,7 +152,6 @@ generateRandomConnectedPGASGraph(const size_t vertexCount, double percentage, PG
         unconnected.push_back(i);
     }
 
-    // PGASGraph::logMsg("min=" + std::to_string(minId) + ", max=" + std::to_string((maxId)));
     using dist_weight_t = upcxx::dist_object<size_t>;
     dist_weight_t weight{1};
     auto genWeight = [](dist_weight_t& weight)
@@ -284,6 +286,29 @@ struct UPCXXInitializer
     }
 };
 
+using PGASGraphType = PGASGraph::Graph<std::string, size_t>;
+size_t generateKnodelGraph(const size_t vertexCount, const size_t delta, PGASGraphType& graph)
+{
+    size_t edgeCount{0};
+    for (std::uint64_t i = 0; i < 2; ++i)
+    {
+        for (std::uint64_t j = 0; j < vertexCount / 2; ++j)
+        {
+            for (std::uint64_t d = 1; d <= delta; ++d)
+            {
+                const auto from{i};
+                const auto to{(std::uint64_t)(j + std::pow(2, d) - 1) % (vertexCount)};
+                if (graph.AddEdge({from, to, 0}))
+                {
+                    edgeCount++;
+                }
+            }
+        }
+    }
+
+    return edgeCount;
+}
+
 int main(int argc, char* argv[])
 {
     UPCXXInitializer upcxxInitializer{};
@@ -323,13 +348,16 @@ int main(int argc, char* argv[])
 
     PGASGraphType pgasGraph(programOptions.totalNumberVertices, verticesPerRank);
     const auto rank_n = upcxx::rank_n();
-    for (auto r = decltype(rank_n){0}; r < rank_n; ++r)
+    // for (auto r = decltype(rank_n){0}; r < rank_n; ++r)
     {
-        if (r == upcxx::rank_me())
+        if (0 == 0 /* upcxx::rank_me() */)
         {
             auto start = std::chrono::steady_clock::now();
-            auto edgeCount = generateRandomConnectedPGASGraph(
-                verticesPerRank, programOptions.percentage, pgasGraph);
+            // auto edgeCount = generateRandomConnectedPGASGraph(
+            //     verticesPerRank, programOptions.percentage, pgasGraph);
+            auto edgeCount = generateKnodelGraph(programOptions.totalNumberVertices,
+                                                 std::log2(programOptions.totalNumberVertices),
+                                                 pgasGraph);
             auto end = std::chrono::steady_clock::now();
             auto took = std::chrono::duration<double>(end - start).count();
 
@@ -339,9 +367,9 @@ int main(int argc, char* argv[])
             //  PGASGraph::logMsg("Peak Mem Usage: " + std::to_string(peakSize / 1000000) + "MB");
 
             const size_t peakSize = getPeakRSS();
-            resultJson["counters"]["generation-time"][fmt::format("rank_{}", r)] = took;
-            resultJson["counters"]["edge-count"][fmt::format("rank_{}", r)] = edgeCount;
-            resultJson["counters"]["peak-rss"][fmt::format("rank_{}", r)] = peakSize;
+            // resultJson["counters"]["generation-time"][fmt::format("rank_{}", r)] = took;
+            // resultJson["counters"]["edge-count"][fmt::format("rank_{}", r)] = edgeCount;
+            // resultJson["counters"]["peak-rss"][fmt::format("rank_{}", r)] = peakSize;
         }
     }
 
@@ -360,7 +388,7 @@ int main(int argc, char* argv[])
     //     perfMonitor->Start();
     // }
 
-    auto mstEdges = pgasGraph.Kruskal();
+    auto mstEdges = std::vector<int>{}; // pgasGraph.Kruskal();
 
     // if (programOptions.usePapi)
     // {
@@ -379,18 +407,18 @@ int main(int argc, char* argv[])
 
     if (upcxx::rank_me() == 0)
     {
-        const auto mstEdgeCount = upcxx::rpc(
-                                      upcxx::rank_me(),
-                                      [](decltype(mstEdges)& mstEdges)
-                                      {
-                                          // PGASGraph::logMsg("MST Edges = " +
-                                          // std::to_string(mstEdges->size()));
-                                          return mstEdges->size();
-                                      },
-                                      mstEdges)
-                                      .wait();
+        // const auto mstEdgeCount = upcxx::rpc(
+        //                               upcxx::rank_me(),
+        //                               [](decltype(mstEdges)& mstEdges)
+        //                               {
+        //                                   // PGASGraph::logMsg("MST Edges = " +
+        //                                   // std::to_string(mstEdges->size()));
+        //                                   return mstEdges->size();
+        //                               },
+        //                               mstEdges)
+        //                               .wait();
 
-        resultJson["computation"]["edge-count"] = mstEdgeCount;
+        // resultJson["computation"]["edge-count"] = mstEdgeCount;
 
         // if (programOptions.usePapi)
         // {

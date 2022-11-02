@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.8)
 project(pgasgraph)
 
+# Set UPCXX-friendly compiler
+set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+set(CMAKE_EXPORT_COMPILE_COMMANDS "/usr/bin/g++")
+
+# Generate compilation database
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Execute Conan.
 #set(
 #        CONAN_SCRIPT_PATH
@@ -89,15 +96,13 @@ message("** PAPI lib dir is: ${PAPI_LIB_DIR}")
 
 
 #### Start UPCXX ####
-# set(CMAKE_CXX_COMPILER "/usr/bin/g++")
-# set(CMAKE_EXPORT_COMPILE_COMMANDS "/usr/bin/g++")
 
 message("*** Using UPCXX_INSTALL=$ENV{UPCXX_INSTALL}")
 if(DEFINED ENV{UPCXX_INSTALL})
   list(APPEND CMAKE_PREFIX_PATH $ENV{UPCXX_INSTALL}/share/cmake/UPCXX)
 endif()
 
-find_package(UPCXX REQUIRED )
+find_package(UPCXX REQUIRED)
 #### End UPCXX ####
 
 ### Stat Conan ####
