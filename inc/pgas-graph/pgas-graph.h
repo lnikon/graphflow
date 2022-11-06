@@ -6,13 +6,13 @@
 #include <upcxx/upcxx.hpp>
 
 // STL
+#include <cmath>
 #include <fstream>
+#include <limits>
 #include <queue>
 #include <sstream>
 #include <type_traits>
 #include <unordered_map>
-#include <cmath>
-#include <limits>
 
 #include <assert.h>
 
@@ -47,89 +47,6 @@ using Rank = upcxx::intrank_t;
 template <typename Vertex, typename Edge> class Graph
 {
 public:
-    /*! \brief Represents edge in a graph.
-     */
-    //struct Edge
-    //{
-    //    // Edge has two ends.
-    //    Id from;
-    //    Id to;
-
-    //    // User supplied data associated with each edge.
-    //    EdgeData data;
-
-    //    /*! \brief Return the inverted edge.
-    //     */
-    //    Edge Invert() const
-    //    {
-    //        return Edge{to, from, data};
-    //    }
-
-    //    bool operator<(const Edge& other)
-    //    {
-    //        return data < other.data;
-    //    }
-
-    //    bool operator>(const Edge& other)
-    //    {
-    //        return !(*this < other);
-    //    }
-
-    //    /*! \brief Serialize the edge into the string.
-    //     */
-    //    std::string ToString()
-    //    {
-    //        std::string result;
-    //        result += "{from=";
-    //        result += std::to_string(from);
-    //        result += ", to=";
-    //        result += std::to_string(to);
-    //        result += ", weight=";
-    //        result += std::to_string(data);
-    //        result += "}\n";
-    //        return result;
-    //    }
-    //};
-
-    /*! \brief Represents vertex in a graph.
-     * Each vertex has an unique id.
-     */
-    //struct Vertex
-    //{
-    //    // A unique local id.
-    //    Id id;
-
-    //    // A value stored in the vertex.
-    //    VertexData value;
-
-    //    /* A list of Id's of the neighbours.
-    //     * Id will be used to fetch actual pointer from the vertex store.
-    //     */
-    //    using weight_node_t = std::pair<EdgeData, Id>;
-    //    std::vector<weight_node_t> neighbours;
-
-    //    /*! \brief Default constructor.
-    //     */
-    //    Vertex() = default;
-
-    //    /*! \brief Construct vertex by a given id.
-    //     */
-    //    Vertex(const Id id)
-    //        : id(id)
-    //    {
-    //    }
-
-    //    /*! \brief Serialize the vertex into the string.
-    //     */
-    //    std::string ToString() const
-    //    {
-    //        std::string result;
-    //        result += "{id=" + std::to_string(id);
-    //        result += "}";
-    //        return result;
-    //    }
-    //};
-
     /*! \brief Construct instance of the graph owned by current rank.
      *
      * \param @totalNumberVertices Number of vertices in the graph.
@@ -162,17 +79,17 @@ public:
 
     /*! \brief Return minimal id that is stored on the current rank.
      */
-    //Id minId() const
-    //{
-    //    return upcxx::rank_me() * m_verticesPerRank;
-    //}
+    std::size_t minId() const
+    {
+        return upcxx::rank_me() * m_verticesPerRank;
+    }
 
     /*! \brief Return maximal id that is stored on the current rank.
      */
-    //Id maxId() const
-    //{
-    //    return (upcxx::rank_me() + 1) * m_verticesPerRank - 1;
-    //}
+    std::size_t maxId() const
+    {
+        return (upcxx::rank_me() + 1) * m_verticesPerRank - 1;
+    }
 
     /*! \brief Print the cut owned by the current rank.
      */
@@ -197,6 +114,7 @@ public:
      *
      *  \param Id of the vertex.
      */
+    // TODO: Need to have partitioning scheme that is independent of the graph itself
     Rank getVertexParent(const typename Vertex::Id& a) const;
 
     /*! \brief Return size of the vertex store.
@@ -213,7 +131,7 @@ private:
      * Helper methods
      */
     bool addEdgeHelper(Edge edge);
-    // bool hasEdgeHelper(const typename Vertex::Id& a, const typename Vertex::Id& b) const;
+    bool hasEdgeHelper(const typename Vertex::Id& a, const typename Vertex::Id& b) const;
     // upcxx::global_ptr<Vertex> fetchVertexFromStore(const typename Vertex::Id& id) const;
 
     size_t normilizeId(const typename Vertex::Id id)
@@ -222,10 +140,9 @@ private:
     }
 };
 
-template <typename Vertex, typename Edge>
-bool Graph<Vertex, Edge>::AddEdge(const Edge& edge)
+template <typename Vertex, typename Edge> bool Graph<Vertex, Edge>::AddEdge(const Edge& edge)
 {
-    if (edge.isLoop())
+    if (edge.IsLoop())
     {
         return false;
     }
@@ -250,17 +167,15 @@ Graph<VertexData, EdgeData>::Graph(const size_t totalNumberVertices, const size_
     upcxx::barrier();
 }
 
-template <typename Vertex, typename Edge>
-bool Graph<Vertex, Edge>::addEdgeHelper(Edge edge)
+template <typename Vertex, typename Edge> bool Graph<Vertex, Edge>::addEdgeHelper(Edge edge)
 {
-    if (edge.isLoop())
+    if (edge.IsLoop())
     {
         return false;
     }
 
     // Lambda to insert single edge into the graph.
-    auto insertSingleEdge =
-        [](Rank rank, GraphStorageType& vertexStore, Edge edge, Rank parentRank)
+    auto insertSingleEdge = [](Rank rank, GraphStorageType& vertexStore, Edge edge, Rank parentRank)
     {
         return upcxx::rpc(
             rank,
@@ -268,21 +183,26 @@ bool Graph<Vertex, Edge>::addEdgeHelper(Edge edge)
             {
                 const auto vertexStoreSize = vertexStore->size();
                 // TODO: Can this partitioning scheme be abstracted?
-                const size_t idx = edge.from - parentRank * vertexStoreSize;
+                // TODO: Wtf are you doing ?!
+                const size_t idx = edge.from.UniversalId() - parentRank * vertexStoreSize;
                 assert(idx < vertexStoreSize);
+
                 // TODO: Wrap into addVertex
                 if (!vertexStore->operator[](idx))
                 {
-                    vertexStore->operator[](idx) = new Vertex(edge.from);
+                    vertexStore->operator[](idx) = new Vertex();
+                    vertexStore->operator[](idx)->id = edge.from;
                 }
 
-                if (vertexStore->operator[](idx)->hasNeighbour(edge.to)) {
+                if (vertexStore->operator[](idx)->HasNeighbour(edge.to))
+                {
                     return false;
                 }
 
-				logMsg("(addEdgeHelper::insertSingleEdge): from=" + std::to_string(edge.from) + ", to=" + std::to_string(edge.to));
+                std::cout << "(addEdgeHelper::insertSingleEdge): edge=" << edge.ToString()
+                          << std::endl;
 
-                vertexStore->operator[](idx)->addNeighbour(edge.data, edge.to);
+                vertexStore->operator[](idx)->AddNeighbour(edge.data, edge.to);
                 return true;
             },
             vertexStore,
@@ -599,7 +519,7 @@ template <typename VertexData, typename EdgeData> void Graph<VertexData, EdgeDat
 //         {
 //             m_parent[v] = v;
 //         }
-// 
+//
 //         Id findSet(Id v)
 //         {
 //             if (m_parent.find(v) == m_parent.end())
@@ -607,15 +527,15 @@ template <typename VertexData, typename EdgeData> void Graph<VertexData, EdgeDat
 //                 m_parent[v] = v;
 //                 return v;
 //             }
-// 
+//
 //             if (m_parent[v] == v)
 //             {
 //                 return v;
 //             }
-// 
+//
 //             return findSet(m_parent[v]);
 //         }
-// 
+//
 //         void unionSets(Id a, Id b)
 //         {
 //             a = findSet(a);
@@ -625,25 +545,26 @@ template <typename VertexData, typename EdgeData> void Graph<VertexData, EdgeDat
 //                 m_parent[b] = a;
 //             }
 //         }
-// 
+//
 //     private:
 //         std::unordered_map<Id, Id> m_parent;
 //         std::unordered_map<Id, size_t> m_rank;
 //     };
-// 
+//
 //     using edges_t = std::vector<Edge>;
 //     auto unionEdges = [](edges_t& lhs, edges_t& rhs)
 //     {
 //         edges_t result;
-// 
+//
 //         std::sort(lhs.begin(), lhs.end());
 //         std::sort(rhs.begin(), rhs.end());
-// 
-//         std::set_union(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), std::back_inserter(result));
-// 
+//
+//         std::set_union(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+//         std::back_inserter(result));
+//
 //         return result;
 //     };
-// 
+//
 //     using dist_mst_edges_t = upcxx::dist_object<edges_t>;
 //     auto addEdgeIntoMST = [](dist_mst_edges_t& mst, Rank rank, Edge edge)
 //     {
@@ -652,7 +573,7 @@ template <typename VertexData, typename EdgeData> void Graph<VertexData, EdgeDat
 //             rank, [](dist_mst_edges_t& mst, Edge edge) { mst->push_back(edge); }, mst, edge)
 //             .wait();
 //     };
-// 
+//
 //     auto addEdgesIntoMST = [](dist_mst_edges_t& mst, Rank rank, edges_t edges)
 //     {
 //         assert(rank >= 0 && rank < upcxx::rank_n());
@@ -669,7 +590,7 @@ template <typename VertexData, typename EdgeData> void Graph<VertexData, EdgeDat
 //             edges)
 //             .wait();
 //     };
-// 
+//
 //     auto getMSTEdgesCount = [](dist_mst_edges_t& mst, Rank rank)
 //     {
 //         assert(rank >= 0 && rank < upcxx::rank_n());
@@ -677,21 +598,22 @@ template <typename VertexData, typename EdgeData> void Graph<VertexData, EdgeDat
 //                    rank, [](dist_mst_edges_t& mst) { return mst->size(); }, mst)
 //             .wait();
 //     };
-// 
+//
 //     auto clearMSTEdgesAsync = [](dist_mst_edges_t& mst, Rank rank)
 //     {
 //         assert(rank >= 0 && rank < upcxx::rank_n());
 //         return upcxx::rpc(
 //             rank, [](dist_mst_edges_t& mst) { mst->clear(); }, mst);
 //     };
-// 
+//
 //     auto clearMSTEdges = [clearMSTEdgesAsync](dist_mst_edges_t& mst, Rank rank)
 //     {
 //         assert(rank >= 0 && rank < upcxx::rank_n());
 //         clearMSTEdgesAsync(mst, rank).wait();
 //     };
-// 
-//     auto kruskal = [](dist_mst_edges_t& mst, Rank rank, edges_t edges, const size_t verticesCount)
+//
+//     auto kruskal = [](dist_mst_edges_t& mst, Rank rank, edges_t edges, const size_t
+//     verticesCount)
 //     {
 //         upcxx::rpc(
 //             rank,
@@ -713,7 +635,7 @@ template <typename VertexData, typename EdgeData> void Graph<VertexData, EdgeDat
 //             verticesCount)
 //             .wait();
 //     };
-// 
+//
 //     // Get the edge list and sort it
 //     auto edgesLocal = std::vector<Edge>{};
 //     {
@@ -731,14 +653,14 @@ template <typename VertexData, typename EdgeData> void Graph<VertexData, EdgeDat
 //             }
 //         }
 //     }
-// 
+//
 //     // Find the local portion of the MST.
 //     dist_mst_edges_t distMSTEdges{{}};
 //     kruskal(distMSTEdges, upcxx::rank_me(), edgesLocal, m_verticesPerRank);
-// 
+//
 //     // Wait until each rank finds its portion of the MST.
 //     upcxx::barrier();
-// 
+//
 //     const size_t superstepCount = std::log2(upcxx::rank_n());
 //     Rank rankOffset{1};
 //     for (size_t superstep = 1; superstep <= superstepCount; ++superstep)
@@ -751,34 +673,34 @@ template <typename VertexData, typename EdgeData> void Graph<VertexData, EdgeDat
 //         {
 //             // Which ranks edges to fetch.
 //             const auto otherRank{upcxx::rank_me() + rankOffset};
-// 
+//
 //             // Fetch the edges.
 //             auto globalMSTOtherFuture = distMSTEdges.fetch(otherRank);
 //             auto globalMSTCurrentFuture = distMSTEdges.fetch(upcxx::rank_me());
-// 
+//
 //             // Wait for the edges to be on the current rank.
 //             auto localMSTOther = globalMSTOtherFuture.wait();
 //             auto localMSTCurrent = globalMSTCurrentFuture.wait();
-// 
+//
 //             // Clear distributed edges while mergines MSTs.
 //             auto clearMSTEdgesFuture = clearMSTEdgesAsync(distMSTEdges, upcxx::rank_me());
-// 
+//
 //             // Merge MST from different ranks.
 //             auto mergedMSTEdges{unionEdges(localMSTCurrent, localMSTOther)};
-// 
+//
 //             // Wait for the edge clearing to be finished.
 //             clearMSTEdgesFuture.wait();
-// 
+//
 //             // Clear the other rank MST edges.
-// 
+//
 //             // Add merges edges into the MST.
 //             kruskal(distMSTEdges, upcxx::rank_me(), mergedMSTEdges, m_totalNumberVertices);
-// 
+//
 //             rankOffset *= 2;
 //         }
 //         upcxx::barrier();
 //     }
-// 
+//
 //     upcxx::barrier();
 //     return distMSTEdges;
 // }
@@ -793,12 +715,12 @@ void Graph<Vertex, Edge>::ExportIntoFile(const std::string& fileName) const
         for (size_t r = 0; r < rank_n; ++r)
         {
             auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
-			logMsg("localVertexStore.size=" + std::to_string(localVertexStore.size()), 0);
-			size_t vertexIdx{0};
+            logMsg("localVertexStore.size=" + std::to_string(localVertexStore.size()), 0);
+            size_t vertexIdx{0};
             for (Vertex* vertex : localVertexStore)
             {
-				logMsg("vertexId=" + std::to_string(vertexIdx), 0);
-				vertexIdx++;
+                logMsg("vertexId=" + std::to_string(vertexIdx), 0);
+                vertexIdx++;
                 assert(vertex != nullptr);
                 for (auto& ngh : vertex->neighbours)
                 {
@@ -817,44 +739,61 @@ void Graph<Vertex, Edge>::ExportIntoFile(const std::string& fileName) const
     graphFile << graphStream.str();
 }
 
-// template <typename VertexData, typename EdgeData>
-// bool Graph<VertexData, EdgeData>::hasEdgeHelper(const Id& a, const Id& b) const
-// {
-    //  // Get rank of the parent of a first node
-    //  const Rank &aRank = getVertexParent(a);
+template <typename Vertex, typename Edge>
+bool Graph<Vertex, Edge>::hasEdgeHelper(const typename Vertex::Id& a,
+                                        const typename Vertex::Id& b) const
+{
+    // Get rank of the parent of a first node
+    const Rank& aRank = getVertexParent(a);
 
-    //  auto singleEdgeFindLambda = [](graph_storage_type &graph, Id idA, Id idB)
-    //  {
-    //    auto itIdA = graph->find(idA);
-    //    if (itIdA == graph->end()) {
-    //      return false;
-    //    }
+    auto singleEdgeFindLambda =
+        [](GraphStorageType& graph, typename Vertex::Id idA, typename Vertex::Id idB)
+    {
+        // TODO: This part must be generic!
+        const auto itA = std::find_if(graph->begin(),
+                                      graph->end(),
+                                      [idA](const Vertex* const vertex)
+                                      {
+                                          if (vertex)
+                                          {
+                                              return vertex->id == idA;
+                                          }
 
-    //    upcxx::global_ptr<Vertex> aPtr = graph[idA]->second;
-    //    auto localAPtr = aPtr.local();
-    //    if (!aPtr && !localAPtr) {
-    //        auto itB = std::find_if(
-    //            localAPtr->neighbours.begin(), localAPtr->neighbours.end(),
-    //            [idB](const auto &weightNode) { return weightNode.second == idB;
-    //            });
-    //        return itB != localAPtr->neighbours.end();
-    //    }
-    //  };
+                                          return false;
+                                      });
 
-    //  upcxx::future<bool> aFuture =
-    //      upcxx::rpc(aRank, singleEdgeFindLambda, m_vertexStore, a, b);
+        if (itA == graph->end())
+        {
+            return false;
+        }
 
-    //  return aFuture.wait();
-//}
+        std::cout << "(hasEdgeHelper::singleEdgeFindLambda): itA" << (*itA)->ToString()
+                  << std::endl;
+        // upcxx::global_ptr<Vertex> aPtr = *itA;
+        // auto localAPtr = aPtr.local();
+        auto localAPtr = *itA;
+        if (localAPtr)
+        {
+            return localAPtr->HasNeighbour(idB);
+        }
+        else
+        {
+            return false;
+        }
+    };
+
+    return upcxx::rpc(aRank, singleEdgeFindLambda, m_vertexStore, a, b).wait();
+}
 
 template <typename Vertex, typename Edge>
 Rank Graph<Vertex, Edge>::getVertexParent(const typename Vertex::Id& id) const
 {
     const auto rank_n = upcxx::rank_n();
-    typename Vertex::Id r = 0;
+    std::size_t r = 0;
     for (; r < rank_n; ++r)
     {
-        if ((id >= r * m_verticesPerRank) && (id <= (r + 1) * m_verticesPerRank - 1))
+        if ((id.UniversalId() >= r * m_verticesPerRank) &&
+            (id.UniversalId() <= (r + 1) * m_verticesPerRank - 1))
         {
             break;
         }
@@ -862,42 +801,39 @@ Rank Graph<Vertex, Edge>::getVertexParent(const typename Vertex::Id& id) const
 
     if (r == rank_n)
     {
-        logMsg("Wrong parent for " + std::to_string(id) + " is " + std::to_string(r));
+        logMsg("Wrong parent for " + std::to_string(id.UniversalId()) + " is " + std::to_string(r));
         --r;
     }
 
     return r;
 }
 
-template <typename Vertex, typename Edge>
-size_t Graph<Vertex, Edge>::VertexStoreSize(const Rank r)
+template <typename Vertex, typename Edge> size_t Graph<Vertex, Edge>::VertexStoreSize(const Rank r)
 {
     return upcxx::rpc(
-               r,
-               [](GraphStorageType& vertexStore) { return vertexStore->size(); },
-               m_vertexStore)
+               r, [](GraphStorageType& vertexStore) { return vertexStore->size(); }, m_vertexStore)
         .wait();
 }
 
-//template <typename Vertex, typename Edge>
-//upcxx::global_ptr<typename Graph<Vertex, Edge>::Vertex>
-//Graph<Vertex, Edge>::fetchVertexFromStore(const typename Vertex::Id& id) const
+// template <typename Vertex, typename Edge>
+// upcxx::global_ptr<typename Graph<Vertex, Edge>::Vertex>
+// Graph<Vertex, Edge>::fetchVertexFromStore(const typename Vertex::Id& id) const
 //{
-//    //  const Rank idParentRank = getVertexParent(id);
-//    //  upcxx::future<upcxx::global_ptr<Vertex>> vertexFuture = upcxx::rpc(
-//    //      idParentRank,
-//    //      [](graph_storage_type &graph, Id id) {
-//    //        auto idIt = graph->find(id);
-//    //        if (idIt == graph->end()) {
-//    //          return upcxx::global_ptr<Vertex>(nullptr);
-//    //        }
+//     //  const Rank idParentRank = getVertexParent(id);
+//     //  upcxx::future<upcxx::global_ptr<Vertex>> vertexFuture = upcxx::rpc(
+//     //      idParentRank,
+//     //      [](graph_storage_type &graph, Id id) {
+//     //        auto idIt = graph->find(id);
+//     //        if (idIt == graph->end()) {
+//     //          return upcxx::global_ptr<Vertex>(nullptr);
+//     //        }
 //
-//    //        return idIt->second;
-//    //      },
-//    //      m_vertexStore, id);
+//     //        return idIt->second;
+//     //      },
+//     //      m_vertexStore, id);
 //
-//    //  return vertexFuture.wait();
-//}
+//     //  return vertexFuture.wait();
+// }
 }; // namespace PGASGraph
 
 #endif // PGAS_GRAPH_H
