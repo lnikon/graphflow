@@ -77,13 +77,91 @@ bool Test_AddVertex2()
     return true;
 }
 
+bool Test_ExportGraph1()
+{
+    using VertexData = int;
+    using EdgeData = int;
+
+    const std::size_t vertexCount{16};
+    const std::size_t vertexCountPerRank{vertexCount / upcxx::rank_n()};
+
+    std::string filename("exported-graph.txt");
+
+    PGASGraph::Graph<PGASGraph::Generators::Knodel::Vertex<VertexData, EdgeData>,
+                     PGASGraph::Generators::Knodel::Edge<EdgeData>>
+        graph(vertexCount, vertexCountPerRank);
+
+    PGASGraph::Generators::Knodel::VertexId from{0, 1};
+    PGASGraph::Generators::Knodel::VertexId to{1, 2};
+
+    graph.AddEdge({from, to, 0});
+    graph.ExportIntoFile(filename); 
+
+    return true;
+}
+
+bool Test_GenerateKnodel1() {
+    using VertexData = int;
+    using EdgeData = int;
+
+    const std::size_t vertexCount{8};
+    const std::size_t vertexCountPerRank{vertexCount / upcxx::rank_n()};
+    const std::size_t delta{static_cast<std::size_t>(std::log2(vertexCount))};
+
+    std::string filename("exported-knodel-graph.txt");
+
+    PGASGraph::Graph<PGASGraph::Generators::Knodel::Vertex<VertexData, EdgeData>,
+                     PGASGraph::Generators::Knodel::Edge<EdgeData>>
+        graph(64, 64);
+
+    PGASGraph::Generators::Knodel::Generate(vertexCount, 2, graph);
+    graph.ExportIntoFile(filename); 
+
+    return true;
+}
+
+void Test_RandomizedPushPullGossip1() {
+    using VertexData = int;
+    using EdgeData = int;
+
+    const std::size_t vertexCount{32};
+    const std::size_t vertexCountPerRank{vertexCount / upcxx::rank_n()};
+    const std::size_t delta{static_cast<std::size_t>(std::log2(vertexCount))};
+
+    std::string filename("exported-knodel-graph.txt");
+
+    PGASGraph::Graph<PGASGraph::Generators::Knodel::Vertex<VertexData, EdgeData>,
+                     PGASGraph::Generators::Knodel::Edge<EdgeData>>
+        graph(64, 64);
+
+    PGASGraph::Generators::Knodel::Generate(vertexCount, delta, graph);
+    PGASGraph::Generators::Knodel::VertexId vertexId1{0, 0};
+    //PGASGraph::Generators::Knodel::VertexId vertexId2{1, 1};
+    //PGASGraph::Generators::Knodel::VertexId vertexId3{1, 2};
+    //PGASGraph::Generators::Knodel::VertexId vertexId4{1, 3};
+    //PGASGraph::Generators::Knodel::VertexId vertexId5{2, 0};
+    //PGASGraph::Generators::Knodel::VertexId vertexId6{2, 1};
+    
+    //graph.AddEdge({vertexId1, vertexId2, 0});
+    //graph.AddEdge({vertexId2, vertexId3, 0});
+    //graph.AddEdge({vertexId3, vertexId4, 0});
+    //graph.AddEdge({vertexId4, vertexId5, 0});
+    //graph.AddEdge({vertexId5, vertexId6, 0});
+    
+    graph.PushPullRandomizedGossip(vertexId1, 15);
+    graph.ExportIntoFile(filename);
+}
+
 int main(int argc, char* argv[])
 {
     upcxx::init();
 
     // Test_ConstructGraph1();
     // Test_AddVertex1();
-    Test_AddVertex2();
+    // Test_AddVertex2();
+    // Test_ExportGraph1();
+    // Test_GenerateKnodel1();
+    Test_RandomizedPushPullGossip1();
 
     upcxx::finalize();
     return 0;
