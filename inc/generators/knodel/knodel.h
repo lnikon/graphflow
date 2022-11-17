@@ -20,6 +20,13 @@ struct VertexId
     Id id{0};
     bool isNull{false};
 
+    VertexId() {}
+
+    explicit VertexId(const Id partitionid, const Id id, const bool isNull = false)
+        : partition(partitionid), id(id), isNull(isNull) {}
+
+    VertexId(const VertexId& vertexId) = default;
+
     std::size_t UniversalId() const
     {
         std::cout << "(VertexId::UniversalId): universalId=" << ToString() << std::endl;
@@ -59,6 +66,9 @@ template <typename VertexData, typename EdgeData> struct Vertex
     VertexData data;
     // TODO: Consider to use std::set<>
     std::vector<Neighbour<Id, VertexData, EdgeData>> neighbourhood;
+
+    explicit Vertex(const VertexId vertexId)
+        : id(vertexId) {}
 
     bool operator==(const Vertex& other)
     {

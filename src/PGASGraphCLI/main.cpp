@@ -1,5 +1,7 @@
 // PGASGraph
 #include <generators/knodel/knodel.h>
+#include <generators/uniform/uniform.h>
+#include <algorithms/gossip/gossip.h>
 #include <pgas-graph/pgas-graph.h>
 
 // CopyPasted
@@ -136,20 +138,57 @@ void Test_RandomizedPushPullGossip1() {
 
     PGASGraph::Generators::Knodel::Generate(vertexCount, delta, graph);
     PGASGraph::Generators::Knodel::VertexId vertexId1{0, 0};
-    //PGASGraph::Generators::Knodel::VertexId vertexId2{1, 1};
-    //PGASGraph::Generators::Knodel::VertexId vertexId3{1, 2};
-    //PGASGraph::Generators::Knodel::VertexId vertexId4{1, 3};
-    //PGASGraph::Generators::Knodel::VertexId vertexId5{2, 0};
-    //PGASGraph::Generators::Knodel::VertexId vertexId6{2, 1};
-    
-    //graph.AddEdge({vertexId1, vertexId2, 0});
-    //graph.AddEdge({vertexId2, vertexId3, 0});
-    //graph.AddEdge({vertexId3, vertexId4, 0});
-    //graph.AddEdge({vertexId4, vertexId5, 0});
-    //graph.AddEdge({vertexId5, vertexId6, 0});
-    
-    graph.PushPullRandomizedGossip(vertexId1, 15);
+    PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
     graph.ExportIntoFile(filename);
+}
+
+// TODO: Actually, there are highly noticable connected component, this is not that much random...
+void Test_GenerateUniformRandomGraph1() {
+    using VertexData = int;
+    using EdgeData = int;
+
+    const std::size_t vertexCount{32};
+    const std::size_t vertexCountPerRank{vertexCount / upcxx::rank_n()};
+    const std::size_t delta{static_cast<std::size_t>(std::log2(vertexCount))};
+
+    std::string filename("exported-uniform-graph.txt");
+
+    PGASGraph::Graph<PGASGraph::Generators::Uniform::Vertex<VertexData, EdgeData>,
+                     PGASGraph::Generators::Uniform::Edge<EdgeData>>
+        graph(64, 64);
+
+    PGASGraph::Generators::Uniform::Generate(16, 80.0, graph);
+    // PGASGraph::Generators::Uniform::VertexId vertexId1{0, 0};
+    // PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
+    graph.ExportIntoFile(filename);
+}
+
+void Test_RandomizedPushOnUniformRandomGraph1() {
+    using VertexData = int;
+    using EdgeData = int;
+
+    const std::size_t vertexCount{16};
+    const size_t vertexCountPerRank{(vertexCount + upcxx::rank_n() - 1) / upcxx::rank_n()};
+    const std::size_t delta{static_cast<std::size_t>(std::log2(vertexCount))};
+
+    const std::string verticesFilename("exported-uniform-vertices-after-push.txt");
+    const std::string edgesFilename("exported-uniform-edges-after-push.txt");
+
+    PGASGraph::Graph<PGASGraph::Generators::Uniform::Vertex<VertexData, EdgeData>,
+                     PGASGraph::Generators::Uniform::Edge<EdgeData>>
+        graph(vertexCount, vertexCountPerRank);
+
+    upcxx::barrier();
+    PGASGraph::Generators::Uniform::Generate(vertexCountPerRank, 100.0, graph);
+    upcxx::barrier();
+    PGASGraph::Generators::Uniform::VertexId vertexId1(0);
+    upcxx::barrier();
+    PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
+    upcxx::barrier();
+    graph.ExportVerticesIntoFile(verticesFilename);
+    upcxx::barrier();
+    graph.ExportIntoFile(edgesFilename);
+    upcxx::barrier();
 }
 
 int main(int argc, char* argv[])
@@ -161,7 +200,9 @@ int main(int argc, char* argv[])
     // Test_AddVertex2();
     // Test_ExportGraph1();
     // Test_GenerateKnodel1();
-    Test_RandomizedPushPullGossip1();
+    // Test_RandomizedPushPullGossip1();
+    // Test_GenerateUniformRandomGraph1();
+    Test_RandomizedPushOnUniformRandomGraph1();
 
     upcxx::finalize();
     return 0;

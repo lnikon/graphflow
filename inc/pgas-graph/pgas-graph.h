@@ -110,102 +110,21 @@ namespace PGASGraph
            *  \param fileName name of the file to export the graph.
            */
         void ExportIntoFile(const std::string& fileName) const;
+        void ExportVerticesIntoFile(const std::string& fileName) const;
 
         /*! \brief Return rank of the specified vertex.
          *
          *  \param Id of the vertex.
          */
          // TODO: Need to have partitioning scheme that is independent of the graph itself
-        Rank getVertexParent(const typename Vertex::Id& a) const;
+        Rank GetVertexParent(const typename Vertex::Id& a) const;
 
         /*! \brief Return size of the vertex store.
          *  \returns Number of vertices in the vertex store.
          */
         size_t VertexStoreSize(const Rank r = upcxx::rank_me());
 
-        // TODO: Move into utilities
-        // TODO: Is this push or pull?
-        // TODO: To async or not to async?
-        // TODO: Need a way to identify vertices that already have been notified
-        void PushPullRandomizedGossip(typename Vertex::Id vertexId, typename Vertex::Data data)
-        {
-            using VertexId = typename Vertex::Id;
-
-            const auto uniformRandomInt = [](const int start, const int end)
-            {
-                std::random_device rd;
-                std::mt19937 gen(rd());
-                std::uniform_int_distribution<> distrib(start, end);
-                return distrib(gen);
-            };
-
-            std::vector<VertexId> visited;
-
-            auto pushRandomizedGossip = [uniformRandomInt, &visited, this](GraphStorageType& graph, typename Vertex::Id vertexId, typename Vertex::Data data)
-            {
-                //// TODO: VertexId may not always directly map to vertex store index, so we need to perform O(N) search here.
-                // const auto localVertexStore = graph->fetch(upcxx::rank_me()).wait();
-                const auto vertexStoreSize{ graph->size() };
-                Vertex* vertex{ nullptr };
-                for (std::size_t idx{ 0 }; idx < vertexStoreSize; ++idx) {
-                    auto* localVertex{ graph->operator[](idx) };
-                    if (localVertex) {
-                        std::cout << "localVertex=" << localVertex->ToString() << std::endl;
-                        if (localVertex->id == vertexId) {
-                            vertex = localVertex;
-                            break;
-                        }
-                    }
-
-                }
-
-                if (!vertex) {
-                    std::cerr << "[ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
-                        << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
-                    return VertexId{0, 0, true};
-                }
-
-                // Update current vertex data
-                vertex->data = data;
-                visited.push_back(vertexId);
-
-                // Choose uniformly random neighbour
-                // const auto randomNeighbourId{ uniformRandomInt(0, vertex->neighbourhood.size()) };
-                // const auto neighbour{ vertex->neighbourhood[randomNeighbourId] };
-                // const neighbourIdParent{ getVertexParent(neighbourId) };
-
-                for (auto neighbour : vertex->neighbourhood) {
-                    auto it = std::find(visited.begin(), visited.end(), neighbour.id);
-                    if (it == visited.end()) {
-                        return neighbour.id;
-                    }
-                }
-
-                // PushPullRandomizedGossip(neighbour.id, data);
-                return VertexId{0, 0, true};
-            };
-
-            std::cout << "(PushPullRandomizedGossip): vertexId=" << vertexId.ToString() << ", data=" << data << std::endl;
-            int count = 0;
-            typename Vertex::Id nextVertexId = vertexId;
-            do {
-                const auto vertexIdParent{ getVertexParent(nextVertexId) };
-                std::cout << "count=" << count << ", " << "nextVertexId=" << nextVertexId.ToString() << std::endl;
-                nextVertexId = upcxx::rpc(
-                    vertexIdParent,
-                    pushRandomizedGossip,
-                    m_vertexStore, nextVertexId, data).wait();
-            } while (!nextVertexId.isNull);
-
-            std::cout << "the end param-pam-pam" << std::endl;
-        }
-
-        // TODO: Is this push or pull?
-        void PushPullRandomizedGossipHelper(Rank parent,
-            typename Vertex::Id vertexId,
-            typename Vertex::Data data)
-        {
-        }
+        GraphStorageType& GetGraphStorage();
 
     private:
         GraphStorageType m_vertexStore{ {} };
@@ -219,9 +138,10 @@ namespace PGASGraph
         bool hasEdgeHelper(const typename Vertex::Id& a, const typename Vertex::Id& b) const;
         // upcxx::global_ptr<Vertex> fetchVertexFromStore(const typename Vertex::Id& id) const;
 
-        size_t normilizeId(const typename Vertex::Id id)
+        typename Vertex::Id NormilizeId(typename Vertex::Id id)
         {
-            return id - getVertexParent(id) * VertexStoreSize();
+            id.id = id.UniversalId() - GetVertexParent(id) * VertexStoreSize();
+            return id;
         }
     };
 
@@ -270,14 +190,15 @@ namespace PGASGraph
                     const auto vertexStoreSize = vertexStore->size();
                     // TODO: Can this partitioning scheme be abstracted?
                     // TODO: Wtf are you doing ?!
-                    const size_t idx = edge.from.UniversalId() - parentRank * vertexStoreSize;
+                    const std::size_t idx = edge.from.UniversalId() - parentRank * vertexStoreSize;
+                    // const std::size_t idx = edge.from.UniversalId() % vertexStoreSize;
+                    // logMsg("edge.from.UniversalId()=" + std::to_string(edge.from.UniversalId()) + ", parentRank=" + std::to_string(parentRank) + ", idx=" + std::to_string(idx) + ", vertexStoreSize=" + std::to_string(vertexStoreSize));
                     assert(idx < vertexStoreSize);
 
                     // TODO: Wrap into addVertex
                     if (!vertexStore->operator[](idx))
                     {
-                        vertexStore->operator[](idx) = new Vertex();
-                        vertexStore->operator[](idx)->id = edge.from;
+                        vertexStore->operator[](idx) = new Vertex(typename Vertex::Id(edge.from));
                     }
 
                     if (vertexStore->operator[](idx)->HasNeighbour(edge.to))
@@ -296,12 +217,12 @@ namespace PGASGraph
                     parentRank);
         };
 
-        const Rank& fromRank = getVertexParent(edge.from);
-        const Rank& toRank = getVertexParent(edge.to);
+        const Rank& fromRank = GetVertexParent(edge.from);
+        const Rank& toRank = GetVertexParent(edge.to);
 
-        auto fromFuture = insertSingleEdge(fromRank, m_vertexStore, edge, getVertexParent(edge.from));
+        auto fromFuture = insertSingleEdge(fromRank, m_vertexStore, edge, GetVertexParent(edge.from));
         auto toFuture = insertSingleEdge(
-            fromRank, m_vertexStore, edge.Invert(), getVertexParent(edge.Invert().from));
+            fromRank, m_vertexStore, edge.Invert(), GetVertexParent(edge.Invert().from));
 
         bool res = fromFuture.wait();
         res &= toFuture.wait();
@@ -791,6 +712,7 @@ namespace PGASGraph
     //     return distMSTEdges;
     // }
 
+    // TODO: Move into separate serializer
     template <typename Vertex, typename Edge>
     void Graph<Vertex, Edge>::ExportIntoFile(const std::string& fileName) const
     {
@@ -807,32 +729,71 @@ namespace PGASGraph
                     // assert(vertex != nullptr);
                     if (vertex)
                     {
+                        for (auto& ngh : vertex->neighbourhood)
+                        {
+                            graphStream << vertex->id.UniversalId() << " " << ngh.id.UniversalId() << std::endl;
+                        }
+                    }
+                }
+            }
+
+            std::fstream graphFile(fileName, std::ios::trunc | std::ios::in | std::ios::out);
+            if (!graphFile.is_open())
+            {
+                logMsg("Unable to open \"" + fileName + "\" to write computation results");
+            }
+
+            graphFile << graphStream.str();
+        }
+
+        upcxx::barrier();
+    }
+
+    // TODO: Move into separate serializer
+    template <typename Vertex, typename Edge>
+    void Graph<Vertex, Edge>::ExportVerticesIntoFile(const std::string& fileName) const
+    {
+        std::stringstream graphStream;
+        if (0 == upcxx::rank_me())
+        {
+            const auto& rank_n = upcxx::rank_n();
+            for (size_t r = 0; r < rank_n; ++r)
+            {
+                auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
+                logMsg("localVertexStore.size=" + std::to_string(localVertexStore.size()), 0);
+                for (Vertex* vertex : localVertexStore)
+                {
+                    // assert(vertex != nullptr);
+                    if (vertex)
+                    {
                         // for (auto& ngh : vertex->neighbourhood)
                         {
-                            // graphStream << vertex->id.UniversalId() << " " << ngh.id.UniversalId() << " " << vertex->data
-                            //     << "\n";
                             graphStream << vertex->id.UniversalId() << " " << vertex->data << "\n";
                         }
                     }
                 }
             }
+
+            std::fstream graphFile(fileName, std::ios::trunc | std::ios::in | std::ios::out);
+            if (!graphFile.is_open())
+            {
+                logMsg("Unable to open \"" + fileName + "\" to write computation results");
+            }
+
+            graphFile << graphStream.str();
         }
 
-        std::fstream graphFile(fileName, std::ios::trunc | std::ios::in | std::ios::out);
-        if (!graphFile.is_open())
-        {
-            logMsg("Unable to open \"" + fileName + "\" to write computation results");
-        }
-
-        graphFile << graphStream.str();
+        upcxx::barrier();
     }
+
+
 
     template <typename Vertex, typename Edge>
     bool Graph<Vertex, Edge>::hasEdgeHelper(const typename Vertex::Id& a,
         const typename Vertex::Id& b) const
     {
         // Get rank of the parent of a first node
-        const Rank& aRank = getVertexParent(a);
+        const Rank& aRank = GetVertexParent(a);
 
         auto singleEdgeFindLambda =
             [](GraphStorageType& graph, typename Vertex::Id idA, typename Vertex::Id idB)
@@ -874,7 +835,7 @@ namespace PGASGraph
     }
 
     template <typename Vertex, typename Edge>
-    Rank Graph<Vertex, Edge>::getVertexParent(const typename Vertex::Id& id) const
+    Rank Graph<Vertex, Edge>::GetVertexParent(const typename Vertex::Id& id) const
     {
         const auto rank_n = upcxx::rank_n();
         std::size_t r = 0;
@@ -922,6 +883,11 @@ namespace PGASGraph
     //
     //     //  return vertexFuture.wait();
     // }
+
+    template <typename Vertex, typename Edge>
+    typename Graph<Vertex, Edge>::GraphStorageType& Graph<Vertex, Edge>::GetGraphStorage() {
+        return m_vertexStore;
+    }
 }; // namespace PGASGraph
 
 #endif // PGAS_GRAPH_H
