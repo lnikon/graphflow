@@ -170,7 +170,7 @@ namespace PGASGraph
             .wait();
 
         // Finish for all ranks to finilize initialization.
-        upcxx::barrier();
+        // upcxx::barrier();
     }
 
     template <typename Vertex, typename Edge> bool Graph<Vertex, Edge>::addEdgeHelper(Edge edge)
@@ -179,6 +179,7 @@ namespace PGASGraph
         {
             return false;
         }
+
 
         // Lambda to insert single edge into the graph.
         auto insertSingleEdge = [](Rank rank, GraphStorageType& vertexStore, Edge edge, Rank parentRank)
@@ -222,7 +223,7 @@ namespace PGASGraph
 
         auto fromFuture = insertSingleEdge(fromRank, m_vertexStore, edge, GetVertexParent(edge.from));
         auto toFuture = insertSingleEdge(
-            fromRank, m_vertexStore, edge.Invert(), GetVertexParent(edge.Invert().from));
+            toRank, m_vertexStore, edge.Invert(), GetVertexParent(edge.Invert().from));
 
         bool res = fromFuture.wait();
         res &= toFuture.wait();
@@ -745,8 +746,6 @@ namespace PGASGraph
 
             graphFile << graphStream.str();
         }
-
-        upcxx::barrier();
     }
 
     // TODO: Move into separate serializer
@@ -782,11 +781,7 @@ namespace PGASGraph
 
             graphFile << graphStream.str();
         }
-
-        upcxx::barrier();
     }
-
-
 
     template <typename Vertex, typename Edge>
     bool Graph<Vertex, Edge>::hasEdgeHelper(const typename Vertex::Id& a,
@@ -852,6 +847,8 @@ namespace PGASGraph
         {
             logMsg("Wrong parent for " + std::to_string(id.UniversalId()) + " is " + std::to_string(r));
             --r;
+        } else {
+            logMsg("Parent for id.UniversalId()=" + std::to_string(id.UniversalId()) + " is parent=" + std::to_string(r));
         }
 
         return r;

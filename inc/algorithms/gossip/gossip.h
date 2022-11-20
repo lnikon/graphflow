@@ -2,6 +2,8 @@
 
 #include <pgas-graph/pgas-graph.h>
 
+#include <sstream>
+
 namespace PGASGraph::Algorithms::Gossip {
     // TODO: Works only for connected graphs! Need to refine termination predicate. Can be research subject.
     // TODO: Each process should traverse its component.
@@ -31,13 +33,17 @@ namespace PGASGraph::Algorithms::Gossip {
 
         // std::unique_ptr<int64_t[]> insertsPerRank(new int64_t[upcxx::rank_n()]());
 
-        std::cout << "[debug]: Starting randomized push-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl;
+        std::stringstream ss;
+        ss << "[debug]: Starting randomized push-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl;
+        logMsg(ss.str());
+        ss.flush();
+
         const auto startTime = std::chrono::high_resolution_clock::now();
 
         const auto localStorage{ graph.GetGraphStorage().fetch(upcxx::rank_me()).wait() };
         logMsg("localStorage=" + std::to_string(localStorage.size()));
 
-        upcxx::barrier();
+        // upcxx::barrier();
 
         // TODO: Effective storage to search for non-negative ids
         upcxx::dist_object<std::vector<VertexId>> visited{{}};
@@ -50,6 +56,15 @@ namespace PGASGraph::Algorithms::Gossip {
         auto getRandomVertexFromLocalStore = [](GraphStorageType& storage) {
             return upcxx::rpc(upcxx::rank_me(), [](GraphStorageType& storage) {
                 // TODO: Use uniform prng
+                logMsg("(PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=" + std::to_string(storage->size()));
+                const auto size{storage->size()};
+                std::size_t notNullCount{0};
+                for(std::size_t idx{0}; idx < size; ++idx) {
+                    if (storage->operator[](idx)) {
+                        notNullCount++;
+                    }
+                }
+                logMsg("(PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=" + std::to_string(notNullCount));
                 return storage->operator[](0);
             }, storage).wait();
         };
@@ -105,22 +120,29 @@ namespace PGASGraph::Algorithms::Gossip {
             return result;
         };
 
-        typename Vertex::Id nextVertexId = getRandomVertexFromLocalStore(graph.GetGraphStorage())->id;
+        const auto randomVertex{getRandomVertexFromLocalStore(graph.GetGraphStorage())};
+        if (!randomVertex) {
+            return;
+        }
+
+        typename Vertex::Id nextVertexId = randomVertex->id;
         while (getVisitedSize(visited) != localStorage.size()) {
-            logMsg("aaa");
             const auto vertexIdParent{ graph.GetVertexParent(nextVertexId) };
             nextVertexId = upcxx::rpc(
                 vertexIdParent,
                 pushRandomizedGossip,
                 graph.GetGraphStorage(), nextVertexId, data, visited).wait();
-            upcxx::barrier();
         }
 
         upcxx::barrier();
 
         auto end = std::chrono::steady_clock::now();
         const auto stopTime = std::chrono::high_resolution_clock::now();
-        std::cout << "[debug]: Finished randomized push-based gossip algorithm" << std::endl;
-        std::cout << "[debug]: Gossiping took " << std::chrono::duration_cast<std::chrono::microseconds>(stopTime - startTime).count() << "ms" << std::endl;
+
+        ss << "[debug]: Finished randomized push-based gossip algorithm" << std::endl;
+        logMsg(ss.str());
+        ss.flush();
+        ss << "[debug]: Gossiping took " << std::chrono::duration_cast<std::chrono::microseconds>(stopTime - startTime).count() << "ms" << std::endl;
+        logMsg(ss.str());
     }
 }

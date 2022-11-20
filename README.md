@@ -9,20 +9,21 @@ PGASGraph is based on a [UPCXX](https://github.com/brycelelbach/upcxx) and uses 
 
 ## Supported distributed algorithms
 
-+ \+ MST: Prim
-- \+ MST: Kruskal
-- \- MST: GHS
-- \- Shortest paths
-- \- Clustering
-- \- Centrality
-- \- Link analysis
++ \+ MST: Prim;
++ \+ MST: Kruskal;
+- \- MST: GHS;
++ \+ Gossip: Randomized Push; Broadcast; 
+- \- Shortest paths;
+- \- Clustering;
+- \- Centrality;
+- \- Link analysis;
 
 ## Requirements
 Make sure that you've installed UPCXX and have correctly set `$UPCXX_INSTALL` environment variable.
 For more information see official UPCXX wiki and INSTALL.md [UPCXX](https://bitbucket.org/berkeleylab/upcxx/wiki/Home).
 
 ## Build
-Launch `./scripts/ExecuteConan.sh/ and `./scripts/Build.sh`.
+Launch `./scripts/ExecuteConan.sh/` and `./scripts/Build.sh`
 
 ### Dependencies
 Library depends on Boost for program options parsing and CPU timer. Make sure that you've Boost libraries installed.
