@@ -23,6 +23,7 @@
 namespace PGASGraph
 {
 
+
 #define DEBUG_LOG_MSG
 
     /*! \brief Print specified message in a "[i/n]: <msg>" format.
@@ -40,6 +41,33 @@ namespace PGASGraph
       * Type for the vertex parent rank.
       */
     using Rank = upcxx::intrank_t;
+
+    template <typename Vertex>
+    Rank GetVertexParent(const typename Vertex::Id& id, const size_t verticesPerRank)
+    {
+        const auto rank_n = upcxx::rank_n();
+        std::size_t r = 0;
+        for (; r < rank_n; ++r)
+        {
+            if ((id.UniversalId() >= r * verticesPerRank) &&
+                (id.UniversalId() <= (r + 1) * verticesPerRank - 1))
+            {
+                break;
+            }
+        }
+
+        if (r == rank_n)
+        {
+            logMsg("Wrong parent for " + std::to_string(id.UniversalId()) + " is " + std::to_string(r));
+            --r;
+        }
+        else {
+            logMsg("Parent for id.UniversalId()=" + std::to_string(id.UniversalId()) + " is parent=" + std::to_string(r));
+        }
+
+        return r;
+    }
+
 
     /*! \brief An adjacency list distributed graph.
      * Each vertex has assigned an Id which is unique across all the
@@ -117,7 +145,6 @@ namespace PGASGraph
          *  \param Id of the vertex.
          */
          // TODO: Need to have partitioning scheme that is independent of the graph itself
-        Rank GetVertexParent(const typename Vertex::Id& a) const;
 
         /*! \brief Return size of the vertex store.
          *  \returns Number of vertices in the vertex store.
@@ -125,6 +152,10 @@ namespace PGASGraph
         size_t VertexStoreSize(const Rank r = upcxx::rank_me());
 
         GraphStorageType& GetGraphStorage();
+
+        size_t GetVerticesPerRank() const {
+            return m_verticesPerRank;
+        }
 
     private:
         GraphStorageType m_vertexStore{ {} };
@@ -140,7 +171,7 @@ namespace PGASGraph
 
         typename Vertex::Id NormilizeId(typename Vertex::Id id)
         {
-            id.id = id.UniversalId() - GetVertexParent(id) * VertexStoreSize();
+            id.id = id.UniversalId() - GetVertexParent<Vertex>(id, m_verticesPerRank) * VertexStoreSize();
             return id;
         }
     };
@@ -218,12 +249,12 @@ namespace PGASGraph
                     parentRank);
         };
 
-        const Rank& fromRank = GetVertexParent(edge.from);
-        const Rank& toRank = GetVertexParent(edge.to);
+        const Rank& fromRank = GetVertexParent<Vertex>(edge.from, m_verticesPerRank);
+        const Rank& toRank = GetVertexParent<Vertex>(edge.to, m_verticesPerRank);
 
-        auto fromFuture = insertSingleEdge(fromRank, m_vertexStore, edge, GetVertexParent(edge.from));
+        auto fromFuture = insertSingleEdge(fromRank, m_vertexStore, edge, GetVertexParent<Vertex>(edge.from, m_verticesPerRank));
         auto toFuture = insertSingleEdge(
-            toRank, m_vertexStore, edge.Invert(), GetVertexParent(edge.Invert().from));
+            toRank, m_vertexStore, edge.Invert(), GetVertexParent<Vertex>(edge.Invert().from, m_verticesPerRank));
 
         bool res = fromFuture.wait();
         res &= toFuture.wait();
@@ -289,7 +320,7 @@ namespace PGASGraph
     //    auto addIdIntoMST = [this](added_set_t& addedSet, Id id)
     //    {
     //        upcxx::rpc(
-    //            getVertexParent(id),
+    //            getVertexParent<Vertex>(id, m_verticesPerRank),
     //            [](added_set_t& addedSet, Id id) { addedSet->insert(id); },
     //            addedSet,
     //            id)
@@ -299,7 +330,7 @@ namespace PGASGraph
     //    auto isIdInMST = [this](added_set_t& addedSet, Id id)
     //    {
     //        return upcxx::rpc(
-    //                   getVertexParent(id),
+    //                   getVertexParent<Vertex>(id, m_verticesPerRank),
     //                   [](added_set_t& addedSet, Id id)
     //                   { return addedSet->find(id) != addedSet->end(); },
     //                   addedSet,
@@ -788,7 +819,7 @@ namespace PGASGraph
         const typename Vertex::Id& b) const
     {
         // Get rank of the parent of a first node
-        const Rank& aRank = GetVertexParent(a);
+        const Rank& aRank = GetVertexParent<Vertex>(a, m_verticesPerRank);
 
         auto singleEdgeFindLambda =
             [](GraphStorageType& graph, typename Vertex::Id idA, typename Vertex::Id idB)
@@ -829,31 +860,6 @@ namespace PGASGraph
         return upcxx::rpc(aRank, singleEdgeFindLambda, m_vertexStore, a, b).wait();
     }
 
-    template <typename Vertex, typename Edge>
-    Rank Graph<Vertex, Edge>::GetVertexParent(const typename Vertex::Id& id) const
-    {
-        const auto rank_n = upcxx::rank_n();
-        std::size_t r = 0;
-        for (; r < rank_n; ++r)
-        {
-            if ((id.UniversalId() >= r * m_verticesPerRank) &&
-                (id.UniversalId() <= (r + 1) * m_verticesPerRank - 1))
-            {
-                break;
-            }
-        }
-
-        if (r == rank_n)
-        {
-            logMsg("Wrong parent for " + std::to_string(id.UniversalId()) + " is " + std::to_string(r));
-            --r;
-        } else {
-            logMsg("Parent for id.UniversalId()=" + std::to_string(id.UniversalId()) + " is parent=" + std::to_string(r));
-        }
-
-        return r;
-    }
-
     template <typename Vertex, typename Edge> size_t Graph<Vertex, Edge>::VertexStoreSize(const Rank r)
     {
         return upcxx::rpc(
@@ -865,7 +871,7 @@ namespace PGASGraph
     // upcxx::global_ptr<typename Graph<Vertex, Edge>::Vertex>
     // Graph<Vertex, Edge>::fetchVertexFromStore(const typename Vertex::Id& id) const
     //{
-    //     //  const Rank idParentRank = getVertexParent(id);
+    //     //  const Rank idParentRank = getVertexParent<Vertex>(id, m_verticesPerRank);
     //     //  upcxx::future<upcxx::global_ptr<Vertex>> vertexFuture = upcxx::rpc(
     //     //      idParentRank,
     //     //      [](graph_storage_type &graph, Id id) {

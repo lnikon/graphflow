@@ -22,7 +22,7 @@ namespace PGASGraph::Generators::Knodel
         Id partition{ 0 };
         Id id{ 0 };
         bool isNull{ false };
-		// TODO: Generialize this
+        // TODO: Generialize this
         Id shift{ 4 };
 
         VertexId() {}
@@ -132,16 +132,19 @@ namespace PGASGraph::Generators::Knodel
     template <template<typename, typename> class Graph, typename Vertex, typename Edge>
     size_t Generate(const size_t vertexCount, const size_t delta, Graph<Vertex, Edge>& graph)
     {
+        const auto rankMe{ upcxx::rank_me() };
+        const auto rankN{ upcxx::rank_n() };
+        const auto minId{ rankMe * vertexCount };
+        const auto maxId{ (rankMe + 1) * vertexCount - 1 };
+
         size_t edgeCount{ 0 };
-        // TODO: Support multipartite Knodel graphs?
-        // for (std::uint64_t i = 0; i < 2; ++i)
         {
-            for (std::uint64_t j = 0; j < vertexCount / 2; ++j)
+            for (std::uint64_t j = minId; j < maxId; ++j)
             {
                 const typename Vertex::Id from{ 0, j };
                 for (std::uint64_t d = 0; d < delta; ++d)
                 {
-                    const auto k{ static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2, d)) - 1) % (vertexCount / 2)) };
+                    const auto k{ static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2, d)) - 1) % ((vertexCount * rankN) / 2)) };
                     const typename Vertex::Id to{ 1, k };
                     if (graph.AddEdge({ from, to, 0 }))
                     {

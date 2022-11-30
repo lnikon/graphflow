@@ -221,6 +221,62 @@ void Test_RandomizedPushOnKnodelGraph1() {
     //graph.ExportIntoFile(edgesFilename);
 }
 
+void Test_BroadcastOnUniformRandomGraph1() {
+    using VertexData = long unsigned int;
+    using EdgeData = long unsigned int;
+
+    const std::size_t vertexCount{ 16 };
+    const size_t vertexCountPerRank{ (vertexCount + upcxx::rank_n() - 1) / upcxx::rank_n() };
+    const std::size_t delta{ static_cast<std::size_t>(std::log2(vertexCount)) };
+
+    const std::string verticesFilename("exported-uniform-vertices-after-push.txt");
+    const std::string edgesFilename("exported-uniform-edges-after-push.txt");
+
+    PGASGraph::Graph<PGASGraph::Generators::Uniform::Vertex<VertexData, EdgeData>,
+        PGASGraph::Generators::Uniform::Edge<EdgeData>>
+        graph(vertexCount, vertexCountPerRank);
+
+    upcxx::barrier();
+    PGASGraph::Generators::Uniform::Generate(vertexCountPerRank, 100.0, graph);
+    upcxx::barrier();
+    PGASGraph::Generators::Uniform::VertexId vertexId1(0);
+    upcxx::barrier();
+    PGASGraph::Algorithms::Gossip::BroadcastGossip(graph, vertexId1, 15);
+    upcxx::barrier();
+    graph.ExportVerticesIntoFile(verticesFilename);
+    upcxx::barrier();
+    graph.ExportIntoFile(edgesFilename);
+    upcxx::barrier();
+}
+
+void Test_BroadcastOnKnodelGraph1() {
+    using VertexData = int;
+    using EdgeData = int;
+
+    const std::size_t vertexCount{ 8 };
+    const size_t vertexCountPerRank{ (vertexCount + upcxx::rank_n() - 1) / upcxx::rank_n() };
+    const std::size_t delta{ static_cast<std::size_t>(std::log2(vertexCount)) };
+    const std::size_t deltaPerRank{ delta / upcxx::rank_n() };
+
+    const std::string verticesFilename("exported-knodel-vertices-after-push.txt");
+    const std::string edgesFilename("exported-knodel-edges-after-push.txt");
+
+    PGASGraph::Graph<PGASGraph::Generators::Knodel::Vertex<VertexData, EdgeData>,
+        PGASGraph::Generators::Knodel::Edge<EdgeData>>
+        graph(vertexCount, vertexCountPerRank);
+
+    //upcxx::barrier();
+    // TODO: Which delta to supply?
+    PGASGraph::Generators::Knodel::Generate(vertexCountPerRank, delta, graph);
+
+    // upcxx::barrier();
+    // PGASGraph::Generators::Knodel::VertexId vertexId1(0, 0);
+    upcxx::barrier();
+    // PGASGraph::Algorithms::Gossip::BroadcastGossip(graph, vertexId1, 15);
+    //graph.ExportVerticesIntoFile(verticesFilename);
+    graph.ExportIntoFile(edgesFilename);
+}
+
 int main(int argc, char* argv[])
 {
     upcxx::init();
@@ -233,7 +289,10 @@ int main(int argc, char* argv[])
     // Test_RandomizedPushPullGossip1();
     // Test_GenerateUniformRandomGraph1();
     // Test_RandomizedPushOnUniformRandomGraph1();
-    Test_RandomizedPushOnKnodelGraph1();
+    // Test_RandomizedPushOnKnodelGraph1();
+    // Test_BroadcastOnUniformRandomGraph1();
+
+    Test_BroadcastOnKnodelGraph1();
 
     upcxx::finalize();
     return 0;
