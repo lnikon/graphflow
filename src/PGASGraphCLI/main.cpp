@@ -47,8 +47,8 @@ bool Test_AddVertex1()
         PGASGraph::Generators::Knodel::Edge<EdgeData>>
         graph(vertexCount, vertexCountPerRank);
 
-    PGASGraph::Generators::Knodel::VertexId from{ 0, 1 };
-    PGASGraph::Generators::Knodel::VertexId to{ 1, 2 };
+    PGASGraph::Generators::Knodel::VertexId from{ 0, 1, vertexCount / 2 };
+    PGASGraph::Generators::Knodel::VertexId to{ 1, 2, vertexCount / 2};
 
     graph.AddEdge({ from, to, 0 });
     return true;
@@ -66,8 +66,8 @@ bool Test_AddVertex2()
         PGASGraph::Generators::Knodel::Edge<EdgeData>>
         graph(vertexCount, vertexCountPerRank);
 
-    PGASGraph::Generators::Knodel::VertexId from{ 0, 1 };
-    PGASGraph::Generators::Knodel::VertexId to{ 1, 2 };
+    PGASGraph::Generators::Knodel::VertexId from{ 0, 1, vertexCount / 2 };
+    PGASGraph::Generators::Knodel::VertexId to{ 1, 2, vertexCount / 2 };
 
     graph.AddEdge({ from, to, 0 });
     if (graph.HasEdge(from, to))
@@ -93,8 +93,8 @@ bool Test_ExportGraph1()
         PGASGraph::Generators::Knodel::Edge<EdgeData>>
         graph(vertexCount, vertexCountPerRank);
 
-    PGASGraph::Generators::Knodel::VertexId from{ 0, 1 };
-    PGASGraph::Generators::Knodel::VertexId to{ 1, 2 };
+    PGASGraph::Generators::Knodel::VertexId from{ 0, 1, vertexCount / 2 };
+    PGASGraph::Generators::Knodel::VertexId to{ 1, 2, vertexCount / 2 };
 
     graph.AddEdge({ from, to, 0 });
     graph.ExportIntoFile(filename);
@@ -116,7 +116,7 @@ bool Test_GenerateKnodel1() {
         PGASGraph::Generators::Knodel::Edge<EdgeData>>
         graph(64, 64);
 
-    PGASGraph::Generators::Knodel::Generate(vertexCount, 2, graph);
+    PGASGraph::Generators::Knodel::Generate(vertexCount, vertexCount, 2, graph);
     graph.ExportIntoFile(filename);
 
     return true;
@@ -136,8 +136,8 @@ void Test_RandomizedPushPullGossip1() {
         PGASGraph::Generators::Knodel::Edge<EdgeData>>
         graph(64, 64);
 
-    PGASGraph::Generators::Knodel::Generate(vertexCount, delta, graph);
-    PGASGraph::Generators::Knodel::VertexId vertexId1{ 0, 0 };
+    PGASGraph::Generators::Knodel::Generate(vertexCount, vertexCount, delta, graph);
+    PGASGraph::Generators::Knodel::VertexId vertexId1{ 0, 0, vertexCount };
     PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
     graph.ExportIntoFile(filename);
 }
@@ -207,14 +207,10 @@ void Test_RandomizedPushOnKnodelGraph1() {
         PGASGraph::Generators::Knodel::Edge<EdgeData>>
         graph(vertexCount, vertexCountPerRank);
 
-    //upcxx::barrier();
-    // TODO: Which delta to supply?
-    if (upcxx::rank_me() == 0) {
-        PGASGraph::Generators::Knodel::Generate(vertexCount, delta, graph);
-    }
+    PGASGraph::Generators::Knodel::Generate(vertexCount, vertexCount, delta, graph);
 
     upcxx::barrier();
-    PGASGraph::Generators::Knodel::VertexId vertexId1(0, 0);
+    PGASGraph::Generators::Knodel::VertexId vertexId1(0, 0, vertexCount / 2);
     upcxx::barrier();
     PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
     //graph.ExportVerticesIntoFile(verticesFilename);
@@ -253,13 +249,13 @@ void Test_BroadcastOnKnodelGraph1() {
     using VertexData = int;
     using EdgeData = int;
 
-    const std::size_t vertexCount{ 8 };
+    const std::size_t vertexCount{ 1024 };
     const size_t vertexCountPerRank{ (vertexCount + upcxx::rank_n() - 1) / upcxx::rank_n() };
     const std::size_t delta{ static_cast<std::size_t>(std::log2(vertexCount)) };
     const std::size_t deltaPerRank{ delta / upcxx::rank_n() };
 
-    const std::string verticesFilename("exported-knodel-vertices-after-push.txt");
-    const std::string edgesFilename("exported-knodel-edges-after-push.txt");
+    const std::string verticesFilename("/home/nikon/projects/phd/pgas-graph/build/exported-knodel-vertices-after-push.txt");
+    const std::string edgesFilename("/home/nikon/projects/phd/pgas-graph/build/exported-knodel-edges-after-push.txt");
 
     PGASGraph::Graph<PGASGraph::Generators::Knodel::Vertex<VertexData, EdgeData>,
         PGASGraph::Generators::Knodel::Edge<EdgeData>>
@@ -267,14 +263,23 @@ void Test_BroadcastOnKnodelGraph1() {
 
     //upcxx::barrier();
     // TODO: Which delta to supply?
-    PGASGraph::Generators::Knodel::Generate(vertexCountPerRank, delta, graph);
+    PGASGraph::Generators::Knodel::Generate(vertexCount, vertexCountPerRank, delta, graph);
 
     // upcxx::barrier();
-    // PGASGraph::Generators::Knodel::VertexId vertexId1(0, 0);
+    PGASGraph::Generators::Knodel::VertexId vertexId1(0, 0, vertexCount / 2);
+    //upcxx::barrier();
+    //if (upcxx::rank_me() == 0) {
+    //    graph.printLocal();
+    //}
+    //upcxx::barrier();
+    //if (upcxx::rank_me() == 1) {
+    //    graph.printLocal();
+    //}
+    PGASGraph::Algorithms::Gossip::BroadcastGossip(graph, vertexId1, 15);
+    graph.ExportVerticesIntoFile(verticesFilename);
     upcxx::barrier();
-    // PGASGraph::Algorithms::Gossip::BroadcastGossip(graph, vertexId1, 15);
-    //graph.ExportVerticesIntoFile(verticesFilename);
     graph.ExportIntoFile(edgesFilename);
+    upcxx::barrier();
 }
 
 int main(int argc, char* argv[])

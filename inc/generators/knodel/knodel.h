@@ -16,35 +16,33 @@ namespace PGASGraph::Generators::Knodel
 {
 
     using Id = std::uint64_t;
+    using Size = std::uint64_t;
 
     struct VertexId
     {
         Id partition{ 0 };
         Id id{ 0 };
         bool isNull{ false };
-        // TODO: Generialize this
-        Id shift{ 4 };
+        Size shift{ 0 };
 
         VertexId() {}
 
-        explicit VertexId(const Id partitionid, const Id id, const bool isNull = false)
-            : partition(partitionid), id(id), isNull(isNull) {}
+        explicit VertexId(const Id partitionid, const Id id, const Size shift, const bool isNull = false)
+            : partition(partitionid), id(id), shift(shift), isNull(isNull) {}
 
         VertexId(const VertexId& vertexId) = default;
 
         std::size_t UniversalId() const
         {
-            // const auto result{ partition * 10 + id };
             const auto result{ partition * shift + id };
-            if (result == 17) {
-                std::cout << "(VertexId::UniversalId): partition=" << partition << ", id=" << id << std::endl;
-            }
+            //logMsg("(Knodel::UniversalId): id=" + std::to_string(result));
             return result;
         }
 
         bool operator==(const VertexId& other) const
         {
-            return partition == other.partition && id == other.id;
+            //return partition == other.partition && id == other.id;
+            return UniversalId() == other.UniversalId();
         }
 
         bool operator!=(const VertexId& other) const
@@ -130,8 +128,16 @@ namespace PGASGraph::Generators::Knodel
     };
 
     template <template<typename, typename> class Graph, typename Vertex, typename Edge>
-    size_t Generate(const size_t vertexCount, const size_t delta, Graph<Vertex, Edge>& graph)
+    size_t Generate(const size_t totalVertexCount, const size_t vertexCount, const size_t delta, Graph<Vertex, Edge>& graph)
     {
+        {
+            std::stringstream ss;
+            ss << "[debug]: Starting generation of knodel random graph with " << vertexCount << " vertices and " << delta << " vertex degree" << std::endl;
+            logMsg(ss.str());
+        }
+
+        const auto startTime = std::chrono::high_resolution_clock::now();
+
         const auto rankMe{ upcxx::rank_me() };
         const auto rankN{ upcxx::rank_n() };
         const auto minId{ rankMe * vertexCount };
@@ -141,11 +147,11 @@ namespace PGASGraph::Generators::Knodel
         {
             for (std::uint64_t j = minId; j < maxId; ++j)
             {
-                const typename Vertex::Id from{ 0, j };
+                const typename Vertex::Id from{ 0, j, totalVertexCount / 2 };
                 for (std::uint64_t d = 0; d < delta; ++d)
                 {
                     const auto k{ static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2, d)) - 1) % ((vertexCount * rankN) / 2)) };
-                    const typename Vertex::Id to{ 1, k };
+                    const typename Vertex::Id to{ 1, k, totalVertexCount / 2 };
                     if (graph.AddEdge({ from, to, 0 }))
                     {
                         edgeCount++;
@@ -154,7 +160,13 @@ namespace PGASGraph::Generators::Knodel
             }
         }
 
+        {
+            const auto stopTime = std::chrono::high_resolution_clock::now();
+            std::stringstream ss;
+            ss << "[debug]: Finished generation of knodel graph. Generation took " << std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count() << "ms" << std::endl;
+            logMsg(ss.str());
+        }
+
         return edgeCount;
     }
-
 } // namespace PGASGraph::Generators::Knodel

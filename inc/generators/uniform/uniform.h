@@ -39,7 +39,7 @@ struct VertexId
 
     bool operator==(const VertexId& other) const
     {
-        return id == other.id;
+        return UniversalId() == other.UniversalId();
     }
 
     bool operator!=(const VertexId& other) const
@@ -282,7 +282,7 @@ Generate(const size_t vertexCount, double percentage, Graph<Vertex, Edge>& graph
     end = std::chrono::steady_clock::now();
     const auto stopTime = std::chrono::high_resolution_clock::now();
     ss << "[debug]: Finished generation of uniform random graph" << std::endl;
-    ss << "[debug]: Generation took " << std::chrono::duration_cast<std::chrono::microseconds>(stopTime - startTime).count() << "ms" << std::endl;
+    ss << "[debug]: Generation took " << std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count() << "ms" << std::endl;
     logMsg(ss.str());
 
     return edges;

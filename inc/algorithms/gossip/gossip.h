@@ -15,35 +15,17 @@ namespace PGASGraph::Algorithms::Gossip {
         using GraphStorageType = typename PGASGraphType::GraphStorageType;
         using VertexId = typename Vertex::Id;
 
-        //const auto uniformRandomInt = [](const int start, const int end)
-        //{
-        //    std::random_device rd;
-        //    std::mt19937 gen(rd());
-        //    std::uniform_int_distribution<> distrib(start, end);
-        //    return distrib(gen);
-        //};
-
-        // std::size_t globalVertexCount{0};
-        // for (Rank r{0}; r < upcxx::rank_n(); ++r) {
-        //     const auto localStorage{graph.GetGraphStorage().fetch(r)};
-        //     globalVertexCount += localStorage->size();
-        // }
-
-        // upcxx::barrier();
-
-        // std::unique_ptr<int64_t[]> insertsPerRank(new int64_t[upcxx::rank_n()]());
-
-        std::stringstream ss;
-        ss << "[debug]: Starting randomized push-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl;
-        logMsg(ss.str());
-        ss.flush();
+        {
+            std::stringstream ss;
+            ss << "[debug]: Starting randomized push-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl;
+            logMsg(ss.str());
+        }
 
         const auto startTime = std::chrono::high_resolution_clock::now();
 
-        const auto localStorage{ graph.GetGraphStorage().fetch(upcxx::rank_me()).wait() };
-        logMsg("localStorage=" + std::to_string(localStorage.size()));
+        upcxx::barrier();
 
-        // upcxx::barrier();
+        const auto localStorage{ graph.GetGraphStorage().fetch(upcxx::rank_me()).wait() };
 
         // TODO: Effective storage to search for non-negative ids
         upcxx::dist_object<std::vector<VertexId>> visited{ {} };
@@ -71,14 +53,12 @@ namespace PGASGraph::Algorithms::Gossip {
 
         auto pushRandomizedGossip = [](GraphStorageType& storage, typename Vertex::Id vertexId, typename Vertex::Data data, upcxx::dist_object<std::vector<VertexId>>& visited)
         {
-            //// TODO: VertexId may not always directly map to vertex store index, so we need to perform O(N) search here.
-            // const auto localVertexStore = graph->fetch(upcxx::rank_me()).wait();
+            // TODO: VertexId may not always directly map to vertex store index, so we need to perform O(N) search here.
             const auto vertexStoreSize{ storage->size() };
             Vertex* vertex{ nullptr };
             for (std::size_t idx{ 0 }; idx < vertexStoreSize; ++idx) {
                 auto* localVertex{ storage->operator[](idx) };
                 if (localVertex) {
-                    // std::cout << "localVertex=" << localVertex->ToString() << std::endl;
                     if (localVertex->id == vertexId) {
                         vertex = localVertex;
                         break;
@@ -87,21 +67,18 @@ namespace PGASGraph::Algorithms::Gossip {
             }
 
             if (!vertex) {
-                std::cerr << "[ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
-                    << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
+                {
+                    std::stringstream ss;
+                    ss << "(pushRandomizedGossip): [ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
+                        << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
+                    logMsg(ss.str());
+                }
                 return VertexId{};
             }
 
             // Update current vertex data
-            logMsg("[VAGAG]: visited.size()=" + std::to_string(visited->size()));
             vertex->data = data;
             visited->push_back(vertexId);
-            // insertsPerRank[upcxx::rank_me()]++;
-
-            // Choose uniformly random neighbour
-            // const auto randomNeighbourId{ uniformRandomInt(0, vertex->neighbourhood.size()) };
-            // const auto neighbour{ vertex->neighbourhood[randomNeighbourId] };
-            // const neighbourIdParent{ getVertexParent(neighbourId) };
 
             for (auto neighbour : vertex->neighbourhood) {
                 auto it = std::find(visited->begin(), visited->end(), neighbour.id);
@@ -136,14 +113,12 @@ namespace PGASGraph::Algorithms::Gossip {
 
         upcxx::barrier();
 
-        auto end = std::chrono::steady_clock::now();
-        const auto stopTime = std::chrono::high_resolution_clock::now();
-
-        ss << "[debug]: Finished randomized push-based gossip algorithm" << std::endl;
-        logMsg(ss.str());
-        ss.flush();
-        ss << "[debug]: Gossiping took " << std::chrono::duration_cast<std::chrono::microseconds>(stopTime - startTime).count() << "ms" << std::endl;
-        logMsg(ss.str());
+        {
+            const auto stopTime = std::chrono::high_resolution_clock::now();
+            std::stringstream ss;
+            ss << "[debug]: Finished randomized push-based gossip algorithm" << ". Gossiping took " << std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count() << "ms" << std::endl;
+            logMsg(ss.str());
+        }
     }
 
     template <typename Vertex, typename Edge>
@@ -153,35 +128,17 @@ namespace PGASGraph::Algorithms::Gossip {
         using GraphStorageType = typename PGASGraphType::GraphStorageType;
         using VertexId = typename Vertex::Id;
 
-        //const auto uniformRandomInt = [](const int start, const int end)
-        //{
-        //    std::random_device rd;
-        //    std::mt19937 gen(rd());
-        //    std::uniform_int_distribution<> distrib(start, end);
-        //    return distrib(gen);
-        //};
-
-        // std::size_t globalVertexCount{0};
-        // for (Rank r{0}; r < upcxx::rank_n(); ++r) {
-        //     const auto localStorage{graph.GetGraphStorage().fetch(r)};
-        //     globalVertexCount += localStorage->size();
-        // }
-
-        // upcxx::barrier();
-
-        // std::unique_ptr<int64_t[]> insertsPerRank(new int64_t[upcxx::rank_n()]());
-
-        std::stringstream ss;
-        ss << "[debug]: Starting broadcast-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl;
-        logMsg(ss.str());
-        ss.flush();
+        {
+            std::stringstream ss;
+            ss << "[debug]: Starting broadcast-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl;
+            logMsg(ss.str());
+        }
 
         const auto startTime = std::chrono::high_resolution_clock::now();
 
-        const auto localStorage{ graph.GetGraphStorage().fetch(upcxx::rank_me()).wait() };
-        logMsg("localStorage=" + std::to_string(localStorage.size()));
+        upcxx::barrier();
 
-        // upcxx::barrier();
+        const auto localStorage{ graph.GetGraphStorage().fetch(upcxx::rank_me()).wait() };
 
         // TODO: Effective storage to search for non-negative ids
         upcxx::dist_object<std::vector<VertexId>> visited{ {} };
@@ -194,7 +151,6 @@ namespace PGASGraph::Algorithms::Gossip {
         auto getRandomVertexFromLocalStore = [](GraphStorageType& storage) {
             return upcxx::rpc(upcxx::rank_me(), [](GraphStorageType& storage) {
                 // TODO: Use uniform prng
-                logMsg("(BroadcastGossip::getRandomVertexFromLocalStore): storage->size()=" + std::to_string(storage->size()));
                 const auto size{ storage->size() };
                 std::size_t notNullCount{ 0 };
                 for (std::size_t idx{ 0 }; idx < size; ++idx) {
@@ -202,7 +158,7 @@ namespace PGASGraph::Algorithms::Gossip {
                         notNullCount++;
                     }
                 }
-                logMsg("(BroadcastGossip::getRandomVertexFromLocalStore): notNullCount=" + std::to_string(notNullCount));
+
                 return storage->operator[](0);
                 }, storage).wait();
         };
@@ -211,21 +167,23 @@ namespace PGASGraph::Algorithms::Gossip {
             return upcxx::rpc(PGASGraph::GetVertexParent<Vertex>(vertexId, localStorage.size()),
                 [](GraphStorageType& storage, typename Vertex::Id vertexId, typename Vertex::Data data) {
                     const auto vertexStoreSize{ storage->size() };
-
                     Vertex* vertex{ nullptr };
                     for (std::size_t idx{ 0 }; idx < vertexStoreSize; ++idx) {
                         auto* localVertex{ storage->operator[](idx) };
-                        if (localVertex) {
-                            if (localVertex->id == vertexId) {
-                                vertex = localVertex;
-                                break;
-                            }
+                        if (localVertex && localVertex->id == vertexId) {
+                            vertex = localVertex;
+                            break;
                         }
                     }
 
                     if (!vertex) {
-                        std::cerr << "[ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
-                            << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
+                        {
+                            std::stringstream ss;
+                            ss << "(transferGossip): [ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
+                                << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
+                            logMsg(ss.str());
+                        }
+
                         return false;
                     }
 
@@ -241,46 +199,47 @@ namespace PGASGraph::Algorithms::Gossip {
         auto broadcastGossip = [&transferGossip, &neighbourhoodFeatures](GraphStorageType& storage, typename Vertex::Id vertexId, typename Vertex::Data data, upcxx::dist_object<std::vector<VertexId>>& visited)
         {
             // TODO: VertexId may not always directly map to vertex store index, so we need to perform O(N) search here.
-            // const auto localVertexStore = graph->fetch(upcxx::rank_me()).wait();
-
             const auto vertexStoreSize{ storage->size() };
             Vertex* vertex{ nullptr };
             for (std::size_t idx{ 0 }; idx < vertexStoreSize; ++idx) {
                 auto* localVertex{ storage->operator[](idx) };
-                if (localVertex) {
-                    if (localVertex->id == vertexId) {
-                        vertex = localVertex;
-                        break;
-                    }
+                if (localVertex && localVertex->id == vertexId) {
+                    vertex = localVertex;
+                    break;
                 }
             }
 
-            std::vector<typename Vertex::Id> neighIds;
             if (!vertex) {
-                std::cerr << "[ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
-                    << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
+                {
+                    std::stringstream ss;
+                    ss << "(broadcastGossip): [ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
+                        << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
+                    logMsg(ss.str());
+                }
                 return neighIds;
             }
 
             // Update current vertex data
-            logMsg("[VAGAG]: visited.size()=" + std::to_string(visited->size()));
+            // logMsg("[VAGAG]: visited.size()=" + std::to_string(visited->size()));
             vertex->data = data;
             visited->push_back(vertexId);
 
+            std::vector<typename Vertex::Id> neighIds;
             for (auto neighbour : vertex->neighbourhood) {
                 // neighbourhoodFeatures.push_back(transferGossip(storage, neighbour.id, data));
                 neighIds.push_back(neighbour.id);
             }
-
-            //for (auto& feature : neighbourhoodFeatures) {
-            //    feature.then([](){});
-            //}
 
             return neighIds;
         };
 
         const auto randomVertex{ getRandomVertexFromLocalStore(graph.GetGraphStorage()) };
         if (!randomVertex) {
+            {
+                std::stringstream ss;
+                ss << "(BroadcastGossip): [ERROR]: Unable to get random vertex from graph" << std::endl;
+                logMsg(ss.str());
+            }
             return;
         }
 
@@ -295,12 +254,6 @@ namespace PGASGraph::Algorithms::Gossip {
 
             upcxx::barrier();
 
-            //auto localFeatures{ neighbourhoodFeatures.fetch(upcxx::rank_me()).wait() };
-            for (auto& feature : neighbourhoodFeatures) {
-                //logMsg("asdfas");
-                //feature.wait();
-            }
-
             for (auto id : ids) {
                 frontline.push_back(transferGossip(graph.GetGraphStorage(), id, data));
             }
@@ -310,23 +263,15 @@ namespace PGASGraph::Algorithms::Gossip {
             }
 
             upcxx::barrier();
-
-
-            //for (const auto id : neighbourhoodIds) {
-            //    const auto neighbourParentRank{ PGASGraph::GetVertexParent<Vertex>(id, graph.GetVerticesPerRank()) };
-            //    const auto neighbourFuture = upcxx::rpc(neighbourParentRank, broadcastGossip, graph.GetGraphStorage(), id, data, visited);
-            //}
-        }
+       }
 
         upcxx::barrier();
 
-        auto end = std::chrono::steady_clock::now();
-        const auto stopTime = std::chrono::high_resolution_clock::now();
-
-        ss << "[debug]: Finished broadcast-based gossip algorithm" << std::endl;
-        logMsg(ss.str());
-        ss.flush();
-        ss << "[debug]: Gossiping took " << std::chrono::duration_cast<std::chrono::microseconds>(stopTime - startTime).count() << "ms" << std::endl;
-        logMsg(ss.str());
+        {
+            std::stringstream ss;
+            const auto stopTime = std::chrono::high_resolution_clock::now();
+            ss << "[debug]: Finished broadcast-based gossip algorithm" << ". Gossiping took " << std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count() << "ms" << std::endl;
+            logMsg(ss.str());
+        }
     }
 }

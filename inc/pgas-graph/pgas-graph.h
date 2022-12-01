@@ -62,7 +62,7 @@ namespace PGASGraph
             --r;
         }
         else {
-            logMsg("Parent for id.UniversalId()=" + std::to_string(id.UniversalId()) + " is parent=" + std::to_string(r));
+            //logMsg("Parent for id.UniversalId()=" + std::to_string(id.UniversalId()) + " is parent=" + std::to_string(r));
         }
 
         return r;
@@ -211,7 +211,6 @@ namespace PGASGraph
             return false;
         }
 
-
         // Lambda to insert single edge into the graph.
         auto insertSingleEdge = [](Rank rank, GraphStorageType& vertexStore, Edge edge, Rank parentRank)
         {
@@ -222,9 +221,9 @@ namespace PGASGraph
                     const auto vertexStoreSize = vertexStore->size();
                     // TODO: Can this partitioning scheme be abstracted?
                     // TODO: Wtf are you doing ?!
-                    const std::size_t idx = edge.from.UniversalId() - parentRank * vertexStoreSize;
+                    const std::size_t idx = edge.from.UniversalId() - GetVertexParent<Vertex>(edge.from, vertexStoreSize) * vertexStoreSize;
                     // const std::size_t idx = edge.from.UniversalId() % vertexStoreSize;
-                    // logMsg("edge.from.UniversalId()=" + std::to_string(edge.from.UniversalId()) + ", parentRank=" + std::to_string(parentRank) + ", idx=" + std::to_string(idx) + ", vertexStoreSize=" + std::to_string(vertexStoreSize));
+                    //logMsg("(insertSingleEdge): edge.from.UniversalId()=" + std::to_string(edge.from.UniversalId()) + ", parentRank=" + std::to_string(GetVertexParent<Vertex>(edge.from, vertexStoreSize)) + ", idx=" + std::to_string(idx) + ", vertexStoreSize=" + std::to_string(vertexStoreSize));
                     assert(idx < vertexStoreSize);
 
                     // TODO: Wrap into addVertex
@@ -235,6 +234,7 @@ namespace PGASGraph
 
                     if (vertexStore->operator[](idx)->HasNeighbour(edge.to))
                     {
+                        logMsg("Already has edge");
                         return false;
                     }
 
@@ -280,11 +280,11 @@ namespace PGASGraph
         std::string msg;
         for (auto idx = size_t{ 0 }; idx < localVertexStore.size(); ++idx)
         {
-            msg += "\n" + std::to_string(localVertexStore[idx]->id) + ": [";
-            auto neighs = localVertexStore[idx]->neighbours;
+            msg += "\n" + localVertexStore[idx]->id.ToString() + ": [";
+            auto neighs = localVertexStore[idx]->neighbourhood;
             for (const auto& neigh : neighs)
             {
-                msg += " (" + std::to_string(neigh.first) + ", " + std::to_string(neigh.second) + "), ";
+                msg += " (" + neigh.id.ToString() + ", " + std::to_string(neigh.data) + "), ";
             }
             msg += "]\n";
         }
@@ -754,19 +754,24 @@ namespace PGASGraph
             const auto& rank_n = upcxx::rank_n();
             for (size_t r = 0; r < rank_n; ++r)
             {
-                auto localVertexStore = m_vertexStore.fetch(upcxx::rank_me()).wait();
-                logMsg("localVertexStore.size=" + std::to_string(localVertexStore.size()), 0);
-                for (Vertex* vertex : localVertexStore)
-                {
-                    // assert(vertex != nullptr);
-                    if (vertex)
-                    {
-                        for (auto& ngh : vertex->neighbourhood)
+                std::string vertexStoreSerialized = upcxx::rpc(r, [](GraphStorageType& storage) {
+                    const auto size{ storage->size() };
+                    std::stringstream graphStream;
+                    for (auto idx{ 0 }; idx < size; idx++) {
+                        Vertex* vertex{ storage->operator[](idx) };
+                        if (vertex)
                         {
-                            graphStream << vertex->id.UniversalId() << " " << ngh.id.UniversalId() << std::endl;
+                            for (auto& ngh : vertex->neighbourhood)
+                            {
+                                graphStream << vertex->id.UniversalId() << " " << ngh.id.UniversalId() << std::endl;
+                            }
                         }
                     }
-                }
+
+                    return graphStream.str();
+                    }, m_vertexStore).wait();
+                
+                graphStream << vertexStoreSerialized;
             }
 
             std::fstream graphFile(fileName, std::ios::trunc | std::ios::in | std::ios::out);
@@ -777,6 +782,8 @@ namespace PGASGraph
 
             graphFile << graphStream.str();
         }
+
+        upcxx::barrier();
     }
 
     // TODO: Move into separate serializer
