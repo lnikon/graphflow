@@ -201,7 +201,7 @@ namespace PGASGraph
             .wait();
 
         // Finish for all ranks to finilize initialization.
-        // upcxx::barrier();
+        upcxx::barrier();
     }
 
     template <typename Vertex, typename Edge> bool Graph<Vertex, Edge>::addEdgeHelper(Edge edge)
@@ -234,7 +234,7 @@ namespace PGASGraph
 
                     if (vertexStore->operator[](idx)->HasNeighbour(edge.to))
                     {
-                        logMsg("Already has edge");
+                        // logMsg("Already has edge");
                         return false;
                     }
 

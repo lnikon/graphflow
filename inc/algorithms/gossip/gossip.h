@@ -3,6 +3,8 @@
 #include <pgas-graph/pgas-graph.h>
 
 #include <sstream>
+#include <exception>
+#include <random>
 
 namespace PGASGraph::Algorithms::Gossip {
     // TODO: Works only for connected graphs! Need to refine termination predicate. Can be research subject.
@@ -37,8 +39,10 @@ namespace PGASGraph::Algorithms::Gossip {
 
         auto getRandomVertexFromLocalStore = [](GraphStorageType& storage) {
             return upcxx::rpc(upcxx::rank_me(), [](GraphStorageType& storage) {
-                // TODO: Use uniform prng
                 logMsg("(PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=" + std::to_string(storage->size()));
+                std::default_random_engine generator;
+                std::uniform_int_distribution<int> distribution(0, storage->size()-1);
+                int idx = distribution(generator);
                 const auto size{ storage->size() };
                 std::size_t notNullCount{ 0 };
                 for (std::size_t idx{ 0 }; idx < size; ++idx) {
@@ -47,7 +51,7 @@ namespace PGASGraph::Algorithms::Gossip {
                     }
                 }
                 logMsg("(PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=" + std::to_string(notNullCount));
-                return storage->operator[](0);
+                return storage->operator[](idx);
                 }, storage).wait();
         };
 
@@ -78,7 +82,15 @@ namespace PGASGraph::Algorithms::Gossip {
 
             // Update current vertex data
             vertex->data = data;
-            visited->push_back(vertexId);
+            if (std::find(visited->begin(), visited->end(), vertexId) == visited->end()) {
+                visited->push_back(vertexId);
+            }
+
+            std::random_device generator;
+            std::uniform_int_distribution<int> distribution(0, vertex->neighbourhood.size()-1);
+            int idx = distribution(generator);
+            //std::cout << "vertex=" << vertex->ToString() << ", vertex->neighbourhood.size()=" << vertex->neighbourhood.size() << "idx=" << idx << std::endl;
+            return (vertex->neighbourhood.begin() + idx)->id;
 
             for (auto neighbour : vertex->neighbourhood) {
                 auto it = std::find(visited->begin(), visited->end(), neighbour.id);
@@ -93,25 +105,30 @@ namespace PGASGraph::Algorithms::Gossip {
 
             // PushPullRandomizedGossip(neighbour.id, data);
             auto result = VertexId{};
-            result.isNull = true;
             return result;
         };
 
+        upcxx::barrier();
         const auto randomVertex{ getRandomVertexFromLocalStore(graph.GetGraphStorage()) };
         if (!randomVertex) {
-            return;
+            throw std::logic_error("cannot get random vertex from store");
         }
+        upcxx::barrier();
 
         typename Vertex::Id nextVertexId = randomVertex->id;
-        while (getVisitedSize(visited) != localStorage.size()) {
+        while (getVisitedSize(visited) != localStorage.size()-1) {
             const auto vertexIdParent{ PGASGraph::GetVertexParent<Vertex>(nextVertexId, graph.GetVerticesPerRank()) };
             nextVertexId = upcxx::rpc(
                 vertexIdParent,
                 pushRandomizedGossip,
                 graph.GetGraphStorage(), nextVertexId, data, visited).wait();
-        }
 
-        upcxx::barrier();
+            {
+                std::stringstream ss;
+                ss << "getVisitedSize(visited)=" << getVisitedSize(visited) << ", localStorage.size()=" << localStorage.size() << std::endl;
+                logMsg(ss.str());
+            }
+        }
 
         {
             const auto stopTime = std::chrono::high_resolution_clock::now();
@@ -119,6 +136,8 @@ namespace PGASGraph::Algorithms::Gossip {
             ss << "[debug]: Finished randomized push-based gossip algorithm" << ". Gossiping took " << std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count() << "ms" << std::endl;
             logMsg(ss.str());
         }
+
+        upcxx::barrier();
     }
 
     template <typename Vertex, typename Edge>
@@ -209,6 +228,7 @@ namespace PGASGraph::Algorithms::Gossip {
                 }
             }
 
+            std::vector<typename Vertex::Id> neighIds;
             if (!vertex) {
                 {
                     std::stringstream ss;
@@ -224,7 +244,6 @@ namespace PGASGraph::Algorithms::Gossip {
             vertex->data = data;
             visited->push_back(vertexId);
 
-            std::vector<typename Vertex::Id> neighIds;
             for (auto neighbour : vertex->neighbourhood) {
                 // neighbourhoodFeatures.push_back(transferGossip(storage, neighbour.id, data));
                 neighIds.push_back(neighbour.id);
@@ -263,7 +282,7 @@ namespace PGASGraph::Algorithms::Gossip {
             }
 
             upcxx::barrier();
-       }
+        }
 
         upcxx::barrier();
 

@@ -204,7 +204,7 @@ Generate(const size_t vertexCount, double percentage, Graph<Vertex, Edge>& graph
 
         if (u != v)
         {
-            logMsg("[DEBUG]: Adding edge between u=" + std::to_string(u.id) + " v=" + std::to_string(v.id));
+            //logMsg("[DEBUG]: Adding edge between u=" + std::to_string(u.id) + " v=" + std::to_string(v.id));
             if (graph.AddEdge({u, v, genWeight(weight)}))
             {
                 edges++;
