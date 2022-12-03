@@ -193,7 +193,8 @@ bool Test_RandomizedPushOnUniformRandomGraph1() {
     upcxx::barrier();
     PGASGraph::Generators::Uniform::VertexId vertexId1(0);
     upcxx::barrier();
-    PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
+    //PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
+    PGASGraph::Algorithms::Gossip::BroadcastGossip(graph, vertexId1, 15);
     upcxx::barrier();
     graph.ExportVerticesIntoFile(verticesFilename);
     upcxx::barrier();
@@ -262,7 +263,7 @@ bool Test_BroadcastOnKnodelGraph1() {
     using VertexData = int;
     using EdgeData = int;
 
-    const std::size_t vertexCount{ 8 };
+    const std::size_t vertexCount{ 64 };
     const size_t vertexCountPerRank{ (vertexCount + upcxx::rank_n() - 1) / upcxx::rank_n() };
     const std::size_t delta{ static_cast<std::size_t>(std::log2(vertexCount)) };
     const std::size_t deltaPerRank{ delta / upcxx::rank_n() };
@@ -281,8 +282,9 @@ bool Test_BroadcastOnKnodelGraph1() {
     // upcxx::barrier();
     PGASGraph::Generators::Knodel::VertexId vertexId1(0, 0, vertexCount / 2);
     upcxx::barrier();
-    //graph.printLocal();
-    PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
+    graph.printLocal();
+    //PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
+    PGASGraph::Algorithms::Gossip::BroadcastGossip(graph, vertexId1, 15);
     upcxx::barrier();
     //graph.ExportVerticesIntoFile(verticesFilename);
     graph.ExportIntoFile(edgesFilename);
@@ -312,7 +314,8 @@ int main(int argc, char* argv[])
     //tests.push_back({ Test_RandomizedPushOnKnodelGraph1, "Test_RandomizedPushOnKnodelGraph1" });
     //tests.push_back({ Test_BroadcastOnUniformRandomGraph1, "Test_BroadcastOnUniformRandomGraph1" });
     //tests.push_back({ Test_BroadcastOnKnodelGraph1, "Test_BroadcastOnKnodelGraph1" });
-    Test_BroadcastOnKnodelGraph1();
+    //Test_BroadcastOnKnodelGraph1();
+    Test_RandomizedPushOnUniformRandomGraph1();
 
     for (auto& test : tests) {
         if (upcxx::rank_me() == 0) {

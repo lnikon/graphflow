@@ -142,21 +142,32 @@ namespace PGASGraph::Generators::Knodel
         const auto rankN{ upcxx::rank_n() };
         const auto minId{ rankMe * vertexCountPerRank };
         const auto maxId{ (rankMe + 1) * vertexCountPerRank - 1 };
+        const auto deltaPerRank{ static_cast<std::size_t>(std::log2(vertexCountPerRank)) };
 
         size_t edgeCount{ 0 };
         {
             {
                 std::stringstream ss;
-                ss << "[debug]: minId=" << minId << ", maxId=" << maxId << ", maxId/2=" << maxId/2 << std::endl;
+                ss << "[debug]: minId=" << minId << ", maxId=" << maxId << ", maxId/2=" << maxId / 2 << std::endl;
                 logMsg(ss.str());
             }
 
-            for (std::uint64_t j = 0; j <= vertexCountPerRank/2 + 1; ++j)
+            //for (std::uint64_t j = minId; j < (minId + vertexCountPerRank)/2; ++j)
+            //% static_cast<std::size_t>(std::ceil((totalVertexCount / 2))) + 1
+            //for (std::uint64_t j = minId; j <= (minId + vertexCountPerRank / 2 - 1) % (totalVertexCount / 2); ++j)
+            for (std::uint64_t j = minId; j <= maxId % (totalVertexCount / 2); ++j)
             {
+                {
+                    std::stringstream ss;
+                    ss << "[debug]: j=" << j << std::endl;
+                    logMsg(ss.str());
+                }
+
                 const typename Vertex::Id from{ 0, j, totalVertexCount / 2 };
                 for (std::uint64_t d = 0; d < delta; ++d)
                 {
-                    const auto k{ static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2, d)) - 1) % ((vertexCountPerRank * rankN) / 2)) };
+                    // const auto k{ static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2, d)) - 1) % ((totalVertexCount) / 2)) };
+                    const auto k{ static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2, d)) - 1)) % (static_cast<std::size_t>(std::ceil(totalVertexCount / 2))) };
                     const typename Vertex::Id to{ 1, k, totalVertexCount / 2 };
                     if (graph.AddEdge({ from, to, 0 }))
                     {
