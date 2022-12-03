@@ -262,7 +262,7 @@ bool Test_BroadcastOnKnodelGraph1() {
     using VertexData = int;
     using EdgeData = int;
 
-    const std::size_t vertexCount{ 1024 };
+    const std::size_t vertexCount{ 8 };
     const size_t vertexCountPerRank{ (vertexCount + upcxx::rank_n() - 1) / upcxx::rank_n() };
     const std::size_t delta{ static_cast<std::size_t>(std::log2(vertexCount)) };
     const std::size_t deltaPerRank{ delta / upcxx::rank_n() };
@@ -281,13 +281,7 @@ bool Test_BroadcastOnKnodelGraph1() {
     // upcxx::barrier();
     PGASGraph::Generators::Knodel::VertexId vertexId1(0, 0, vertexCount / 2);
     upcxx::barrier();
-    //if (upcxx::rank_me() == 0) {
-    //    graph.printLocal();
-    //}
-    //upcxx::barrier();
-    //if (upcxx::rank_me() == 1) {
-    //    graph.printLocal();
-    //}
+    //graph.printLocal();
     PGASGraph::Algorithms::Gossip::PushRandomizedGossip(graph, vertexId1, 15);
     upcxx::barrier();
     //graph.ExportVerticesIntoFile(verticesFilename);

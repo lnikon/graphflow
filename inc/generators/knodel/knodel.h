@@ -128,11 +128,11 @@ namespace PGASGraph::Generators::Knodel
     };
 
     template <template<typename, typename> class Graph, typename Vertex, typename Edge>
-    size_t Generate(const size_t totalVertexCount, const size_t vertexCount, const size_t delta, Graph<Vertex, Edge>& graph)
+    size_t Generate(const size_t totalVertexCount, const size_t vertexCountPerRank, const size_t delta, Graph<Vertex, Edge>& graph)
     {
         {
             std::stringstream ss;
-            ss << "[debug]: Starting generation of knodel random graph with " << vertexCount << " vertices and " << delta << " vertex degree" << std::endl;
+            ss << "[debug]: Starting generation of knodel random graph with " << vertexCountPerRank << " vertices and " << delta << " vertex degree" << std::endl;
             logMsg(ss.str());
         }
 
@@ -140,17 +140,23 @@ namespace PGASGraph::Generators::Knodel
 
         const auto rankMe{ upcxx::rank_me() };
         const auto rankN{ upcxx::rank_n() };
-        const auto minId{ rankMe * vertexCount };
-        const auto maxId{ (rankMe + 1) * vertexCount - 1 };
+        const auto minId{ rankMe * vertexCountPerRank };
+        const auto maxId{ (rankMe + 1) * vertexCountPerRank - 1 };
 
         size_t edgeCount{ 0 };
         {
-            for (std::uint64_t j = minId; j < maxId; ++j)
+            {
+                std::stringstream ss;
+                ss << "[debug]: minId=" << minId << ", maxId=" << maxId << ", maxId/2=" << maxId/2 << std::endl;
+                logMsg(ss.str());
+            }
+
+            for (std::uint64_t j = 0; j <= vertexCountPerRank/2 + 1; ++j)
             {
                 const typename Vertex::Id from{ 0, j, totalVertexCount / 2 };
                 for (std::uint64_t d = 0; d < delta; ++d)
                 {
-                    const auto k{ static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2, d)) - 1) % ((vertexCount * rankN) / 2)) };
+                    const auto k{ static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2, d)) - 1) % ((vertexCountPerRank * rankN) / 2)) };
                     const typename Vertex::Id to{ 1, k, totalVertexCount / 2 };
                     if (graph.AddEdge({ from, to, 0 }))
                     {

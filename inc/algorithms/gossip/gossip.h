@@ -126,7 +126,7 @@ namespace PGASGraph::Algorithms::Gossip {
             {
                 std::stringstream ss;
                 ss << "getVisitedSize(visited)=" << getVisitedSize(visited) << ", localStorage.size()=" << localStorage.size() << std::endl;
-                logMsg(ss.str());
+                //logMsg(ss.str());
             }
         }
 

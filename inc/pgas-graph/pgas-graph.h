@@ -229,6 +229,12 @@ namespace PGASGraph
                     // TODO: Wrap into addVertex
                     if (!vertexStore->operator[](idx))
                     {
+                        {
+                            std::stringstream ss;
+                            ss << "Adding vertex with id=" << edge.from.UniversalId() << " at idx=" << idx << std::endl;
+                            logMsg(ss.str());
+                        }
+
                         vertexStore->operator[](idx) = new Vertex(typename Vertex::Id(edge.from));
                     }
 
@@ -280,13 +286,18 @@ namespace PGASGraph
         std::string msg;
         for (auto idx = size_t{ 0 }; idx < localVertexStore.size(); ++idx)
         {
-            msg += "\n" + localVertexStore[idx]->id.ToString() + ": [";
-            auto neighs = localVertexStore[idx]->neighbourhood;
-            for (const auto& neigh : neighs)
-            {
-                msg += " (" + neigh.id.ToString() + ", " + std::to_string(neigh.data) + "), ";
+            if (localVertexStore[idx]) {
+                msg += "\n" + localVertexStore[idx]->id.ToString() + ": [";
+                auto neighs = localVertexStore[idx]->neighbourhood;
+                for (const auto& neigh : neighs)
+                {
+                    if (true) {
+
+                        msg += " (" + neigh.id.ToString() + ", " + std::to_string(neigh.data) + "), ";
+                    }
+                }
+                msg += "]\n";
             }
-            msg += "]\n";
         }
 
         logMsg(msg);
@@ -770,8 +781,8 @@ namespace PGASGraph
 
                     return graphStream.str();
                     }, m_vertexStore).wait();
-                
-                graphStream << vertexStoreSerialized;
+
+                    graphStream << vertexStoreSerialized;
             }
 
             std::fstream graphFile(fileName, std::ios::trunc | std::ios::in | std::ios::out);
