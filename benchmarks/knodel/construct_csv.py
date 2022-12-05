@@ -47,6 +47,36 @@ def write_csv(metrics):
             
             wrtiter.writerow(row)
 
+    with open(output_knodel_generation, 'w') as f:
+        wrtiter = csv.writer(f)
+        for metric in metrics['uniform']:
+            row = []
+            row.append(metric['edges'])
+            for data in metric['datasets']:
+                row.append(data['mean'])
+            
+            wrtiter.writerow(row)
+
+    with open(output_knodel_pushrandomized, 'w') as f:
+        wrtiter = csv.writer(f)
+        for metric in metrics['uniform']:
+            row = []
+            row.append(metric['edges'])
+            for data in metric['pushrandomized']:
+                row.append(data['mean'])
+            
+            wrtiter.writerow(row)
+
+    with open(output_knodel_broadcast, 'w') as f:
+        wrtiter = csv.writer(f)
+        for metric in metrics['uniform']:
+            row = []
+            row.append(metric['edges'])
+            for data in metric['broadcast']:
+                row.append(data['mean'])
+            
+            wrtiter.writerow(row)
+
 def construct_metrics(path):
     results = [_json for _json in load_results_generator("./*.json")]
     metrics = {
