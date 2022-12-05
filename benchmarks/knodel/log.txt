@@ -1,0 +1,310 @@
+[0/1] [debug]: Starting generation of knodel random graph with 1024 vertices and 10 vertex degree
+
+[0/1] [debug]: Finished generation of knodel graph. Generation took 160ms
+
+[0/1] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[0/1] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=1024
+[0/1] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=1024
+[0/1] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 463ms
+
+[0/2] [debug]: Starting generation of knodel random graph with 512 vertices and 10 vertex degree
+
+[1/2] [debug]: Starting generation of knodel random graph with 512 vertices and 10 vertex degree
+
+[1/2] [debug]: Finished generation of knodel graph. Generation took 99ms
+
+[0/2] [debug]: Finished generation of knodel graph. Generation took 105ms
+
+[0/2] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[1/2] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[1/2] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=512
+[0/2] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=512
+[1/2] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=512
+[0/2] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=511
+[1/2] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 113ms
+
+[0/2] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 420ms
+
+[0/4] [debug]: Starting generation of knodel random graph with 256 vertices and 10 vertex degree
+
+[1/4] [debug]: Starting generation of knodel random graph with 256 vertices and 10 vertex degree
+
+[2/4] [debug]: Starting generation of knodel random graph with 256 vertices and 10 vertex degree
+
+[3/4] [debug]: Starting generation of knodel random graph with 256 vertices and 10 vertex degree
+
+[0/4] [debug]: Finished generation of knodel graph. Generation took 48ms
+
+[1/4] [debug]: Finished generation of knodel graph. Generation took 49ms
+
+[2/4] [debug]: Finished generation of knodel graph. Generation took 53ms
+
+[3/4] [debug]: Finished generation of knodel graph. Generation took 53ms
+
+[0/4] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[1/4] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[2/4] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[3/4] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[0/4] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=256
+[1/4] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=256
+[2/4] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=256
+[3/4] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=256
+[0/4] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=255
+[1/4] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=255
+[2/4] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=256
+[3/4] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=256
+[2/4] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 39ms
+
+[3/4] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 64ms
+
+[0/4] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 118ms
+
+[1/4] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 237ms
+
+[3/8] [debug]: Starting generation of knodel random graph with 128 vertices and 10 vertex degree
+
+[1/8] [debug]: Starting generation of knodel random graph with 128 vertices and 10 vertex degree
+
+[7/8] [debug]: Starting generation of knodel random graph with 128 vertices and 10 vertex degree
+
+[0/8] [debug]: Starting generation of knodel random graph with 128 vertices and 10 vertex degree
+
+[4/8] [debug]: Starting generation of knodel random graph with 128 vertices and 10 vertex degree
+
+[5/8] [debug]: Starting generation of knodel random graph with 128 vertices and 10 vertex degree
+
+[2/8] [debug]: Starting generation of knodel random graph with 128 vertices and 10 vertex degree
+
+[6/8] [debug]: Starting generation of knodel random graph with 128 vertices and 10 vertex degree
+
+[3/8] [debug]: Finished generation of knodel graph. Generation took 24ms
+
+[0/8] [debug]: Finished generation of knodel graph. Generation took 24ms
+
+[1/8] [debug]: Finished generation of knodel graph. Generation took 24ms
+
+[2/8] [debug]: Finished generation of knodel graph. Generation took 25ms
+
+[4/8] [debug]: Finished generation of knodel graph. Generation took 27ms
+
+[7/8] [debug]: Finished generation of knodel graph. Generation took 27ms
+
+[6/8] [debug]: Finished generation of knodel graph. Generation took 27ms
+
+[5/8] [debug]: Finished generation of knodel graph. Generation took 27ms
+
+[0/8] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[3/8] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[5/8] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[7/8] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[2/8] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[6/8] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[4/8] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[1/8] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[5/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=128
+[2/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=128
+[4/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=128
+[3/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=128
+[1/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=128
+[0/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=128
+[6/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=128
+[7/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=128
+[5/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=128
+[2/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=127
+[4/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=128
+[3/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=127
+[1/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=127
+[0/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=127
+[6/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=128
+[7/8] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=128
+[6/8] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 18ms
+
+[7/8] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 20ms
+
+[4/8] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 28ms
+
+[5/8] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 29ms
+
+[1/8] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 50ms
+
+[0/8] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 62ms
+
+[3/8] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 110ms
+
+[2/8] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 123ms
+
+[15/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[8/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[13/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[9/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[0/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[12/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[7/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[5/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[14/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[1/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[10/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[4/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[11/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[6/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[3/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[2/16] [debug]: Starting generation of knodel random graph with 64 vertices and 10 vertex degree
+
+[12/16] [debug]: Finished generation of knodel graph. Generation took 15ms
+
+[15/16] [debug]: Finished generation of knodel graph. Generation took 15ms
+
+[7/16] [debug]: Finished generation of knodel graph. Generation took 15ms
+
+[4/16] [debug]: Finished generation of knodel graph. Generation took 16ms
+
+[3/16] [debug]: Finished generation of knodel graph. Generation took 16ms
+
+[2/16] [debug]: Finished generation of knodel graph. Generation took 17ms
+
+[5/16] [debug]: Finished generation of knodel graph. Generation took 17ms
+
+[6/16] [debug]: Finished generation of knodel graph. Generation took 17ms
+
+[0/16] [debug]: Finished generation of knodel graph. Generation took 17ms
+
+[1/16] [debug]: Finished generation of knodel graph. Generation took 17ms
+
+[11/16] [debug]: Finished generation of knodel graph. Generation took 19ms
+
+[10/16] [debug]: Finished generation of knodel graph. Generation took 19ms
+
+[8/16] [debug]: Finished generation of knodel graph. Generation took 19ms
+
+[14/16] [debug]: Finished generation of knodel graph. Generation took 20ms
+
+[13/16] [debug]: Finished generation of knodel graph. Generation took 20ms
+
+[9/16] [debug]: Finished generation of knodel graph. Generation took 20ms
+
+[0/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[3/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[13/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[6/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[7/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[1/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[5/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[15/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[12/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[2/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[8/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[10/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[9/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[14/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[4/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[11/16] [debug]: Starting randomized push-based gossip algorithm from vertex with Id partition=0, id=0 and data 15
+
+[12/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[15/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[5/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[7/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[0/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[10/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[3/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[8/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[13/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[6/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[11/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[4/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[1/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[14/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[9/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[2/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=64
+[12/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=64
+[15/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=64
+[5/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=63
+[7/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=63
+[0/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=63
+[10/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=64
+[3/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=63
+[8/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=64
+[13/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=64
+[6/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=63
+[11/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=64
+[4/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=63
+[1/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=63
+[14/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=64
+[9/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=64
+[2/16] (PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=63
+[15/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 7ms
+
+[12/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 7ms
+
+[14/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 9ms
+
+[13/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 9ms
+
+[11/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 9ms
+
+[10/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 10ms
+
+[8/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 11ms
+
+[9/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 17ms
+
+[4/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 19ms
+
+[5/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 28ms
+
+[3/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 34ms
+
+[0/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 37ms
+
+[1/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 38ms
+
+[2/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 60ms
+
+[7/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 62ms
+
+[6/16] [debug]: Finished randomized push-based gossip algorithm. Gossiping took 83ms
+

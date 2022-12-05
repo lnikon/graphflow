@@ -1,0 +1,40 @@
+[0/1] Start time: Mon May 24 09:59:56 2021
+
+[0/1] min=0, max=134671
+[0/1] Graph generation elapsed time: 153.382248
+[0/1] Edge count: 4534136
+[0/1] Peak Mem Usage: 290MB
+[0/1] MST Elapsed Time: 3078.963711
+[0/1] MST Edges = 134671
+[0/1] Finish time: Mon May 24 10:53:49 2021
+
+//////////////////////////////////////////////////
+upcxx::init():
+> WARNING: Requested UPC++ shared heap size (1 GB) is larger than the GASNet segment size (978 MB). Adjusted shared heap size to 978 MB.
+//////////////////////////////////////////////////
+[0/2] Start time: Mon May 24 10:53:49 2021
+
+[0/2] min=0, max=67335
+[0/2] Graph generation elapsed time: 49.014144
+[0/2] Edge count: 1136902
+[0/2] Peak Mem Usage: 89MB
+[0/2] MST Elapsed Time: 815.875357
+[0/2] MST Edges = 134671
+[0/2] Finish time: Mon May 24 11:08:14 2021
+
+[1/2] Start time: Mon May 24 10:53:49 2021
+
+[1/2] min=67336, max=134671
+[1/2] Graph generation elapsed time: 49.014187
+[1/2] Edge count: 1136902
+[1/2] Peak Mem Usage: 86MB
+[1/2] MST Elapsed Time: 815.875393
+[1/2] Finish time: Mon May 24 11:08:14 2021
+
+*** Caught a signal (proc 0): SIGINT(2)
+[0/1] Start time: Mon May 24 11:08:14 2021
+
+[0/1] min=0, max=269343
+[0/1] Graph generation elapsed time: 418.465585
+[0/1] Edge count: 10881928
+[0/1] Peak Mem Usage: 650MB
