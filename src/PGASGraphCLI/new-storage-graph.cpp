@@ -29,31 +29,10 @@ namespace po = boost::program_options;
 // TODO: Move into separate module
 auto currentTime()
 {
-    auto time = std::time(nullptr);
-    return std::asctime(std::localtime(&time));
-}
-
-struct ProgramOptions
-{
-    size_t totalNumberVertices{256};
-    double percentage{5.0};
-    bool printLocal{false};
-    std::string exportPath{};
-    bool usePapi{false};
-};
-
-po::options_description CreateProgramOptions()
-{
-    po::options_description desc("Allowed options");
-    desc.add_options()("help", "produce help message");
-    desc.add_options()("vertex-count", po::value<int>(), "set vertex count");
-    desc.add_options()("percentage", po::value<double>(), "set connectivity percentage");
-    desc.add_options()("print-local", po::value<int>(), "print edges on the current node");
-    desc.add_options()(
-        "export-path", po::value<std::string>(), "export graph as a edgelist into the file");
-    desc.add_options()("use-papi", po::value<bool>(), "use PAPIs performance counters");
-
-    return desc;
+    std::time_t time = std::time({});
+    char timeString[std::size("hh:mm:ss")];
+    std::strftime(std::data(timeString), std::size(timeString), "%T", std::gmtime(&time));
+    return timeString;
 }
 
 ProgramOptions ParseOptions(int argc, char** argv)
@@ -459,6 +438,13 @@ int main(int argc, char* argv[])
             auto rResultJson = nlohmann::json::parse(rResult);
             resultJson.merge_patch(rResultJson);
         }
+
+        resultJson["generationTime"]["mean"] = 0;
+        for (upcxx::intrank_t r = 1; r < upcxx::rank_n(); r++)
+        {
+            resultJson["generationTime"]["mean"] += resultJson["generationTime"][fmt::format("rank_{}", r)];
+        }
+        resultJson["generationTime"]["mean"] /= upcxx::rank_n();
 
         std::cout << resultJson << std::endl;
     }

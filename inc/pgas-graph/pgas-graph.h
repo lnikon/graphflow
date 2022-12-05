@@ -232,7 +232,7 @@ namespace PGASGraph
                         {
                             std::stringstream ss;
                             ss << "Adding vertex with id=" << edge.from.UniversalId() << " at idx=" << idx << std::endl;
-                            logMsg(ss.str());
+                            //logMsg(ss.str());
                         }
 
                         vertexStore->operator[](idx) = new Vertex(typename Vertex::Id(edge.from));
