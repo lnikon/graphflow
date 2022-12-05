@@ -49,7 +49,7 @@ def write_csv(metrics):
 
     with open(output_knodel_generation, 'w') as f:
         wrtiter = csv.writer(f)
-        for metric in metrics['uniform']:
+        for metric in metrics['knodel']:
             row = []
             row.append(metric['edges'])
             for data in metric['datasets']:
@@ -59,7 +59,7 @@ def write_csv(metrics):
 
     with open(output_knodel_pushrandomized, 'w') as f:
         wrtiter = csv.writer(f)
-        for metric in metrics['uniform']:
+        for metric in metrics['knodel']:
             row = []
             row.append(metric['edges'])
             for data in metric['pushrandomized']:
@@ -69,7 +69,7 @@ def write_csv(metrics):
 
     with open(output_knodel_broadcast, 'w') as f:
         wrtiter = csv.writer(f)
-        for metric in metrics['uniform']:
+        for metric in metrics['knodel']:
             row = []
             row.append(metric['edges'])
             for data in metric['broadcast']:
