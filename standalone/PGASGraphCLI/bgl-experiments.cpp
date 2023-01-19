@@ -1,6 +1,6 @@
 // PGASGraph
-#include <pgas-graph/graph-utilities.hpp>
-#include <pgas-graph/pgas-graph.h>
+#include <pgasgraph/graph-utilities.hpp>
+#include <pgasgraph/pgasgraph.h>
 
 // STL
 #include <chrono>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <pgas-graph/pgas-graph.h>
+#include "../../pgasgraph.h"
 
 #include <sstream>
 #include <exception>
@@ -20,7 +20,7 @@ namespace PGASGraph::Algorithms::Gossip {
         {
             std::stringstream ss;
             ss << "[debug]: Starting randomized push-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl;
-            logMsg(ss.str());
+            //logMsg(ss.str());
         }
 
         const auto startTime = std::chrono::high_resolution_clock::now();
@@ -39,7 +39,7 @@ namespace PGASGraph::Algorithms::Gossip {
 
         auto getRandomVertexFromLocalStore = [](GraphStorageType& storage) {
             return upcxx::rpc(upcxx::rank_me(), [](GraphStorageType& storage) {
-                logMsg("(PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=" + std::to_string(storage->size()));
+                //logMsg("(PushRandomizedGossip::getRandomVertexFromLocalStore): storage->size()=" + std::to_string(storage->size()));
                 std::default_random_engine generator;
                 std::uniform_int_distribution<int> distribution(0, storage->size()-1);
                 int idx = distribution(generator);
@@ -50,7 +50,7 @@ namespace PGASGraph::Algorithms::Gossip {
                         notNullCount++;
                     }
                 }
-                logMsg("(PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=" + std::to_string(notNullCount));
+                //logMsg("(PushRandomizedGossip::getRandomVertexFromLocalStore): notNullCount=" + std::to_string(notNullCount));
                 return storage->operator[](idx);
                 }, storage).wait();
         };
@@ -75,7 +75,7 @@ namespace PGASGraph::Algorithms::Gossip {
                     std::stringstream ss;
                     ss << "(pushRandomizedGossip): [ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
                         << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
-                    logMsg(ss.str());
+                    //logMsg(ss.str());
                 }
                 return VertexId{};
             }
@@ -134,7 +134,7 @@ namespace PGASGraph::Algorithms::Gossip {
             const auto stopTime = std::chrono::high_resolution_clock::now();
             std::stringstream ss;
             ss << "[debug]: Finished randomized push-based gossip algorithm" << ". Gossiping took " << std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count() << "ms" << std::endl;
-            logMsg(ss.str());
+            //logMsg(ss.str());
         }
 
         upcxx::barrier();
@@ -150,7 +150,7 @@ namespace PGASGraph::Algorithms::Gossip {
         {
             std::stringstream ss;
             ss << "[debug]: Starting broadcast-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl;
-            logMsg(ss.str());
+            //logMsg(ss.str());
         }
 
         const auto startTime = std::chrono::high_resolution_clock::now();
@@ -200,7 +200,7 @@ namespace PGASGraph::Algorithms::Gossip {
                             std::stringstream ss;
                             ss << "(transferGossip): [ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
                                 << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
-                            logMsg(ss.str());
+                            //logMsg(ss.str());
                         }
 
                         return false;
@@ -234,7 +234,7 @@ namespace PGASGraph::Algorithms::Gossip {
                     std::stringstream ss;
                     ss << "(broadcastGossip): [ERROR]: Unable to find vertex with VertexId=" << vertexId.ToString()
                         << " inside vertex store of rank=" << upcxx::rank_me() << std::endl;
-                    logMsg(ss.str());
+                    //logMsg(ss.str());
                 }
                 return neighIds;
             }
@@ -257,7 +257,7 @@ namespace PGASGraph::Algorithms::Gossip {
             {
                 std::stringstream ss;
                 ss << "(BroadcastGossip): [ERROR]: Unable to get random vertex from graph" << std::endl;
-                logMsg(ss.str());
+                //logMsg(ss.str());
             }
             return;
         }
@@ -290,7 +290,7 @@ namespace PGASGraph::Algorithms::Gossip {
             std::stringstream ss;
             const auto stopTime = std::chrono::high_resolution_clock::now();
             ss << "[debug]: Finished broadcast-based gossip algorithm" << ". Gossiping took " << std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count() << "ms" << std::endl;
-            logMsg(ss.str());
+            //logMsg(ss.str());
         }
     }
 }

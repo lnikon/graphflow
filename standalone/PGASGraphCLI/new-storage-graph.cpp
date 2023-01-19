@@ -1,9 +1,9 @@
 // PGASGraph
 // #include <performance/performance_monitor.hpp>
-#include <pgas-graph/pgas-graph.h>
+#include <pgasgraph/pgasgraph.h>
 
 // CopyPasted
-#include <pgas-graph/cppmemusage.hpp>
+#include <pgasgraph/cppmemusage.hpp>
 
 // STL
 #include <chrono>

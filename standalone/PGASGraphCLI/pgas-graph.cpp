@@ -1,6 +1,6 @@
 #include <upcxx/upcxx.hpp>
 
-#include <pgas-graph/pgas-graph.h>
+#include <pgasgraph/pgasgraph.h>
 
 namespace PGASGraph {
 

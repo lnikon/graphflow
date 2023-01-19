@@ -1,11 +1,11 @@
 // PGASGraph
-#include <generators/knodel/knodel.h>
-#include <generators/uniform/uniform.h>
-#include <algorithms/gossip/gossip.h>
-#include <pgas-graph/pgas-graph.h>
+#include <pgasgraph/generators/knodel/knodel.h>
+#include <pgasgraph/generators/uniform/uniform.h>
+#include <pgasgraph/algorithms/gossip/gossip.h>
+#include <pgasgraph/pgasgraph.h>
 
 // CopyPasted
-// #include <pgas-graph/cppmemusage.hpp>
+// #include <pgasgraph/cppmemusage.hpp>
 
 // STL
 #include <chrono>
@@ -33,6 +33,9 @@ std::string currentTime()
     std::time_t time = std::time({});
     char timeString[std::size("hh:mm:ss")];
     std::strftime(std::data(timeString), std::size(timeString), "%T", std::gmtime(&time));
+
+    std::string s("asd");
+
     return timeString;
 }
 
@@ -368,8 +371,8 @@ bool Test_BroadcastOnKnodelGraph1() {
     const std::size_t delta{ static_cast<std::size_t>(std::log2(vertexCount)) };
     const std::size_t deltaPerRank{ delta / upcxx::rank_n() };
 
-    const std::string verticesFilename("/home/nikon/projects/phd/pgas-graph/build/exported-knodel-vertices-after-push.txt");
-    const std::string edgesFilename("/home/nikon/projects/phd/pgas-graph/build/exported-knodel-edges-after-push.txt");
+    const std::string verticesFilename("/home/nikon/projects/phd/pgasgraph/build/exported-knodel-vertices-after-push.txt");
+    const std::string edgesFilename("/home/nikon/projects/phd/pgasgraph/build/exported-knodel-edges-after-push.txt");
 
     PGASGraph::Graph<PGASGraph::Generators::Knodel::Vertex<VertexData, EdgeData>,
         PGASGraph::Generators::Knodel::Edge<EdgeData>>
@@ -580,7 +583,7 @@ int main(int argc, char* argv[])
         {
             std::stringstream ss;
             ss << "Following model=" << programOptions.model << " is not supported by PGASGraph" << std::endl;
-            PGASGraph::logMsg(ss.str());
+            //PGASGraph::logMsg(ss.str());
         }
         return -1;
     }
@@ -646,7 +649,7 @@ int main(int argc, char* argv[])
 
                     std::stringstream ss;
                     ss << "Unable to open metrics JSON file=" << programOptions.metricsJsonPath;
-                    PGASGraph::logMsg(ss.str());
+                    //PGASGraph::logMsg(ss.str());
                 }
             }
             else {
