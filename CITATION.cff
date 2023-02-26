@@ -1,0 +1,22 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: GraphFlow
+message: >-
+  Distributed graph data structures and algorithms in PGAS
+  model 
+type: software
+authors:
+  - given-names: Vahag Bejanyan
+    email: bejanyan.vahag@pm.me
+    affiliation: BSc
+    orcid: 'https://orcid.org/0000-0002-0842-7776'
+repository-code: 'https://github.com/lnikon/graphflow'
+keywords:
+  - graph
+  - hpc
+  - parallel
+  - distributed
+  - scalability
+license: MIT
