@@ -16,9 +16,9 @@
 #include <functional>
 
 // Boost
+#include <nlohmann/json.hpp>
 #include <boost/program_options.hpp>
 #include <fmt/core.h>
-#include <nlohmann/json.hpp>
 
 // System
 #include <limits.h>

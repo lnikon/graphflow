@@ -36,8 +36,8 @@ struct VertexId
                       const bool isNull = false)
         : partition(partitionid)
         , id(id)
-        , shift(shift)
         , isNull(isNull)
+        , shift(shift)
     {
     }
 
@@ -149,13 +149,6 @@ size_t Generate(size_t totalVertexCount,
                 const size_t delta,
                 Graph<Vertex, Edge>& graph)
 {
-    {
-        std::stringstream ss;
-        ss << "[debug]: Starting generation of knodel random graph with " << vertexCountPerRank
-           << " vertices and " << delta << " vertex degree" << std::endl;
-        //logMsg(ss.str());
-    }
-
     totalVertexCount /= 2;
     vertexCountPerRank = (totalVertexCount + upcxx::rank_n() - 1) / upcxx::rank_n();
 
@@ -169,45 +162,17 @@ size_t Generate(size_t totalVertexCount,
 
     size_t edgeCount{0};
     {
-        {
-            std::stringstream ss;
-            ss << "[debug]: minId=" << minId << ", maxId=" << maxId
-               << ", maxId % (totalVertexCount / 2)=" << maxId % (totalVertexCount / 2)
-               << ", maxId/2=" << maxId / 2 << std::endl;
-            //logMsg(ss.str());
-        }
-
-        // for (std::uint64_t j = minId; j < (minId + vertexCountPerRank)/2; ++j)
-        //% static_cast<std::size_t>(std::ceil((totalVertexCount / 2))) + 1
-        // for (std::uint64_t j = minId; j <= (minId + vertexCountPerRank / 2 - 1) %
-        // (totalVertexCount / 2); ++j)
         for (std::uint64_t j = minId; j <= maxId % (2 * totalVertexCount); ++j)
         {
-            {
-                // std::stringstream ss;
-                // ss << "[debug]: j=" << j << std::endl;
-                // logMsg(ss.str());
-            }
-
             const typename Vertex::Id from{0, j, totalVertexCount};
             for (std::uint64_t d = 0; d < delta; ++d)
             {
-                // const auto k{ static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2,
-                // d)) - 1) % ((totalVertexCount) / 2)) };
                 const auto k{
                     static_cast<std::size_t>((j + static_cast<std::size_t>(std::pow(2, d)) - 1)) %
                     (static_cast<std::size_t>(std::ceil(totalVertexCount)))};
                 const typename Vertex::Id to{1, k, totalVertexCount};
                 if (graph.AddEdge({from, to, 0}))
                 {
-                    if (upcxx::rank_me() == 0 || upcxx::rank_me() == 1)
-                    {
-                        {
-                            // std::stringstream ss;
-                            // ss << "[debug]: im here" << std::endl;
-                            // logMsg(ss.str());
-                        }
-                    }
                     edgeCount++;
                 }
             }
@@ -220,7 +185,7 @@ size_t Generate(size_t totalVertexCount,
         ss << "[debug]: Finished generation of knodel graph. Generation took "
            << std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count()
            << "ms" << std::endl;
-        //logMsg(ss.str());
+        // logMsg(ss.str());
     }
 
     return edgeCount;

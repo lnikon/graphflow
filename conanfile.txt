@@ -1,8 +1,8 @@
 [requires]
-boost/1.80
-spdlog/1.9.2
-fmt/8.1.1
-nlohmann_json/3.10.5
+boost/1.81.0
+spdlog/1.11.0
+fmt/9.1.0
+nlohmann_json/3.11.0
 
 [generators]
 cmake

@@ -149,8 +149,7 @@ namespace PGASGraph::Algorithms::Gossip {
 
         {
             std::stringstream ss;
-            ss << "[debug]: Starting broadcast-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl;
-            //logMsg(ss.str());
+            ss << "[debug]: Starting broadcast-based gossip algorithm from vertex with Id " << vertexId.ToString() << " and data " << data << std::endl; //logMsg(ss.str());
         }
 
         const auto startTime = std::chrono::high_resolution_clock::now();
